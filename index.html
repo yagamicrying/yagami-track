@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Yagami Track">
+  <meta name="description" content="Ежедневный трекер калорий, веса и сна.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>Yagami Track</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">Y<span>.</span></div>
+      <div class="brand-copy"><strong>YAGAMI</strong><span>DAILY TRACKER</span></div>
+      <button class="icon-button" id="todayBtn" aria-label="Перейти к сегодняшнему дню" title="Сегодня">↻</button>
+    </header>
+
+    <section class="date-row">
+      <button class="date-arrow" id="prevDay" aria-label="Предыдущий день">‹</button>
+      <div class="date-copy"><div id="dayName" class="eyebrow">СРЕДА</div><h1 id="dateTitle">15 октября</h1></div>
+      <button class="date-arrow" id="nextDay" aria-label="Следующий день">›</button>
+    </section>
+
+    <section class="card calories-card">
+      <div class="section-heading"><div><span class="eyebrow">ПИТАНИЕ</span><h2>Калории</h2></div><button class="text-button" id="editGoal">Цель: <span id="goalLabel">3500</span></button></div>
+      <div class="calorie-main"><div><span class="eyebrow">СЪЕДЕНО</span><div class="calorie-number"><span id="caloriesValue">0</span><small>ккал</small></div></div><div class="remaining"><span class="eyebrow">ОСТАЛОСЬ</span><strong id="remainingValue">3500</strong><small>ккал</small></div></div>
+      <div class="progress-track"><div id="calorieProgress" class="progress-fill"></div></div>
+      <div class="progress-meta"><span id="progressPercent">0% от цели</span><span id="progressStatus">Начни свой день</span></div>
+      <div class="quick-add-label eyebrow">БЫСТРО ДОБАВИТЬ</div>
+      <div class="quick-add-grid">
+        <button class="add-chip" data-add="50">+50</button><button class="add-chip" data-add="100">+100</button><button class="add-chip" data-add="200">+200</button><button class="add-chip" data-add="300">+300</button><button class="add-chip" data-add="500">+500</button><button class="add-chip custom-add" id="customAdd">+ Другое</button>
+      </div>
+      <button class="secondary-button full-width" id="resetCalories">Сбросить калории за день</button>
+    </section>
+
+    <section class="stats-grid">
+      <article class="card stat-card"><div class="stat-head"><span class="eyebrow">ТЕЛО</span><span class="stat-icon">↗</span></div><div class="stat-title">Вес</div><div class="stat-value"><span id="weightValue">—</span><small>кг</small></div><button class="inline-edit" id="editWeight">+ Записать вес</button><div class="stat-note" id="weightNote">Отслеживай динамику</div></article>
+      <article class="card stat-card"><div class="stat-head"><span class="eyebrow">ВОССТАНОВЛЕНИЕ</span><span class="stat-icon">☾</span></div><div class="stat-title">Сон</div><div class="stat-value"><span id="sleepValue">—</span><small>ч</small></div><button class="inline-edit" id="editSleep">+ Записать сон</button><div class="stat-note" id="sleepNote">Цель — 8 часов</div></article>
+    </section>
+
+    <section class="card routine-card"><div class="section-heading"><div><span class="eyebrow">ДИСЦИПЛИНА</span><h2>День под контролем</h2></div><span class="routine-count" id="routineCount">0/3</span></div>
+      <label class="check-row"><input type="checkbox" data-check="water"><span class="custom-check"></span><span class="check-copy"><strong>Вода</strong><small>Не забывай пить в течение дня</small></span></label>
+      <label class="check-row"><input type="checkbox" data-check="activity"><span class="custom-check"></span><span class="check-copy"><strong>Активность</strong><small>Тренировка или прогулка</small></span></label>
+      <label class="check-row"><input type="checkbox" data-check="sleepRoutine"><span class="custom-check"></span><span class="check-copy"><strong>Режим сна</strong><small>Лечь вовремя</small></span></label>
+    </section>
+
+    <section class="card note-card"><div class="section-heading"><div><span class="eyebrow">ЗАМЕТКИ</span><h2>Как прошёл день?</h2></div></div><textarea id="dayNote" rows="3" maxlength="1000" placeholder="Самочувствие, тренировка, важные мысли..."></textarea><div class="note-footer"><span>Сохраняется автоматически</span><span id="noteCount">0/1000</span></div></section>
+
+    <nav class="bottom-nav" aria-label="Основная навигация"><button class="nav-item active" data-view="day"><span>◷</span><small>День</small></button><button class="nav-item" data-view="history"><span>▤</span><small>История</small></button><button class="nav-item" data-view="stats"><span>⌁</span><small>Прогресс</small></button><button class="nav-item" data-view="settings"><span>⚙</span><small>Настройки</small></button></nav>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+  <dialog id="editDialog"><form method="dialog" id="editForm"><div class="dialog-head"><h2 id="dialogTitle">Изменить</h2><button class="dialog-close" value="cancel" aria-label="Закрыть">×</button></div><label id="fieldLabel" for="fieldInput">Значение</label><input id="fieldInput" type="number" inputmode="decimal" min="0" step="any"><p id="fieldHint" class="dialog-hint"></p><div class="dialog-actions"><button class="secondary-button" value="cancel">Отмена</button><button class="primary-button" id="saveField" value="save">Сохранить</button></div></form></dialog>
+  <section id="subview" class="subview" hidden><div class="subview-head"><button id="backToDay" class="date-arrow" aria-label="Назад">‹</button><div><span class="eyebrow">YAGAMI TRACK</span><h1 id="subviewTitle">История</h1></div></div><div id="subviewContent"></div></section>
+  <script src="app.js"></script>
+</body>
+</html>
