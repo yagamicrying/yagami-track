@@ -42,6 +42,7 @@
   let selectedCaseId = 'medium';
   let selectedOpenCount = 1;
   let rouletteAnimationTimer = null;
+  let rouletteReelAnimation = null;
   let rouletteCooldownTimer = null;
   let rouletteIsSpinning = false;
   let gameUiRefresh = null;
@@ -388,7 +389,7 @@
     };
     const batchResultsMarkup=()=>{const drops=state.game.pendingDrops||[];if(!drops.length)return '';return '<section class="batch-results"><div class="batch-results-heading"><div><span class="eyebrow">РЕЗУЛЬТАТ ОТКРЫТИЯ</span><h3>Выпало '+drops.length+' '+plural(drops.length,'предмет','предмета','предметов')+'</h3></div><span class="batch-results-total">'+formatMoney(drops.reduce((sum,item)=>sum+item.price,0))+'</span></div><div class="batch-drop-grid">'+drops.map(item=>'<article class="batch-drop tier-border-'+item.tier.toLowerCase()+'"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="batch-drop-copy"><strong>'+escapeHtml(item.name)+'</strong><b>+'+formatMoney(itemIncomeRate(item))+' / сек</b><small>'+escapeHtml(item.company)+'</small><span>Цена '+formatMoney(item.price)+' · продажа '+formatMoney(sellValue(item))+'</span></div></article>').join('')+'</div><div class="batch-result-actions"><button type="button" class="secondary-button" data-batch-action="sell">Продать все · '+formatMoney(drops.reduce((sum,item)=>sum+sellValue(item),0))+'</button><button type="button" class="primary-button" data-batch-action="keep">Оставить лучшие</button></div><p class="batch-result-note">Если места не хватит, останутся предметы с более высоким рангом. Остальные автоматически продадутся за половину цены.</p></section>';};
     content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+formatMoney(game.money)+'</span></strong><div class="wallet-income"><span>Пассивный доход</span><strong id="gameIncomeRate">+'+formatMoney(passiveIncomePerSecond())+'/сек</strong></div></div><div class="wallet-meta"><span id="walletLevel">Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячеек</span></div><div class="wallet-xp-track"><i id="walletXpFill" style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span id="walletXpText">'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section><div class="game-floating-balance" id="gameFloatingBalance"><span>Баланс</span><strong id="floatingGameMoney">'+formatMoney(game.money)+'</strong><small id="floatingGameIncome">+'+formatMoney(passiveIncomePerSecond())+'/сек</small></div>'+
-      dailyRewardMarkup()+dailyRewardDialogMarkup()+'<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Выбери кейс и количество открытий. После прокрутки можно продать весь дроп или оставить самые редкие предметы.</p>'+caseButtons()+'<div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Открыть ×'+selectedOpenCount+' · '+formatMoney(selectedCase().price*selectedOpenCount)+'</button><div id="batchResults">'+batchResultsMarkup()+'</div></section>'+
+      dailyRewardMarkup()+dailyRewardDialogMarkup()+'<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Выбери кейс и количество открытий. После прокрутки можно продать весь дроп или оставить самые редкие предметы.</p>'+caseButtons()+'<div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-reel-window" id="rouletteReelWindow" aria-label="Лента выпадающих предметов"><div class="roulette-reel-track" id="rouletteReelTrack"></div><span class="roulette-center-marker" aria-hidden="true"><i></i></span></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Открыть ×'+selectedOpenCount+' · '+formatMoney(selectedCase().price*selectedOpenCount)+'</button><div id="batchResults">'+batchResultsMarkup()+'</div></section>'+
       '<details class="game-collapsible inventory-collapsible" open><summary><span><small>ТВОИ ПРЕДМЕТЫ</small><strong>Инвентарь</strong></span><span class="game-collapsible-meta" id="inventoryCapacity">'+game.inventory.length+' / '+capacity+'</span></summary><div class="game-collapsible-body"><div id="inventoryContents">'+inventoryMarkup()+'</div></div></details>'+ '<details class="game-collapsible crafting-collapsible"><summary><span><small>УЛУЧШЕНИЕ ПРЕДМЕТОВ</small><strong>Мастерская</strong></span><span class="game-collapsible-meta">3 → 1</span></summary><div class="game-collapsible-body" id="craftingDetails">'+craftMarkup()+'</div></details>'+
       '<details class="tier-details"><summary>Каталог предметов <span>Название · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+formatMoney(item.price)+'</b></div><small>'+escapeHtml(item.company)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
     const button=$('#spinRoulette',content),result=$('#rouletteResult',content),stage=$('#rouletteStage',content),status=$('#rouletteStatus',content);
@@ -408,7 +409,81 @@
     const claimDailyButton=$('#claimDailyReward',content);if(claimDailyButton)claimDailyButton.addEventListener('click',()=>{const info=dailyRewardForToday();if(info.claimed){toast('Ежедневная награда уже получена');return;}const reward=info.reward;let message='';if(reward.type==='money'||reward.type==='mixed'){state.game.money+=reward.amount;message='+'+formatMoney(reward.amount);}if(reward.tier){const pool=GAME_ITEMS.filter(item=>item.tier===reward.tier),template=pool[Math.floor(Math.random()*pool.length)]||GAME_ITEMS[0],gift={...template,instanceId:state.game.nextItemId++,price:fixedPrice(template),acquiredAt:Date.now(),dailyReward:true};if(state.game.inventory.length<inventoryCapacity()){state.game.inventory.push(gift);message+=(message?' · ':'')+'предмет '+gift.tier+'-ранга';}else{const sold=sellValue(gift);state.game.money+=sold;message+=(message?' · ':'')+'предмет продан из-за заполненного инвентаря: '+formatMoney(sold);}}state.game.lastDailyClaimDate=info.today;state.game.dailyStreak=info.day;state.game.xp+=info.day*5;markGameChanged();renderRoulette(content);triggerHaptic('notification','success');toast('Награда получена: '+message+' · +'+(info.day*5)+' XP');});
     updateButton();
     if(Date.now()-game.lastSpinAt<2000)rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},200);
-    button.addEventListener('click',()=>{const now=Date.now();if(rouletteIsSpinning||(state.game.pendingDrops||[]).length)return;if(now-state.game.lastSpinAt<2000){updateButton();return;}const activeCase=selectedCase(),count=activeCase.id==='starter'?1:selectedOpenCount,totalCost=activeCase.price*count;if(activeCase.id==='starter'&&state.game.starterBoxClaimed){toast('Бесплатный стартовый бокс уже получен');updateButton();return;}if(state.game.money<totalCost){toast('Недостаточно средств. Нужно '+formatMoney(totalCost));updateButton();return;}const oldLevel=playerLevelInfo().level;triggerHaptic('impact','medium');state.game.money-=totalCost;if(activeCase.id==='starter')state.game.starterBoxClaimed=true;state.game.lastSpinAt=now;state.game.xp+=8*count;const drops=Array.from({length:count},()=>{const baseItem=pickGameItem(activeCase.id),item={...baseItem,price:fixedPrice(baseItem)};return {...item,instanceId:state.game.nextItemId++,acquiredAt:now};});state.game.pendingDrops=drops;const item=drops[drops.length-1];state.game.lastDrop={...item};markGameChanged();rouletteIsSpinning=true;stage.classList.add('is-spinning');result.classList.remove('is-revealed','roulette-pop');status.textContent=count>1?'ОТКРЫВАЕМ '+count+' КЕЙСОВ':'ПОИСК ПРЕДМЕТА';updateButton();refreshWallet();if(rouletteAnimationTimer)clearTimeout(rouletteAnimationTimer);const totalSteps=36;let step=0;const roll=()=>{if(!result.isConnected){rouletteIsSpinning=false;return;}const preview=pickGameItem(activeCase.id);setDropGlow(preview.tier);const tierNode=result.querySelector('.roulette-tier'),incomeNode=result.querySelector('.roulette-income');tierNode.className='roulette-tier tier-'+preview.tier.toLowerCase();tierNode.textContent=preview.tier;result.querySelector('strong').textContent=preview.name;if(incomeNode)incomeNode.textContent='+'+formatMoney(itemIncomeRate(preview))+' / сек';result.querySelector('small').textContent=preview.company;result.classList.remove('roulette-pop');step++;const progress=step/totalSteps;if(progress>.72)status.textContent=progress>.91?'ПОСЛЕДНИЕ МГНОВЕНИЯ…':'УЖЕ ПОЧТИ…';if(progress>.88&&step%2===0)triggerHaptic('selection');if(step>=totalSteps){setDropGlow(item.tier);triggerHaptic('notification','success');tierNode.className='roulette-tier tier-'+item.tier.toLowerCase();tierNode.textContent=item.tier;result.querySelector('strong').textContent=count>1?count+' '+plural(count,'предмет выпал','предмета выпало','предметов выпало'):item.name;if(incomeNode)incomeNode.textContent='+'+formatMoney(itemIncomeRate(item))+' / сек';result.querySelector('small').textContent=count>1?'Последний предмет · '+item.company:item.company+' · цена '+formatMoney(item.price);result.classList.add('is-revealed','roulette-pop');stage.classList.remove('is-spinning');stage.classList.add('has-result');status.textContent=count>1?'ВЫПАЛО '+count+' ПРЕДМЕТОВ':'ВЫПАЛ РАНГ '+item.tier+' · +'+formatMoney(itemIncomeRate(item))+'/СЕК';rouletteIsSpinning=false;refreshInventoryAndCraft();refreshBatchResults();const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Новая ячейка инвентаря.':'Готово: '+count+' '+plural(count,'предмет','предмета','предметов'));return;}const delay=24+Math.round(Math.pow(progress,5)*720);rouletteAnimationTimer=setTimeout(roll,delay);};rouletteAnimationTimer=setTimeout(roll,24);if(rouletteCooldownTimer)clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},200);});
+    button.addEventListener('click',()=>{
+      const now=Date.now();
+      if(rouletteIsSpinning||(state.game.pendingDrops||[]).length)return;
+      if(now-state.game.lastSpinAt<2000){updateButton();return;}
+      const activeCase=selectedCase(),count=activeCase.id==='starter'?1:selectedOpenCount,totalCost=activeCase.price*count;
+      if(activeCase.id==='starter'&&state.game.starterBoxClaimed){toast('Бесплатный стартовый бокс уже получен');updateButton();return;}
+      if(state.game.money<totalCost){toast('Недостаточно средств. Нужно '+formatMoney(totalCost));updateButton();return;}
+      const oldLevel=playerLevelInfo().level;
+      triggerHaptic('impact','medium');
+      state.game.money-=totalCost;
+      if(activeCase.id==='starter')state.game.starterBoxClaimed=true;
+      state.game.lastSpinAt=now;
+      state.game.xp+=8*count;
+      const drops=Array.from({length:count},()=>{const baseItem=pickGameItem(activeCase.id),item={...baseItem,price:fixedPrice(baseItem)};return {...item,instanceId:state.game.nextItemId++,acquiredAt:now};});
+      state.game.pendingDrops=drops;
+      const item=drops[drops.length-1];
+      state.game.lastDrop={...item};
+      markGameChanged();
+      rouletteIsSpinning=true;
+      stage.classList.add('is-spinning');
+      stage.classList.remove('has-result');
+      result.classList.remove('is-revealed','roulette-pop');
+      status.textContent='ЛЕНТА ЗАПУЩЕНА';
+      updateButton();
+      refreshWallet();
+      const reelWindow=$('#rouletteReelWindow',content),track=$('#rouletteReelTrack',content);
+      if(!reelWindow||!track){rouletteIsSpinning=false;stage.classList.remove('is-spinning');updateButton();return;}
+      if(rouletteAnimationTimer)clearTimeout(rouletteAnimationTimer);
+      if(rouletteReelAnimation){rouletteReelAnimation.cancel();rouletteReelAnimation=null;}
+      const targetIndex=38,startIndex=72,totalTiles=90;
+      const reelItems=Array.from({length:totalTiles},()=>pickGameItem(activeCase.id));
+      reelItems[targetIndex]=item;
+      track.innerHTML=reelItems.map((entry,index)=>'<div class="roulette-reel-tile tier-border-'+String(entry.tier||'D').toLowerCase()+(index===targetIndex?' is-winning-tile':'')+'" data-reel-index="'+index+'"><span class="reel-tile-rank tier-'+String(entry.tier||'D').toLowerCase()+'">'+escapeHtml(entry.tier||'D')+'</span><strong>'+escapeHtml(entry.name)+'</strong><small>'+formatMoney(fixedPrice(entry))+'</small></div>').join('');
+      const targetTile=track.querySelector('[data-reel-index="'+targetIndex+'"]'),startTile=track.querySelector('[data-reel-index="'+startIndex+'"]');
+      if(!targetTile||!startTile){rouletteIsSpinning=false;stage.classList.remove('is-spinning');updateButton();return;}
+      const centerOffset=tile=>reelWindow.clientWidth/2-(tile.offsetLeft+tile.offsetWidth/2);
+      const finalOffset=centerOffset(targetTile),startOffset=centerOffset(startTile);
+      track.style.transform='translate3d('+startOffset+'px,0,0)';
+      void track.offsetWidth;
+      status.textContent='ОПРЕДЕЛЯЕМ РЕЗУЛЬТАТ…';
+      rouletteReelAnimation=track.animate([
+        {transform:'translate3d('+startOffset+'px,0,0)'},
+        {transform:'translate3d('+finalOffset+'px,0,0)'}
+      ],{duration:6800,easing:'cubic-bezier(0.06, 0.68, 0.12, 1)',fill:'forwards'});
+      rouletteAnimationTimer=setTimeout(()=>{if(rouletteIsSpinning)triggerHaptic('selection');status.textContent='ПОЧТИ…';},4900);
+      const finishSpin=()=>{
+        if(!result.isConnected){rouletteIsSpinning=false;return;}
+        clearTimeout(rouletteAnimationTimer);rouletteAnimationTimer=null;
+        track.style.transform='translate3d('+finalOffset+'px,0,0)';
+        if(rouletteReelAnimation){rouletteReelAnimation.cancel();rouletteReelAnimation=null;}
+        const tierNode=result.querySelector('.roulette-tier'),incomeNode=result.querySelector('.roulette-income');
+        setDropGlow(item.tier);
+        triggerHaptic('notification','success');
+        if(tierNode){tierNode.className='roulette-tier tier-'+item.tier.toLowerCase();tierNode.textContent=item.tier;}
+        const nameNode=result.querySelector('strong');
+        if(nameNode)nameNode.textContent=count>1?count+' '+plural(count,'предмет выпал','предмета выпало','предметов выпало'):item.name;
+        if(incomeNode)incomeNode.textContent='+'+formatMoney(itemIncomeRate(item))+' / сек';
+        const smallNode=result.querySelector('small');
+        if(smallNode)smallNode.textContent=count>1?'Последний предмет · '+item.company:item.company+' · цена '+formatMoney(item.price);
+        result.classList.add('is-revealed','roulette-pop');
+        stage.classList.remove('is-spinning');
+        stage.classList.add('has-result');
+        status.textContent=count>1?'ВЫПАЛО '+count+' ПРЕДМЕТОВ':'ВЫПАЛ РАНГ '+item.tier+' · +'+formatMoney(itemIncomeRate(item))+'/СЕК';
+        rouletteIsSpinning=false;
+        refreshWallet();
+        refreshInventoryAndCraft();
+        refreshBatchResults();
+        const newLevel=playerLevelInfo().level;
+        toast(newLevel>oldLevel?'Уровень '+newLevel+'! Новая ячейка инвентаря.':'Готово: '+count+' '+plural(count,'предмет','предмета','предметов'));
+      };
+      if(rouletteReelAnimation)rouletteReelAnimation.onfinish=finishSpin;
+      else setTimeout(finishSpin,6800);
+      if(rouletteCooldownTimer)clearInterval(rouletteCooldownTimer);
+      rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},200);
+    });
   }
   function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
   function renderHistory(content){
