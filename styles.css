@@ -243,3 +243,19 @@ dialog::backdrop{transition:background-color 180ms ease}
 @media(prefers-reduced-motion:reduce){
   .bottom-nav .nav-indicator{transition:none}
 }
+
+
+/* Ensure the navigation always receives taps above full-screen sections */
+.bottom-nav{
+  z-index:1000 !important;
+  pointer-events:auto !important;
+  touch-action:manipulation;
+}
+.bottom-nav .nav-item{
+  position:relative;
+  z-index:2;
+  pointer-events:auto !important;
+  touch-action:manipulation;
+}
+.bottom-nav .nav-indicator{pointer-events:none !important}
+.subview{z-index:900}
