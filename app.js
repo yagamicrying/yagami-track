@@ -49,12 +49,19 @@
   function loadState(){ try { const saved = JSON.parse(localStorage.getItem(STORE) || '{}'); return {...defaultState, ...saved, days: saved.days && typeof saved.days === 'object' ? saved.days : {}}; } catch { return {...defaultState}; } }
   function saveState(){
     localStorage.setItem(STORE, JSON.stringify(state));
-    if (cloudReady && cloudStorage) scheduleCloudSave();
+    if (cloudReady && cloudStorage) {
+      cloudStatus = 'Сохранено на устройстве · отправка в Telegram…';
+      scheduleCloudSave();
+    }
   }
   function cloudCall(method, ...args){
     return new Promise((resolve, reject) => {
       try {
-        cloudStorage[method](...args, (error, result) => error ? reject(error) : resolve(result));
+        cloudStorage[method](...args, (error, result) => {
+          if (error) return reject(error);
+          if (method === 'setItem' && result === false) return reject(new Error('Telegram CloudStorage не подтвердил запись'));
+          resolve(result);
+        });
       } catch (error) { reject(error); }
     });
   }
@@ -83,37 +90,109 @@
     for (let i = 0; i < chunks.length; i++) await cloudCall('setItem', CLOUD_CHUNK_PREFIX + i, chunks[i]);
     await cloudCall('setItem', CLOUD_META_KEY, JSON.stringify({ version: 1, chunks: chunks.length, updatedAt: Date.now() }));
     cloudStatus = 'Синхронизировано с Telegram';
+    refreshSyncStatus();
+  }
+  function refreshSyncStatus(){
+    const status = $('#syncStatus');
+    if (status) status.textContent = 'Статус: ' + cloudStatus + (cloudStorage ? '.' : '. Открой Yagami Track из Telegram, чтобы синхронизировать данные между устройствами.');
   }
   function scheduleCloudSave(){
     clearTimeout(cloudSaveTimer);
     cloudSaveTimer = setTimeout(async () => {
       try { await writeCloudState(); }
-      catch (error) { cloudStatus = 'Ошибка синхронизации Telegram'; console.warn('Telegram CloudStorage save failed', error); }
+      catch (error) {
+        cloudStatus = 'Ошибка синхронизации — данные пока только на устройстве';
+        console.warn('Telegram CloudStorage save failed', error);
+      }
+      refreshSyncStatus();
     }, 500);
+  }
+  async function syncNow(){
+    if (!cloudStorage) {
+      cloudStatus = 'Telegram CloudStorage недоступен в этом окне';
+      refreshSyncStatus();
+      toast('Открой приложение внутри Telegram');
+      return;
+    }
+    cloudStatus = 'Синхронизация…';
+    refreshSyncStatus();
+    try {
+      const localState = normalizeState(JSON.parse(localStorage.getItem(STORE) || '{}'));
+      const remoteState = await readCloudState();
+      if (remoteState) {
+        const mergedDays = {...localState.days};
+        for (const [key, remoteDay] of Object.entries(remoteState.days)) {
+          const localDay = mergedDays[key];
+          if (!localDay) {
+            mergedDays[key] = remoteDay;
+            continue;
+          }
+          const merged = {...localDay, ...remoteDay, checks: {...(localDay.checks || {}), ...(remoteDay.checks || {})}};
+          for (const field of ['calories','weight','sleep','note']) {
+            const localValue = localDay[field];
+            const remoteValue = remoteDay[field];
+            if ((remoteValue === undefined || remoteValue === '' || remoteValue === 0 || remoteValue === null) && localValue !== undefined && localValue !== '' && localValue !== 0 && localValue !== null) merged[field] = localValue;
+          }
+          mergedDays[key] = merged;
+        }
+        state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays};
+      }
+      localStorage.setItem(STORE, JSON.stringify(state));
+      cloudReady = true;
+      await writeCloudState();
+      render();
+      toast('Данные синхронизированы');
+    } catch (error) {
+      cloudStatus = 'Не удалось синхронизировать — данные сохранены локально';
+      console.warn('Telegram CloudStorage manual sync failed', error);
+      toast('Ошибка синхронизации');
+    }
+    refreshSyncStatus();
   }
   async function initializeStorage(){
     const tg = window.Telegram && window.Telegram.WebApp;
-    if (tg && tg.initData && tg.CloudStorage) {
-      cloudStorage = tg.CloudStorage;
+    if (tg) {
       try { if (typeof tg.ready === 'function') tg.ready(); if (typeof tg.expand === 'function') tg.expand(); } catch {}
+    }
+    if (tg && tg.CloudStorage) {
+      cloudStorage = tg.CloudStorage;
       try {
+        const localState = normalizeState(JSON.parse(localStorage.getItem(STORE) || '{}'));
         const remoteState = await readCloudState();
         if (remoteState) {
-          state = remoteState;
-          localStorage.setItem(STORE, JSON.stringify(state));
-          cloudStatus = 'Загружено из Telegram';
+          const mergedDays = {...localState.days};
+          for (const [key, remoteDay] of Object.entries(remoteState.days)) {
+            const localDay = mergedDays[key];
+            if (!localDay) mergedDays[key] = remoteDay;
+            else {
+              const merged = {...localDay, ...remoteDay, checks: {...(localDay.checks || {}), ...(remoteDay.checks || {})}};
+              for (const field of ['calories','weight','sleep','note']) {
+                const lv = localDay[field], rv = remoteDay[field];
+                if ((rv === undefined || rv === '' || rv === 0 || rv === null) && lv !== undefined && lv !== '' && lv !== 0 && lv !== null) merged[field] = lv;
+              }
+              mergedDays[key] = merged;
+            }
+          }
+          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays};
+          cloudStatus = 'Данные загружены из Telegram';
         } else {
-          cloudStatus = 'Первая синхронизация с Telegram';
+          state = localState;
+          cloudStatus = 'Первая синхронизация — переносим локальные данные';
         }
+        localStorage.setItem(STORE, JSON.stringify(state));
         cloudReady = true;
-        if (!remoteState) await writeCloudState();
+        await writeCloudState();
       } catch (error) {
         cloudReady = false;
-        cloudStatus = 'Ошибка чтения Telegram CloudStorage';
-        console.warn('Telegram CloudStorage load failed', error);
+        cloudStatus = 'Ошибка Telegram CloudStorage — данные на этом устройстве сохранены';
+        console.warn('Telegram CloudStorage initialization failed', error);
       }
+    } else {
+      cloudReady = false;
+      cloudStatus = 'Локальное сохранение · открой приложение внутри Telegram для синхронизации';
     }
     render();
+    refreshSyncStatus();
   }
   function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
   function dayData(key=currentDate){ if(!state.days[key]) state.days[key] = {calories:0, weight:'', sleep:'', checks:{water:false,activity:false,sleepRoutine:false}, note:''}; const d=state.days[key]; d.checks ||= {water:false,activity:false,sleepRoutine:false}; return d; }
