@@ -155,7 +155,7 @@ dialog::backdrop{transition:background-color 180ms ease}
 
 
 /* Smooth, sliding tab indicator and softer screen transitions */
-.bottom-nav{position:fixed;isolation:isolate}
+.bottom-nav{position:fixed;z-index:7;isolation:isolate;grid-template-columns:repeat(4,minmax(0,1fr))}
 .bottom-nav .nav-indicator{
   position:absolute;
   left:0;
