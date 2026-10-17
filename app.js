@@ -5,7 +5,7 @@
   const CLOUD_META_KEY = 'yagami_track_meta';
   const CLOUD_CHUNK_PREFIX = 'yagami_track_chunk_';
   const CLOUD_CHUNK_SIZE = 3000;
-  const defaultState = { goal: 3500, days: {}, game: { money: 500, xp: 0, inventory: [], lastSpinAt: 0, nextItemId: 1, updatedAt: 0, lastDrop: null } };
+  const defaultState = { goal: 3500, days: {}, game: { money: 500, currency: 'RUB', xp: 0, inventory: [], lastSpinAt: 0, lastIncomeAt: Date.now(), nextItemId: 1, updatedAt: 0, lastDrop: null } };
   const SPIN_COST = 100;
   const GAME_ITEMS = [
     {key:'tren-titan',name:'Тренболон',company:'TitanCore Labs',tier:'S',price:6000,weight:1,detail:''},
@@ -90,7 +90,7 @@
     if(xpText)xpText.textContent=fmtNum(levelInfo.xpIntoLevel)+' / '+fmtNum(levelInfo.xpNeeded)+' XP';
   }
 
-  function createDefaultState(){ return {goal:3500,days:{},game:{money:500,xp:0,inventory:[],lastSpinAt:0,nextItemId:1,updatedAt:0,lastDrop:null}}; }
+  function createDefaultState(){ return {goal:3500,days:{},game:{money:500,currency:'RUB',xp:0,inventory:[],lastSpinAt:0,lastIncomeAt:Date.now(),nextItemId:1,updatedAt:0,lastDrop:null}}; }
   function normalizeGame(value){
     const source=value&&typeof value==='object'&&!Array.isArray(value)?value:{};
     const inventory=Array.isArray(source.inventory)?source.inventory.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&typeof item.tier==='string'&&Number.isFinite(Number(item.price))).map(item=>({
@@ -98,7 +98,7 @@
       price:Math.max(1,Math.round(Number(item.price))),weight:Math.max(1,Number(item.weight)||1),detail:String(item.detail||''),acquiredAt:Number(item.acquiredAt)||0
     })).slice(0,100):[];
     const lastDrop=source.lastDrop&&typeof source.lastDrop==='object'&&typeof source.lastDrop.name==='string'?{...source.lastDrop,company:String(source.lastDrop.company||'Неизвестная компания').replace(/ · (?:вымышленный бренд|сомнительный игровой бренд)/g,''),detail:''}:null;
-    return {money:Number.isFinite(Number(source.money))?Math.max(0,Math.floor(Number(source.money))):500,xp:Number.isFinite(Number(source.xp))?Math.max(0,Math.floor(Number(source.xp))):0,inventory,lastSpinAt:Math.max(0,Number(source.lastSpinAt)||0),nextItemId:Math.max(1,Math.floor(Number(source.nextItemId)||1),...inventory.map(item=>item.instanceId+1)),updatedAt:Math.max(0,Number(source.updatedAt)||0),lastDrop};
+    return {money:Number.isFinite(Number(source.money))?Math.max(0,Math.floor(Number(source.money))):500,currency:source.currency==='USD'?'USD':'RUB',xp:Number.isFinite(Number(source.xp))?Math.max(0,Math.floor(Number(source.xp))):0,inventory,lastSpinAt:Math.max(0,Number(source.lastSpinAt)||0),lastIncomeAt:Math.max(0,Number(source.lastIncomeAt)||Date.now()),nextItemId:Math.max(1,Math.floor(Number(source.nextItemId)||1),...inventory.map(item=>item.instanceId+1)),updatedAt:Math.max(0,Number(source.updatedAt)||0),lastDrop};
   }
   function normalizeState(value){
     if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid saved state');
@@ -107,9 +107,38 @@
   }
   function loadState(){try{return normalizeState(JSON.parse(localStorage.getItem(STORE)||'{}'));}catch{return createDefaultState();}}
   function mergeGameStates(localGame,remoteGame){const local=normalizeGame(localGame),remote=normalizeGame(remoteGame);return remote.updatedAt>local.updatedAt?remote:local;}
-  function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(100*Math.pow(level,1.6));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(100*Math.pow(level,1.6));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
+  function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(150*Math.pow(level,1.7));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(150*Math.pow(level,1.7));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
   function inventoryCapacity(){return 2+playerLevelInfo().level-1;}
   function sellValue(item){return Math.max(1,Math.floor(Number(item.price)*0.5));}
+
+  const GAME_DOLLAR_RATE = 90;
+  function formatMoney(value){
+    const currency=state.game.currency==='USD'?'USD':'RUB';
+    const amount=Number(value||0)/(currency==='USD'?GAME_DOLLAR_RATE:1);
+    return new Intl.NumberFormat('ru-RU',{style:'currency',currency,minimumFractionDigits:currency==='USD'?2:0,maximumFractionDigits:currency==='USD'?2:0}).format(amount);
+  }
+  function randomizedPrice(base){return Math.max(1,Math.round(Number(base||0)+(Math.floor(Math.random()*101)-50)));}
+  function passiveIncomePerSecond(){
+    const inventory=state.game.inventory||[];
+    if(!inventory.length)return 10;
+    const rates={D:20,C:40,B:70,A:100,S:150};
+    return inventory.reduce((sum,item)=>sum+(rates[item.tier]||20),0);
+  }
+  let passiveTickCount=0,lastPassiveCloudSave=Date.now();
+  function accruePassiveIncome(){
+    const now=Date.now(),previous=Number(state.game.lastIncomeAt)||now;
+    let seconds=Math.floor((now-previous)/1000);
+    if(seconds<=0)return;
+    seconds=Math.min(seconds,86400);
+    state.game.lastIncomeAt=previous+seconds*1000;
+    state.game.money+=passiveIncomePerSecond()*seconds;
+    const moneyNode=$('#gameMoney');if(moneyNode)moneyNode.textContent=formatMoney(state.game.money);
+    const incomeNode=$('#gameIncomeRate');if(incomeNode)incomeNode.textContent='+'+formatMoney(passiveIncomePerSecond())+'/сек';
+    passiveTickCount+=seconds;
+    if(passiveTickCount>=10){passiveTickCount=0;try{localStorage.setItem(STORE,JSON.stringify(state));}catch(error){console.warn('Local passive-income save failed',error);}}
+    if(now-lastPassiveCloudSave>=15000){lastPassiveCloudSave=now;markGameChanged();}
+  }
+
   function triggerHaptic(kind='impact',style='light'){
     try{
       const tg=window.Telegram&&window.Telegram.WebApp;
@@ -190,7 +219,7 @@
   }
   function refreshSyncStatus(){
     const status = $('#syncStatus');
-    if (status) status.textContent = 'Статус: ' + cloudStatus + (cloudStorage ? '.' : '. Открой Yagami Track из Telegram, чтобы синхронизировать данные между устройствами.');
+    if (status) status.textContent = 'Статус: ' + cloudStatus + (cloudStorage ? '.' : '. Открой Kairo из Telegram, чтобы синхронизировать данные между устройствами.');
   }
   function scheduleCloudSave(){
     clearTimeout(cloudSaveTimer);
@@ -326,107 +355,34 @@
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();refreshPageSections();toast('Калории сброшены');}});
   function renderRoulette(content){
     if(rouletteCooldownTimer){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;}
-    const game=state.game;
-    const level=playerLevelInfo();
-    const capacity=inventoryCapacity();
-    const currentDrop=game.lastDrop;
-    const resultMarkup=currentDrop
-      ? '<span class="roulette-tier tier-'+currentDrop.tier.toLowerCase()+'">'+currentDrop.tier+'</span><strong>'+escapeHtml(currentDrop.name)+'</strong><small>'+escapeHtml(currentDrop.company)+' · цена '+fmtNum(currentDrop.price)+' монет</small>'
-      : '<span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><small>Крутка стоит '+fmtNum(SPIN_COST)+' монет</small>';
-    const inventoryMarkup=()=>state.game.inventory.length
-      ? '<div class="inventory-list">'+state.game.inventory.map(item=>'<article class="inventory-item tier-border-'+item.tier.toLowerCase()+'"><div class="inventory-item-main"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="inventory-item-copy"><strong>'+escapeHtml(item.name)+'</strong><small>'+escapeHtml(item.company)+'</small><span class="inventory-prices">Цена: '+fmtNum(item.price)+' · Продажа: '+fmtNum(sellValue(item))+'</span></div></div><button class="sell-item" data-sell-id="'+item.instanceId+'">Продать</button></article>').join('')+'</div>'
-      : '<div class="inventory-empty">Пока пусто. Крути рулетку, чтобы получить первый предмет.</div>';
-    const selectedCase=()=>GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1];
-    const caseButtons=()=>'<div class="case-selector" role="group" aria-label="Выбор кейса">'+GAME_CASES.map(entry=>'<button type="button" class="case-choice'+(entry.id===selectedCaseId?' is-selected':'')+'" data-case-id="'+entry.id+'" aria-pressed="'+(entry.id===selectedCaseId)+'"><span class="case-choice-name">'+escapeHtml(entry.name)+'</span><strong>'+fmtNum(entry.price)+' <small>монет</small></strong><span class="case-choice-subtitle">'+escapeHtml(entry.subtitle)+'</span></button>').join('')+'</div>';
-    content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+fmtNum(game.money)+'</span><small> монет</small></strong></div><div class="wallet-meta"><span id="walletLevel">Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячеек</span></div><div class="wallet-xp-track"><i id="walletXpFill" style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span id="walletXpText">'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section>'+
-    '<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Выбери кейс, получи предмет и реши — оставить его или продать.</p>'+caseButtons()+'<div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Открыть · '+fmtNum(selectedCase().price)+' монет</button></section>'+
-    '<section class="card inventory-panel"><div class="inventory-heading"><div><span class="eyebrow">ТВОИ ПРЕДМЕТЫ</span><h2>Инвентарь</h2></div><span class="inventory-capacity" id="inventoryCapacity">'+game.inventory.length+' / '+capacity+'</span></div><div id="inventoryContents">'+inventoryMarkup()+'</div></section>'+
-    '<details class="tier-details"><summary>Каталог предметов <span>Название · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+fmtNum(item.price)+' <small>монет</small></b></div><small>'+escapeHtml(item.company)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
-    const button=$('#spinRoulette',content),result=$('#rouletteResult',content),stage=$('#rouletteStage',content),status=$('#rouletteStatus',content);
+    const game=state.game,level=playerLevelInfo(),capacity=inventoryCapacity(),currentDrop=game.lastDrop;
     const tierGlow={S:'#ffb84d',A:'#bf78ff',B:'#5798ff',C:'#48d6a0',D:'#8d8d98'};
-    const setDropGlow=tier=>stage.style.setProperty('--drop-glow',tierGlow[tier]||'#f5c542');
-    setDropGlow(currentDrop&&currentDrop.tier||'D');
-    const bindCaseButtons=()=>$$('[data-case-id]',content).forEach(caseButton=>caseButton.addEventListener('click',()=>{if(rouletteIsSpinning)return;selectedCaseId=caseButton.dataset.caseId;triggerHaptic('selection');$$('[data-case-id]',content).forEach(node=>{const active=node.dataset.caseId===selectedCaseId;node.classList.toggle('is-selected',active);node.setAttribute('aria-pressed',String(active));});updateButton();}));
-    const updateButton=()=>{
-      if(!button.isConnected)return;
-      const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt));
-      if(rouletteIsSpinning){button.disabled=true;button.textContent='Крутится…';return;}
-      if(state.game.inventory.length>=inventoryCapacity()){button.disabled=true;button.textContent='Инвентарь заполнен';return;}
-      const cost=(GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1]).price;
-      if(state.game.money<cost){button.disabled=true;button.textContent='Не хватает монет';return;}
-      if(remaining>0){button.disabled=true;button.textContent='Перезарядка '+(remaining/1000).toFixed(1)+' с';return;}
-      button.disabled=false;button.textContent='Открыть · '+fmtNum(cost)+' монет';
+    const resultMarkup=currentDrop?'<span class="roulette-tier tier-'+String(currentDrop.tier||'D').toLowerCase()+'">'+escapeHtml(currentDrop.tier||'D')+'</span><strong>'+escapeHtml(currentDrop.name)+'</strong><small>'+escapeHtml(currentDrop.company||'')+' · цена '+formatMoney(currentDrop.price)+'</small>':'<span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><small>Выбери кейс и попробуй удачу</small>';
+    const inventoryMarkup=()=>state.game.inventory.length?'<div class="inventory-list">'+state.game.inventory.map(item=>'<article class="inventory-item tier-border-'+item.tier.toLowerCase()+'"><div class="inventory-item-main"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="inventory-item-copy"><strong>'+escapeHtml(item.name)+'</strong><small>'+escapeHtml(item.company)+'</small><span class="inventory-prices">Цена: '+formatMoney(item.price)+' · Продажа: '+formatMoney(sellValue(item))+' · доход '+formatMoney(({D:20,C:40,B:70,A:100,S:150})[item.tier]||20)+'/сек</span></div></div><button class="sell-item" data-sell-id="'+item.instanceId+'">Продать</button></article>').join('')+'</div>':'<div class="inventory-empty">Пока пусто. Доход '+formatMoney(10)+'/сек поможет накопить на первый кейс.</div>';
+    const selectedCase=()=>GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1];
+    const caseButtons=()=>'<div class="case-selector" role="group" aria-label="Выбор кейса">'+GAME_CASES.map(entry=>'<button type="button" class="case-choice'+(entry.id===selectedCaseId?' is-selected':'')+'" data-case-id="'+entry.id+'" aria-pressed="'+(entry.id===selectedCaseId)+'"><span class="case-choice-name">'+escapeHtml(entry.name)+'</span><strong>'+formatMoney(entry.price)+'</strong><span class="case-choice-subtitle">'+escapeHtml(entry.subtitle)+'</span></button>').join('')+'</div>';
+    const craftMarkup=()=>{
+      const currentLevel=playerLevelInfo().level;
+      if(currentLevel<2)return '<section class="card crafting-panel crafting-locked"><div class="inventory-heading"><div><span class="eyebrow">МАСТЕРСКАЯ</span><h2>Крафт предметов</h2></div><span class="craft-lock">LVL 2</span></div><p>Объединяй три одинаковых предмета в один более редкий. Мастерская откроется со второго уровня.</p><div class="craft-progress"><span style="width:50%"></span></div></section>';
+      const groups=new Map();state.game.inventory.forEach(item=>{const id=String(item.key)+'|'+String(item.tier);if(!groups.has(id))groups.set(id,{key:item.key,tier:item.tier,name:item.name,company:item.company,count:0});groups.get(id).count++;});
+      const rows=[...groups.values()].filter(group=>group.tier!=='S');
+      if(!rows.length)return '<section class="card crafting-panel"><div class="inventory-heading"><div><span class="eyebrow">МАСТЕРСКАЯ · LVL 2+</span><h2>Крафт предметов</h2></div><span class="craft-lock">3 → 1</span></div><p>Три одинаковых предмета превращаются в один более редкий. Иногда можно перепрыгнуть через ранг.</p><div class="inventory-empty">Пока нечего улучшать. Собери три одинаковых предмета.</div></section>';
+      return '<section class="card crafting-panel"><div class="inventory-heading"><div><span class="eyebrow">МАСТЕРСКАЯ · LVL 2+</span><h2>Крафт предметов</h2></div><span class="craft-lock">3 → 1</span></div><p>Три одинаковых предмета превращаются в один более редкий. Для рангов D и C есть 15% шанс на дополнительное повышение.</p><div class="crafting-list">'+rows.map(group=>'<article class="crafting-item tier-border-'+group.tier.toLowerCase()+'"><div class="crafting-item-info"><span class="inventory-rank tier-'+group.tier.toLowerCase()+'">'+group.tier+'</span><div><strong>'+escapeHtml(group.name)+'</strong><small>'+escapeHtml(group.company)+'</small><span class="craft-count">'+group.count+' / 3 предмета</span></div></div><button class="craft-button" data-craft-key="'+escapeHtml(group.key)+'" '+(group.count<3?'disabled':'')+'>'+(group.count<3?'Ещё '+(3-group.count):'Скрафтить')+'</button></article>').join('')+'</div></section>';
     };
-    const refreshWallet=()=>{
-      const info=playerLevelInfo(),cap=inventoryCapacity();
-      const money=$('#gameMoney',content),walletLevel=$('#walletLevel',content),count=$('#inventoryCount',content),capacityNode=$('#inventoryCapacity',content),xpFill=$('#walletXpFill',content),xpText=$('#walletXpText',content);
-      if(money)money.textContent=fmtNum(state.game.money);
-      if(walletLevel)walletLevel.textContent='Уровень '+info.level;
-      if(count)count.textContent=state.game.inventory.length+' / '+cap+' ячеек';
-      if(capacityNode)capacityNode.textContent=state.game.inventory.length+' / '+cap;
-      if(xpFill)xpFill.style.width=Math.min(100,Math.round(info.xpIntoLevel/info.xpNeeded*100))+'%';
-      if(xpText)xpText.textContent=fmtNum(info.xpIntoLevel)+' / '+fmtNum(info.xpNeeded)+' XP';
-    };
-    const bindSellButtons=()=>{
-      $$('[data-sell-id]',content).forEach(sellButton=>sellButton.addEventListener('click',()=>{
-        if(rouletteIsSpinning)return;
-        const index=state.game.inventory.findIndex(item=>String(item.instanceId)===sellButton.dataset.sellId);if(index<0)return;
-        const item=state.game.inventory[index],oldLevel=playerLevelInfo().level;
-        triggerHaptic('impact','light');state.game.money+=sellValue(item);state.game.xp+=5;state.game.inventory.splice(index,1);markGameChanged();
-        const inventoryContents=$('#inventoryContents',content);if(inventoryContents)inventoryContents.innerHTML=inventoryMarkup();
-        bindSellButtons();refreshWallet();updateButton();
-        const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Продано за '+fmtNum(sellValue(item))+' монет · +5 XP');
-      }));
-    };
-    bindCaseButtons();bindSellButtons();updateButton();
+    content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+formatMoney(game.money)+'</span></strong><div class="wallet-income"><span>Пассивный доход</span><strong id="gameIncomeRate">+'+formatMoney(passiveIncomePerSecond())+'/сек</strong></div></div><div class="wallet-meta"><span id="walletLevel">Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячеек</span></div><div class="wallet-xp-track"><i id="walletXpFill" style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span id="walletXpText">'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section>'+
+      '<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Выбери кейс, получи предмет и реши — оставить его, продать или улучшить в мастерской.</p>'+caseButtons()+'<div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Открыть · '+formatMoney(selectedCase().price)+'</button></section>'+
+      '<section class="card inventory-panel"><div class="inventory-heading"><div><span class="eyebrow">ТВОИ ПРЕДМЕТЫ</span><h2>Инвентарь</h2></div><span class="inventory-capacity" id="inventoryCapacity">'+game.inventory.length+' / '+capacity+'</span></div><div id="inventoryContents">'+inventoryMarkup()+'</div></section>'+craftMarkup()+
+      '<details class="tier-details"><summary>Каталог предметов <span>Название · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+formatMoney(Math.max(1,item.price-50))+'–'+formatMoney(item.price+50)+'</b></div><small>'+escapeHtml(item.company)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
+    const button=$('#spinRoulette',content),result=$('#rouletteResult',content),stage=$('#rouletteStage',content),status=$('#rouletteStatus',content);
+    const setDropGlow=tier=>stage.style.setProperty('--drop-glow',tierGlow[tier]||'#f5c542');setDropGlow(currentDrop&&currentDrop.tier||'D');if(currentDrop)stage.classList.add('has-result');
+    const updateButton=()=>{if(!button.isConnected)return;const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt));if(rouletteIsSpinning){button.disabled=true;button.textContent='Крутится…';return;}if(state.game.inventory.length>=inventoryCapacity()){button.disabled=true;button.textContent='Инвентарь заполнен';return;}const cost=selectedCase().price;if(state.game.money<cost){button.disabled=true;button.textContent='Не хватает денег';return;}if(remaining>0){button.disabled=true;button.textContent='Перезарядка '+(remaining/1000).toFixed(1)+' с';return;}button.disabled=false;button.textContent='Открыть · '+formatMoney(cost);};
+    const refreshWallet=()=>{const info=playerLevelInfo(),cap=inventoryCapacity(),money=$('#gameMoney',content),walletLevel=$('#walletLevel',content),count=$('#inventoryCount',content),capNode=$('#inventoryCapacity',content),xpFill=$('#walletXpFill',content),xpText=$('#walletXpText',content),income=$('#gameIncomeRate',content);if(money)money.textContent=formatMoney(state.game.money);if(income)income.textContent='+'+formatMoney(passiveIncomePerSecond())+'/сек';if(walletLevel)walletLevel.textContent='Уровень '+info.level;if(count)count.textContent=state.game.inventory.length+' / '+cap+' ячеек';if(capNode)capNode.textContent=state.game.inventory.length+' / '+cap;if(xpFill)xpFill.style.width=Math.min(100,Math.round(info.xpIntoLevel/info.xpNeeded*100))+'%';if(xpText)xpText.textContent=fmtNum(info.xpIntoLevel)+' / '+fmtNum(info.xpNeeded)+' XP';};
+    const bindCaseButtons=()=>$$('[data-case-id]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning)return;selectedCaseId=node.dataset.caseId;triggerHaptic('selection');$$('[data-case-id]',content).forEach(btn=>{const active=btn.dataset.caseId===selectedCaseId;btn.classList.toggle('is-selected',active);btn.setAttribute('aria-pressed',String(active));});updateButton();}));
+    const bindSellButtons=()=>$$('[data-sell-id]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning)return;const index=state.game.inventory.findIndex(item=>String(item.instanceId)===node.dataset.sellId);if(index<0)return;const item=state.game.inventory[index],oldLevel=playerLevelInfo().level,soldFor=sellValue(item);triggerHaptic('impact','light');state.game.money+=soldFor;state.game.xp+=3;state.game.inventory.splice(index,1);markGameChanged();renderRoulette(content);const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Продано за '+formatMoney(soldFor)+' · +3 XP');}));
+    const bindCraftButtons=()=>$$('[data-craft-key]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning)return;if(playerLevelInfo().level<2){toast('Мастерская откроется со второго уровня');return;}const key=node.dataset.craftKey,matching=state.game.inventory.filter(item=>item.key===key);if(matching.length<3){toast('Нужно три одинаковых предмета');return;}const source=matching[0],tier=source.tier,outcomes={D:{normal:'C',rare:'B',chance:.15},C:{normal:'B',rare:'A',chance:.15},B:{normal:'A',rare:'S',chance:.08},A:{normal:'S',rare:'S',chance:0}},outcome=outcomes[tier];if(!outcome){toast('У этого предмета максимальный ранг');return;}const targetTier=Math.random()<outcome.chance?outcome.rare:outcome.normal,family=String(source.key).split('-')[0],sameFamily=GAME_ITEMS.filter(item=>item.tier===targetTier&&String(item.key).split('-')[0]===family),candidates=sameFamily.length?sameFamily:GAME_ITEMS.filter(item=>item.tier===targetTier),template=candidates[Math.floor(Math.random()*candidates.length)],crafted={...template,price:randomizedPrice(template.price),instanceId:state.game.nextItemId++,acquiredAt:Date.now(),crafted:true};let removed=0;state.game.inventory=state.game.inventory.filter(item=>{if(item.key===key&&item.tier===tier&&removed<3){removed++;return false;}return true;});state.game.inventory.push(crafted);state.game.lastDrop={...crafted};state.game.xp+=25;triggerHaptic('notification','success');markGameChanged();renderRoulette(content);toast('Крафт завершён: ранг '+tier+' → '+targetTier+' · +25 XP');}));
+    bindCaseButtons();bindSellButtons();bindCraftButtons();updateButton();
     if(Date.now()-game.lastSpinAt<2000)rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},100);
-    button.addEventListener('click',()=>{
-      const now=Date.now();if(rouletteIsSpinning)return;if(now-state.game.lastSpinAt<2000){updateButton();return;}
-      if(state.game.inventory.length>=inventoryCapacity()){toast('Инвентарь заполнен — продай предмет');updateButton();return;}
-      const activeCase=GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1];
-      if(state.game.money<activeCase.price){toast('Не хватает монет');updateButton();return;}
-      const oldLevel=playerLevelInfo().level;
-      triggerHaptic('impact','medium');
-      state.game.money-=activeCase.price;state.game.lastSpinAt=now;state.game.xp+=15;
-      const item=pickGameItem(activeCase.id),owned={...item,instanceId:state.game.nextItemId++,acquiredAt:now};
-      state.game.inventory.push(owned);state.game.lastDrop={...item};markGameChanged();
-      rouletteIsSpinning=true;stage.classList.add('is-spinning');result.classList.remove('is-revealed','roulette-pop');status.textContent='ПОИСК ПРЕДМЕТА';updateButton();refreshWallet();
-      if(rouletteAnimationTimer)clearTimeout(rouletteAnimationTimer);
-      const totalSteps=22,startAt=performance.now(),duration=2350;
-      let step=0;
-      const roll=()=>{
-        if(!result.isConnected){rouletteIsSpinning=false;return;}
-        const preview=pickGameItem(activeCase.id);setDropGlow(preview.tier);
-        result.querySelector('.roulette-tier').className='roulette-tier tier-'+preview.tier.toLowerCase();
-        result.querySelector('.roulette-tier').textContent=preview.tier;
-        result.querySelector('strong').textContent=preview.name;
-        result.querySelector('small').textContent=preview.company;
-        result.classList.remove('roulette-pop');
-        step++;
-        const progress=step/totalSteps;
-        if(step>=totalSteps){
-          setDropGlow(item.tier);triggerHaptic('notification','success');
-          result.querySelector('.roulette-tier').className='roulette-tier tier-'+item.tier.toLowerCase();
-          result.querySelector('.roulette-tier').textContent=item.tier;
-          result.querySelector('strong').textContent=item.name;
-          result.querySelector('small').textContent=item.company+' · цена '+fmtNum(item.price)+' монет';
-          result.classList.add('is-revealed','roulette-pop');
-          stage.classList.remove('is-spinning');stage.classList.add('has-result');
-          status.textContent='ПРЕДМЕТ ПОЛУЧЕН · РАНГ '+item.tier;
-          rouletteIsSpinning=false;
-          const inventoryContents=$('#inventoryContents',content);if(inventoryContents)inventoryContents.innerHTML=inventoryMarkup();
-          bindSellButtons();refreshWallet();updateButton();
-          const newLevel=playerLevelInfo().level;
-          toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Выпало: '+item.name+' · '+item.tier+' ранг');
-          return;
-        }
-        const eased=progress*progress;
-        rouletteAnimationTimer=setTimeout(roll,55+Math.round(eased*155));
-      };
-      rouletteAnimationTimer=setTimeout(roll,55);
-      if(rouletteCooldownTimer)clearInterval(rouletteCooldownTimer);
-      rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},100);
-    });
+    button.addEventListener('click',()=>{const now=Date.now();if(rouletteIsSpinning)return;if(now-state.game.lastSpinAt<2000){updateButton();return;}if(state.game.inventory.length>=inventoryCapacity()){toast('Инвентарь заполнен — продай предмет или скрафти три одинаковых');updateButton();return;}const activeCase=selectedCase();if(state.game.money<activeCase.price){toast('Не хватает денег');updateButton();return;}const oldLevel=playerLevelInfo().level;triggerHaptic('impact','medium');state.game.money-=activeCase.price;state.game.lastSpinAt=now;state.game.xp+=8;const baseItem=pickGameItem(activeCase.id),item={...baseItem,price:randomizedPrice(baseItem.price)},owned={...item,instanceId:state.game.nextItemId++,acquiredAt:now};state.game.inventory.push(owned);state.game.lastDrop={...item};markGameChanged();rouletteIsSpinning=true;stage.classList.add('is-spinning');result.classList.remove('is-revealed','roulette-pop');status.textContent='ПОИСК ПРЕДМЕТА';updateButton();refreshWallet();if(rouletteAnimationTimer)clearTimeout(rouletteAnimationTimer);const totalSteps=22;let step=0;const roll=()=>{if(!result.isConnected){rouletteIsSpinning=false;return;}const preview=pickGameItem(activeCase.id);setDropGlow(preview.tier);result.querySelector('.roulette-tier').className='roulette-tier tier-'+preview.tier.toLowerCase();result.querySelector('.roulette-tier').textContent=preview.tier;result.querySelector('strong').textContent=preview.name;result.querySelector('small').textContent=preview.company;result.classList.remove('roulette-pop');step++;const progress=step/totalSteps;if(step>=totalSteps){setDropGlow(item.tier);triggerHaptic('notification','success');result.querySelector('.roulette-tier').className='roulette-tier tier-'+item.tier.toLowerCase();result.querySelector('.roulette-tier').textContent=item.tier;result.querySelector('strong').textContent=item.name;result.querySelector('small').textContent=item.company+' · цена '+formatMoney(item.price);result.classList.add('is-revealed','roulette-pop');stage.classList.remove('is-spinning');stage.classList.add('has-result');status.textContent='ПРЕДМЕТ ПОЛУЧЕН · РАНГ '+item.tier;rouletteIsSpinning=false;renderRoulette(content);const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Выпало: '+item.name+' · '+item.tier+' ранг');return;}rouletteAnimationTimer=setTimeout(roll,55+Math.round(progress*progress*155));};rouletteAnimationTimer=setTimeout(roll,55);if(rouletteCooldownTimer)clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},100);});
   }
   function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
   function renderHistory(content){
@@ -474,9 +430,9 @@
       '<article class="card stat-card"><span class="eyebrow">ДНЕЙ С ДАННЫМИ</span><div class="stat-value">'+daysWithData+'</div><div class="stat-note">За всё время</div></article></div>';
   }
     function plural(n,one,few,many){const x=n%100;return x>=11&&x<=14?many:n%10===1?one:n%10>=2&&n%10<=4?few:many;}
-  function renderSettings(content){content.innerHTML=`<div class="card"><div class="section-heading"><div><span class="eyebrow">ЦЕЛИ</span><h2>Твои настройки</h2></div></div><div class="settings-row"><span>Калории в день</span><button id="settingsGoal">${fmtNum(state.goal)} ккал · Изменить</button></div><div class="settings-row"><span>Синхронизация Telegram</span><button id="syncNow">Синхронизировать</button></div><div class="settings-row"><span>Данные</span><button id="exportData">Экспорт JSON</button></div><div class="settings-row"><span>Резервная копия</span><button id="importData">Импорт JSON</button></div><div class="settings-row"><span>Удаление данных</span><button id="clearData">Сбросить всё</button></div><div class="settings-row"><span>Конфиденциальность</span><button id="openPrivacy">Политика конфиденциальности <span aria-hidden="true">↗</span></button></div><p class="settings-copy" id="syncStatus">Хранение: ${cloudStatus}. В Telegram Mini App данные синхронизируются через Telegram CloudStorage для твоего аккаунта. Вне Telegram используется локальное хранилище браузера.</p><p class="settings-copy">Экспорт JSON можно использовать как резервную копию. Yagami Track · версия 1.2</p></div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
-    $('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});$('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;$('#settingsPanel').hidden=true;panel.scrollIntoView({behavior:'smooth',block:'start'});});$('#syncNow').addEventListener('click',syncNow);$('#exportData').addEventListener('click',exportData);$('#importData').addEventListener('click',()=>$('#importFile').click());$('#importFile').addEventListener('change',importData);$('#clearData').addEventListener('click',()=>{if(confirm('Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные удалены');}});}
-  function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='yagami-track-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
+  function renderSettings(content){content.innerHTML=`<div class="card"><div class="section-heading"><div><span class="eyebrow">ЦЕЛИ</span><h2>Твои настройки</h2></div></div><div class="settings-row"><span>Калории в день</span><button id="settingsGoal">${fmtNum(state.goal)} ккал · Изменить</button></div><label class="settings-row"><span>Валюта игры</span><select id="gameCurrency"><option value="RUB" ${state.game.currency==='RUB'?'selected':''}>Рубли (₽)</option><option value="USD" ${state.game.currency==='USD'?'selected':''}>Доллары ($)</option></select></label><p class="settings-copy">Внутренний баланс считается в рублях. Для отображения в долларах используется условный курс $1 = 90 ₽.</p><div class="settings-row"><span>Синхронизация Telegram</span><button id="syncNow">Синхронизировать</button></div><div class="settings-row"><span>Данные</span><button id="exportData">Экспорт JSON</button></div><div class="settings-row"><span>Резервная копия</span><button id="importData">Импорт JSON</button></div><div class="settings-row"><span>Удаление данных</span><button id="clearData">Сбросить всё</button></div><div class="settings-row"><span>Конфиденциальность</span><button id="openPrivacy">Политика конфиденциальности <span aria-hidden="true">↗</span></button></div><p class="settings-copy" id="syncStatus">Хранение: ${cloudStatus}. В Telegram Mini App данные синхронизируются через Telegram CloudStorage для твоего аккаунта. Вне Telegram используется локальное хранилище браузера.</p><p class="settings-copy">Экспорт JSON можно использовать как резервную копию. Kairo · версия 1.2</p></div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
+    $('#gameCurrency').addEventListener('change',e=>{state.game.currency=e.target.value==='USD'?'USD':'RUB';markGameChanged();renderRoulette($('#rouletteContent'));renderSettings($('#settingsContent'));toast('Валюта изменена');});$('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});$('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;$('#settingsPanel').hidden=true;panel.scrollIntoView({behavior:'smooth',block:'start'});});$('#syncNow').addEventListener('click',syncNow);$('#exportData').addEventListener('click',exportData);$('#importData').addEventListener('click',()=>$('#importFile').click());$('#importFile').addEventListener('change',importData);$('#clearData').addEventListener('click',()=>{if(confirm('Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные удалены');}});}
+  function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kairo-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
   function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state=normalizeState(parsed);saveState();render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
   $('#openSettings').addEventListener('click',()=>{
     const panel=$('#settingsPanel');
@@ -485,6 +441,6 @@
   });
   $('#closeSettings').addEventListener('click',()=>$('#settingsPanel').hidden=true);
   $('#closePrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=true;$('#settingsPanel').hidden=false;$('#settingsPanel').scrollIntoView({behavior:'smooth',block:'start'});});
-  initializeStorage();
+  initializeStorage().finally(()=>setInterval(accruePassiveIncome,1000));
   if('serviceWorker' in navigator && location.protocol.startsWith('http')) window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
