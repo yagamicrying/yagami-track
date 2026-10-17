@@ -134,18 +134,20 @@
   let lastPassiveCloudSave=Date.now();
   function accruePassiveIncome(){
     const now=Date.now(),previous=Number(state.game.lastIncomeAt)||now;
-    const elapsedHours=Math.floor((now-previous)/3600000);
-    if(elapsedHours<=0)return;
-    const hours=Math.min(elapsedHours,12);
-    state.game.money+=passiveIncomePerHour()*hours;
-    state.game.lastIncomeAt=elapsedHours>12?now:previous+hours*3600000;
+    const elapsedMs=Math.max(0,now-previous);
+    if(elapsedMs<=0)return;
+    // Accrue continuously, while the UI deliberately displays whole currency units.
+    const hourlyRate=passiveIncomePerHour();
+    state.game.money=Math.max(0,Number(state.game.money)||0)+hourlyRate*(elapsedMs/3600000);
+    state.game.lastIncomeAt=now;
     const moneyNode=$('#gameMoney');if(moneyNode)moneyNode.textContent=formatMoney(state.game.money);
+    const floatingMoney=$('#floatingGameMoney');if(floatingMoney)floatingMoney.textContent=formatMoney(state.game.money);
     if(gameUiRefresh)gameUiRefresh();
-    const incomeNode=$('#gameIncomeRate');if(incomeNode)incomeNode.textContent='+'+formatIncomeRate(passiveIncomePerHour())+' / час';
-    const floatingIncome=$('#floatingGameIncome');if(floatingIncome)floatingIncome.textContent='+'+formatIncomeRate(passiveIncomePerHour())+' / час';
+    const incomeText='+'+formatIncomeRate(hourlyRate)+' / час';
+    const incomeNode=$('#gameIncomeRate');if(incomeNode)incomeNode.textContent=incomeText;
+    const floatingIncome=$('#floatingGameIncome');if(floatingIncome)floatingIncome.textContent=incomeText;
     try{localStorage.setItem(STORE,JSON.stringify(state));}catch(error){console.warn('Local passive-income save failed',error);}
     if(now-lastPassiveCloudSave>=15000){lastPassiveCloudSave=now;markGameChanged();}
-    else markGameChanged();
   }
 
   function triggerHaptic(kind='impact',style='light'){
@@ -153,12 +155,11 @@
       const tg=window.Telegram&&window.Telegram.WebApp;
       const h=tg&&tg.HapticFeedback;
       if(h){
-        if(kind==='selection'&&typeof h.selectionChanged==='function')h.selectionChanged();
-        else if(kind==='notification'&&typeof h.notificationOccurred==='function')h.notificationOccurred(style);
-        else if(typeof h.impactOccurred==='function')h.impactOccurred(style);
-        return;
+        if(kind==='selection'&&typeof h.selectionChanged==='function'){h.selectionChanged();return;}
+        if(kind==='notification'&&typeof h.notificationOccurred==='function'){h.notificationOccurred(style);return;}
+        if(typeof h.impactOccurred==='function'){h.impactOccurred(style);return;}
       }
-      if(navigator.vibrate)navigator.vibrate(kind==='notification'?[22,35,32]:kind==='selection'?8:style==='heavy'?28:12);
+      if(navigator.vibrate)navigator.vibrate(kind==='notification'?[22,35,32]:kind==='selection'?10:style==='heavy'?28:12);
     }catch(_){}
   }
   function markGameChanged(){
@@ -455,10 +456,26 @@
         {transform:'translate3d('+startOffset+'px,0,0)'},
         {transform:'translate3d('+finalOffset+'px,0,0)'}
       ],{duration:6800,easing:'cubic-bezier(0.06, 0.68, 0.12, 1)',fill:'forwards'});
-      rouletteAnimationTimer=setTimeout(()=>{if(rouletteIsSpinning)triggerHaptic('selection');status.textContent='ПОЧТИ…';},4900);
+      // A light selection haptic fires as each reel tile crosses the center marker.
+      let lastHapticTile=-1,slotHapticFrame=0;
+      const tileStep=(targetTile.offsetWidth||96)+8;
+      const pulseSlots=()=>{
+        if(!rouletteIsSpinning||!track.isConnected)return;
+        const transform=getComputedStyle(track).transform;
+        let currentX=startOffset;
+        if(transform&&transform!=='none'){
+          try{currentX=new DOMMatrixReadOnly(transform).m41;}catch(_){}
+        }
+        const passed=Math.max(0,Math.floor(Math.abs(currentX-startOffset)/tileStep));
+        if(passed!==lastHapticTile){lastHapticTile=passed;triggerHaptic('selection');}
+        slotHapticFrame=requestAnimationFrame(pulseSlots);
+      };
+      slotHapticFrame=requestAnimationFrame(pulseSlots);
+      rouletteAnimationTimer=setTimeout(()=>{if(rouletteIsSpinning)triggerHaptic('impact','medium');status.textContent='ПОЧТИ…';},4900);
       const finishSpin=()=>{
         if(!result.isConnected){rouletteIsSpinning=false;return;}
         clearTimeout(rouletteAnimationTimer);rouletteAnimationTimer=null;
+        if(slotHapticFrame)cancelAnimationFrame(slotHapticFrame);
         track.style.transform='translate3d('+finalOffset+'px,0,0)';
         if(rouletteReelAnimation){rouletteReelAnimation.cancel();rouletteReelAnimation=null;}
         const tierNode=result.querySelector('.roulette-tier'),incomeNode=result.querySelector('.roulette-income');
