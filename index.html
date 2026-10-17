@@ -22,7 +22,8 @@
         <strong id="profileName">Пользователь</strong>
         <span class="profile-status" id="profileStatus"><i></i><span>Сегодня ещё не начинал</span></span>
       </div>
-      <button class="icon-button" id="todayBtn" aria-label="Перейти к сегодняшнему дню" title="Сегодня">↻</button>
+      <button class="icon-button today-button" id="todayBtn" aria-label="Перейти к сегодняшнему дню" title="Сегодня">↻</button>
+      <button class="icon-button settings-gear" id="openSettings" aria-label="Настройки" title="Настройки">⚙</button>
     </header>
 
     <section class="date-row">
@@ -52,11 +53,25 @@
 
 
 
-    <nav class="bottom-nav" aria-label="Основная навигация"><button class="nav-item active" data-view="day"><span>◷</span><small>День</small></button><button class="nav-item" data-view="stats"><span>⌁</span><small>Прогресс</small></button><button class="nav-item" data-view="roulette"><span>◉</span><small>Рулетка</small></button><button class="nav-item" data-view="settings"><span>⚙</span><small>Настройки</small></button></nav>
+    <section class="page-section progress-page">
+      <div class="page-section-heading"><div><span class="eyebrow">АНАЛИТИКА</span><h2>Прогресс</h2></div></div>
+      <div id="progressContent"></div>
+    </section>
+    <section class="page-section history-page">
+      <div class="page-section-heading"><div><span class="eyebrow">ЖУРНАЛ</span><h2>История записей</h2></div></div>
+      <div id="historyContent"></div>
+    </section>
+    <section class="page-section roulette-page">
+      <div class="page-section-heading"><div><span class="eyebrow">ДЛЯ ИНТЕРЕСА</span><h2>Рулетка добавок</h2></div></div>
+      <div id="rouletteContent"></div>
+    </section>
+    <section class="page-section settings-page" id="settingsPanel" hidden>
+      <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2>Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
+      <div id="settingsContent"></div>
+    </section>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </main>
   <dialog id="editDialog"><form method="dialog" id="editForm"><div class="dialog-head"><h2 id="dialogTitle">Изменить</h2><button class="dialog-close" value="cancel" aria-label="Закрыть">×</button></div><label id="fieldLabel" for="fieldInput">Значение</label><input id="fieldInput" type="number" inputmode="decimal" min="0" step="any"><p id="fieldHint" class="dialog-hint"></p><div class="dialog-actions"><button class="secondary-button" value="cancel">Отмена</button><button class="primary-button" id="saveField" value="save">Сохранить</button></div></form></dialog>
-  <section id="subview" class="subview" hidden><div class="subview-head"><button id="backToDay" class="date-arrow" aria-label="Назад">‹</button><div><span class="eyebrow">YAGAMI TRACK</span><h1 id="subviewTitle">История</h1></div></div><div id="subviewContent"></div></section>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="app.js"></script>
 </body>
