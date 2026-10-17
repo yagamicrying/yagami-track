@@ -548,3 +548,37 @@ dialog::backdrop{transition:background-color 180ms ease}
 .craft-button:disabled{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.035);color:#777780;opacity:.85}
 .settings-row select{max-width:155px;min-width:120px;padding:9px 12px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:#202024;color:inherit;font:inherit;font-size:13px}
 @media(max-width:380px){.crafting-item{align-items:flex-start;flex-direction:column}.craft-button{width:100%}.wallet-income{font-size:11px}}
+
+
+/* Roulette refresh: visible odds, strong item utility, smooth suspense */
+.roulette-stage:before,.roulette-stage:after{display:none!important;content:none!important}
+.roulette-stage{min-height:244px;background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--drop-glow,#f5c542) 12%,transparent),transparent 64%),linear-gradient(155deg,#202023,#141416 78%);transition:background 1s ease,border-color .6s ease,box-shadow .8s ease}
+.roulette-stage.is-spinning{border-color:color-mix(in srgb,var(--drop-glow,#f5c542) 52%,#343438);box-shadow:0 0 38px color-mix(in srgb,var(--drop-glow,#f5c542) 12%,transparent)}
+.roulette-stage.is-spinning .roulette-result{animation:rouletteFloat .7s ease-in-out infinite alternate}
+.roulette-stage.is-spinning .roulette-result strong,.roulette-stage.is-spinning .roulette-income,.roulette-stage.is-spinning .roulette-tier{transition:color .25s ease,transform .25s ease,filter .25s ease}
+@keyframes rouletteFloat{from{transform:translateY(2px) scale(.99)}to{transform:translateY(-2px) scale(1.01)}}
+.roulette-result{gap:6px;min-height:176px;height:176px;flex-basis:176px}
+.roulette-result .roulette-tier{width:48px;height:48px;flex-basis:48px;border-radius:15px;font-size:22px}
+.roulette-result strong{font-size:clamp(18px,5vw,23px);font-weight:750;letter-spacing:-.45px}
+.roulette-result .roulette-income{display:block;width:100%;font-size:clamp(19px,5.2vw,24px);line-height:1.15;font-weight:850;letter-spacing:-.45px;color:#82e5ac;text-shadow:0 0 20px rgba(91,230,157,.15);font-variant-numeric:tabular-nums}
+.roulette-result small{min-height:15px;font-size:10px;color:#a5a5ae}
+.case-odds-heading{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:12px 1px 7px;font-size:10px;color:#a7a7b0}
+.case-odds-heading span:first-child{font-weight:750;color:#ededf0;font-size:11px}
+.case-odds-heading span:last-child{text-align:right}
+.case-odds-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.case-odds-row{display:flex;align-items:center;flex-direction:column;gap:4px;padding:8px 2px 7px;min-width:0;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025)}
+.odds-rank{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;font-size:11px;font-weight:850;background:rgba(255,255,255,.08)}
+.odds-label{font-size:8px;color:#a6a6ad;white-space:nowrap}
+.case-odds-row strong{font-size:clamp(10px,2.8vw,12px);font-weight:800;font-variant-numeric:tabular-nums;color:#f2f2f5}
+.tier-odds-s .odds-rank{background:rgba(255,184,77,.17);color:#ffc46b}
+.tier-odds-a .odds-rank{background:rgba(191,120,255,.17);color:#d8a6ff}
+.tier-odds-b .odds-rank{background:rgba(87,152,255,.17);color:#8ebaff}
+.tier-odds-c .odds-rank{background:rgba(72,214,160,.17);color:#76e5ba}
+.tier-odds-d .odds-rank{background:rgba(160,160,170,.13);color:#c3c3cb}
+.jackpot-note{margin:8px 1px 0;font-size:10px;line-height:1.5;color:#a8a8b0}
+.jackpot-note strong{color:#ffc46b;font-weight:850}
+.item-income-main{margin:3px 0 4px;font-size:clamp(15px,4vw,18px);line-height:1.2;font-weight:850;letter-spacing:-.35px;color:#82e5ac;font-variant-numeric:tabular-nums}
+.inventory-item-copy{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.inventory-prices{margin-top:4px;font-size:10px;line-height:1.35;color:#9d9da7}
+@media(max-width:350px){.case-odds-grid{gap:3px}.case-odds-row{padding:7px 1px}.odds-label{font-size:7px}.case-odds-row strong{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.roulette-stage.is-spinning .roulette-result{animation:none!important}.roulette-stage{transition:none!important}}
