@@ -34,10 +34,10 @@
   ];
 
   const GAME_CASES = [
-    {id:'starter',name:'Первый шаг',price:0,subtitle:'Один бесплатный бокс для каждого игрока',tierOdds:{S:1,A:4,B:15,C:30,D:50}},
-    {id:'forbidden',name:'Чёрный протокол',price:2500,subtitle:'Высокий риск · шанс S-ранга 20%',tierOdds:{S:20,A:25,B:30,C:15,D:10}},
-    {id:'medium',name:'Золотой стандарт',price:1500,subtitle:'Сбалансированный кейс · шанс B и выше 60%',tierOdds:{S:10,A:20,B:30,C:25,D:15}},
-    {id:'useless',name:'Складской остаток',price:1000,subtitle:'Доступный кейс · шанс B и выше 50%',tierOdds:{S:5,A:15,B:30,C:25,D:25}}
+    {id:'starter',name:'Первый шаг',price:0,subtitle:'Бесплатный старт · редкие машины остаются редкими',tierOdds:{S:0.38,A:5.62,B:28,C:65,D:1}},
+    {id:'forbidden',name:'Чёрный протокол',price:2500,subtitle:'Премиальный кейс · общая кривая редкости',tierOdds:{S:0.38,A:5.62,B:28,C:65,D:1}},
+    {id:'medium',name:'Золотой стандарт',price:1500,subtitle:'Сбалансированный кейс · общая кривая редкости',tierOdds:{S:0.38,A:5.62,B:28,C:65,D:1}},
+    {id:'useless',name:'Складской остаток',price:1000,subtitle:'Бюджетный кейс · шанс S-ранга 0,38%',tierOdds:{S:0.38,A:5.62,B:28,C:65,D:1}}
   ];
   let selectedCaseId = 'medium';
   let selectedOpenCount = 1;
@@ -176,7 +176,7 @@
   function chanceLabel(value){return value<0.1?value.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':value.toLocaleString('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:2})+'%';}
   function tierOddsMarkup(caseEntry){
     const labels={S:'S · Легендарный',A:'A · Эпический',B:'B · Редкий',C:'C · Необычный',D:'D · Обычный'};
-    return '<div class="case-odds-heading"><span>Шансы выпадения</span><span>'+escapeHtml(caseEntry.name)+'</span></div><div class="case-odds-grid">'+['S','A','B','C','D'].map(tier=>'<div class="case-odds-row tier-odds-'+tier.toLowerCase()+'"><span class="odds-rank">'+tier+'</span><span class="odds-label">'+labels[tier].slice(4)+'</span><strong>'+chanceLabel(caseEntry.tierOdds[tier]||0)+'</strong></div>').join('')+'</div>'+(caseEntry.id==='useless'?'<p class="jackpot-note">Шанс на Тренболон S в этом кейсе: <strong>5%</strong>.</p>':'');
+    return '<div class="case-odds-heading"><span>Шансы выпадения</span><span>'+escapeHtml(caseEntry.name)+'</span></div><div class="case-odds-grid">'+['S','A','B','C','D'].map(tier=>'<div class="case-odds-row tier-odds-'+tier.toLowerCase()+'"><span class="odds-rank">'+tier+'</span><span class="odds-label">'+labels[tier].slice(4)+'</span><strong>'+chanceLabel(caseEntry.tierOdds[tier]||0)+'</strong></div>').join('')+'</div>'+(caseEntry.id==='useless'?'<p class="jackpot-note">Шанс предмета S-ранга в этом кейсе: <strong>'+chanceLabel(caseEntry.tierOdds.S||0)+'</strong>.</p>':'');
   }
   function pickGameItem(caseId=selectedCaseId){
     const selected=GAME_CASES.find(entry=>entry.id===caseId)||GAME_CASES[1];
