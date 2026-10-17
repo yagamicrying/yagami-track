@@ -232,14 +232,17 @@
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();refreshPageSections();toast('Калории сброшены');}});
   function renderRoulette(content){
     const items=[
-      {name:'Протеин',tier:'S',detail:'Белок для добора суточной нормы'},
-      {name:'Креатин',tier:'S',detail:'Одна из наиболее изученных спортивных добавок'},
-      {name:'Предтрен',tier:'A',detail:'Эффект и состав зависят от продукта'},
-      {name:'Тестостерон',tier:'B',detail:'Гормональная терапия — только по медицинским показаниям'},
-      {name:'Гормон роста',tier:'C',detail:'Не для самостоятельного применения'},
-      {name:'Тренболон',tier:'D',detail:'Высокие риски; не одобрен для применения у людей во многих странах'}
+      {name:'Тренболон',tier:'S',detail:'Анаболический стероид с серьёзными рисками; не одобрен для применения у людей во многих странах'},
+      {name:'Гормон роста',tier:'S',detail:'Гормональный препарат; применение — только по медицинским показаниям'},
+      {name:'Предтрен',tier:'A',detail:'Эффект зависит от состава; проверь дозу кофеина и других стимуляторов'},
+      {name:'Протеин',tier:'B',detail:'Удобный способ добрать белок, если его не хватает в рационе'},
+      {name:'Креатин',tier:'B',detail:'Хорошо изученная добавка для повышения силовых показателей'},
+      {name:'Электролиты',tier:'C',detail:'Могут быть полезны при длительной нагрузке и сильном потоотделении'},
+      {name:'Омега-3',tier:'C',detail:'Добавка не заменяет полноценное питание; польза зависит от рациона'},
+      {name:'BCAA',tier:'D',detail:'При достаточном количестве белка дополнительная польза для мышц обычно ограничена'},
+      {name:'Глютамин',tier:'D',detail:'Убедительных доказательств заметного роста мышц у здоровых людей мало'}
     ];
-    content.innerHTML=`<section class="roulette-hero card"><span class="eyebrow">RANDOM TIER</span><h2>Рулетка добавок</h2><p>Крути и получи случайный предмет с его классом.</p><div class="roulette-result" id="rouletteResult"><span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><small>Нажми кнопку ниже</small></div><button class="primary-button full-width" id="spinRoulette">Крутить рулетку</button><p class="roulette-disclaimer">Развлекательная классификация, не медицинская рекомендация. Гормоны и анаболические стероиды могут причинить серьёзный вред; не используй их без врача.</p></section><details class="tier-details"><summary>Показать классы <span>Редкость и цветовая маркировка</span></summary><section class="tier-list">${['S','A','B','C','D'].map(tier=>`<div class="tier-row tier-${tier.toLowerCase()}"><span class="tier-label tier-${tier.toLowerCase()}">${tier}</span><div class="tier-items">${items.filter(item=>item.tier===tier).map(item=>`<div class="tier-item"><strong>${item.name}</strong><small>${item.detail}</small></div>`).join('')}</div></div>`).join('')}</section></details>`;
+    content.innerHTML=`<section class="roulette-hero card"><span class="eyebrow">RANDOM TIER</span><h2>Рулетка спортпита</h2><p>Случайный предмет и его игровой ранг.</p><div class="roulette-result" id="rouletteResult"><span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><small>Нажми кнопку ниже</small></div><button class="primary-button full-width" id="spinRoulette">Крутить рулетку</button><p class="roulette-disclaimer">Ранги — игровая редкость, а не оценка пользы или безопасности. Тренболон и гормон роста — не обычный спортпит: самостоятельное применение может причинить серьёзный вред.</p></section><details class="tier-details"><summary>Показать ранги <span>Редкость и цветовая маркировка</span></summary><section class="tier-list">${['S','A','B','C','D'].map(tier=>`<div class="tier-row tier-${tier.toLowerCase()}"><span class="tier-label tier-${tier.toLowerCase()}">${tier}</span><div class="tier-items">${items.filter(item=>item.tier===tier).map(item=>`<div class="tier-item"><strong>${item.name}</strong><small>${item.detail}</small></div>`).join('')}</div></div>`).join('')}</section></details>`;
     $('#spinRoulette',content).addEventListener('click',()=>{
       const button=$('#spinRoulette',content);
       const result=$('#rouletteResult',content);
