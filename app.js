@@ -220,10 +220,39 @@
   $$('.add-chip[data-add]').forEach(btn=>btn.addEventListener('click',()=>{dayData().calories+=Number(btn.dataset.add);saveState();render();toast('Добавлено '+btn.dataset.add+' ккал');}));
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();toast('Калории сброшены');}});
   const app=$('.app-shell');const sub=$('#subview');
-  function showView(view){if(view==='day'){sub.hidden=true;app.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view==='day'));return;}app.hidden=true;sub.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));const titles={history:'История',stats:'Прогресс',settings:'Настройки'};$('#subviewTitle').textContent=titles[view];const content=$('#subviewContent');content.innerHTML='';
+  function showView(view){if(view==='day'){sub.hidden=true;app.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view==='day'));return;}app.hidden=true;sub.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));const titles={history:'История',stats:'Прогресс',roulette:'Рулетка',settings:'Настройки'};$('#subviewTitle').textContent=titles[view];const content=$('#subviewContent');content.innerHTML='';
     if(view==='history') renderHistory(content);
     if(view==='stats') renderStats(content);
+    if(view==='roulette') renderRoulette(content);
     if(view==='settings') renderSettings(content);
+  }
+  function renderRoulette(content){
+    const items=[
+      {name:'Протеин',tier:'S',detail:'Белок для добора суточной нормы'},
+      {name:'Креатин',tier:'S',detail:'Одна из наиболее изученных спортивных добавок'},
+      {name:'Предтрен',tier:'A',detail:'Эффект и состав зависят от продукта'},
+      {name:'Тестостерон',tier:'B',detail:'Гормональная терапия — только по медицинским показаниям'},
+      {name:'Гормон роста',tier:'C',detail:'Не для самостоятельного применения'},
+      {name:'Тренболон',tier:'D',detail:'Высокие риски; не одобрен для применения у людей во многих странах'}
+    ];
+    content.innerHTML=`<section class="roulette-hero card"><span class="eyebrow">RANDOM TIER</span><h2>Рулетка добавок</h2><p>Крути и получи случайный предмет с его классом.</p><div class="roulette-result" id="rouletteResult"><span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><small>Нажми кнопку ниже</small></div><button class="primary-button full-width" id="spinRoulette">Крутить рулетку</button><p class="roulette-disclaimer">Развлекательная классификация, не медицинская рекомендация. Гормоны и анаболические стероиды могут причинить серьёзный вред; не используй их без врача.</p></section><section class="tier-list"><h2>Классы</h2>${['S','A','B','C','D'].map(tier=>`<div class="tier-row tier-${tier.toLowerCase()}"><span class="tier-label">${tier}</span><div class="tier-items">${items.filter(item=>item.tier===tier).map(item=>`<div class="tier-item"><strong>${item.name}</strong><small>${item.detail}</small></div>`).join('')}</div></div>`).join('')}</section>`;
+    $('#spinRoulette',content).addEventListener('click',()=>{
+      const button=$('#spinRoulette',content);
+      const result=$('#rouletteResult',content);
+      button.disabled=true;
+      result.classList.remove('roulette-pop');
+      let ticks=0;
+      const timer=setInterval(()=>{
+        const item=items[Math.floor(Math.random()*items.length)];
+        result.innerHTML=`<span class="roulette-tier tier-${item.tier.toLowerCase()}">${item.tier}</span><strong>${item.name}</strong><small>${item.detail}</small>`;
+        ticks++;
+        if(ticks>=14){
+          clearInterval(timer);
+          result.classList.add('roulette-pop');
+          button.disabled=false;
+        }
+      },90);
+    });
   }
   function renderHistory(content){const keys=Object.keys(state.days).filter(k=>{const d=state.days[k];return d.calories||d.weight!==''||d.sleep!==''||d.note||(d.checks&&Object.values(d.checks).some(Boolean));}).sort().reverse();if(!keys.length){content.innerHTML='<div class="card empty-state">Здесь появятся дни, в которые ты вносил данные.<br>Начни с сегодняшнего дня.</div>';return;}keys.forEach(key=>{const d=state.days[key];const row=document.createElement('button');row.className='history-row';row.style.cssText='width:100%;background:transparent;border:0;color:inherit;text-align:left';row.innerHTML=`<span><strong>${formatDate(key)}</strong><small>${formatDay(key)}</small></span><span class="history-value">${fmtNum(d.calories||0)} <small>ккал</small></span>`;row.addEventListener('click',()=>{currentDate=key;showView('day');render();});content.append(row);});}
   function renderStats(content){const entries=Object.entries(state.days).sort(([a],[b])=>a.localeCompare(b));const weights=entries.filter(([,d])=>d.weight!==''&&Number.isFinite(Number(d.weight)));const sleeps=entries.filter(([,d])=>d.sleep!==''&&Number.isFinite(Number(d.sleep)));const cal=entries.filter(([,d])=>Number(d.calories)>0);const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;const avgCal=avg(cal.map(([,d])=>Number(d.calories)));const avgSleep=avg(sleeps.map(([,d])=>Number(d.sleep)));const latestWeight=weights.at(-1);content.innerHTML=`<div class="stats-grid"><article class="card stat-card"><span class="eyebrow">СРЕДНИЕ КАЛОРИИ</span><div class="stat-value">${cal.length?fmtNum(avgCal):'—'}<small>ккал</small></div><div class="stat-note">По ${cal.length} ${plural(cal.length,'дню','дням','дням')} с записями</div></article><article class="card stat-card"><span class="eyebrow">СРЕДНИЙ СОН</span><div class="stat-value">${sleeps.length?fmtNum(avgSleep):'—'}<small>ч</small></div><div class="stat-note">По ${sleeps.length} ${plural(sleeps.length,'ночи','ночам','ночам')} с записями</div></article><article class="card stat-card"><span class="eyebrow">ПОСЛЕДНИЙ ВЕС</span><div class="stat-value">${latestWeight?fmtNum(latestWeight[1].weight):'—'}<small>кг</small></div><div class="stat-note">${latestWeight?formatDate(latestWeight[0]):'Добавь первую запись'}</div></article><article class="card stat-card"><span class="eyebrow">ДНЕЙ С ДАННЫМИ</span><div class="stat-value">${entries.length}</div><div class="stat-note">Записи сохраняются на этом устройстве</div></article></div><div class="card"><div class="section-heading"><div><span class="eyebrow">ПОДСКАЗКА</span><h2>Стабильность важнее идеала</h2></div></div><p class="settings-copy">Вноси данные каждый день — со временем здесь появится полезная динамика. Средние значения считаются только по дням, где есть записи.</p></div>`;}
