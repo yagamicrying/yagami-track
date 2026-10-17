@@ -210,7 +210,7 @@
     $('#progressStatus').textContent=calories===0?'Начни свой день':remaining<0?'Цель превышена':remaining===0?'Цель выполнена':'Хороший темп';
     $('#weightValue').textContent=d.weight===''?'—':fmtNum(d.weight); $('#sleepValue').textContent=d.sleep===''?'—':fmtNum(d.sleep);
     $('#weightNote').textContent=d.weight===''?'Отслеживай динамику':'Записано за этот день'; $('#sleepNote').textContent=d.sleep===''?'Цель — 8 часов':Number(d.sleep)>=8?'Цель по сну достигнута':'До цели: '+fmtNum(8-Number(d.sleep))+' ч';
-    $$('[data-check]').forEach(el=>el.checked=!!d.checks[el.dataset.check]); $('#routineCount').textContent=$$('[data-check]').filter(el=>el.checked).length+'/3'; $('#dayNote').value=d.note||''; $('#noteCount').textContent=(d.note||'').length+'/1000';
+    
   }
   function shiftDay(delta){const d=dateFromKey(currentDate);d.setDate(d.getDate()+delta);currentDate=dateKey(d);render();}
   function openEditor(type){editType=type;const config={goal:['Дневная цель','Калории в день','3500','Укажи цель в ккал.'],weight:['Записать вес','Вес в килограммах',dayData().weight||'','Например, 78.5 кг.'],sleep:['Записать сон','Часов сна',dayData().sleep||'','Можно указать дробное значение, например 7.5.'],custom:['Добавить калории','Количество ккал','','Укажи число больше нуля.']}[type];$('#dialogTitle').textContent=config[0];$('#fieldLabel').textContent=config[1];$('#fieldInput').value=config[2];$('#fieldInput').placeholder=type==='weight'?'78.5':type==='sleep'?'7.5':'0';$('#fieldInput').step=type==='weight'||type==='sleep'?'0.1':'1';$('#fieldInput').min='0';$('#fieldHint').textContent=config[3];$('#editDialog').showModal();setTimeout(()=>$('#fieldInput').focus(),100);}
@@ -219,9 +219,6 @@
   $('#editGoal').addEventListener('click',()=>openEditor('goal'));$('#editWeight').addEventListener('click',()=>openEditor('weight'));$('#editSleep').addEventListener('click',()=>openEditor('sleep'));$('#customAdd').addEventListener('click',()=>openEditor('custom'));
   $$('.add-chip[data-add]').forEach(btn=>btn.addEventListener('click',()=>{dayData().calories+=Number(btn.dataset.add);saveState();render();toast('Добавлено '+btn.dataset.add+' ккал');}));
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();toast('Калории сброшены');}});
-  $$('[data-check]').forEach(el=>el.addEventListener('change',()=>{dayData().checks[el.dataset.check]=el.checked;saveState();render();}));
-  $('#dayNote').addEventListener('input',()=>{dayData().note=$('#dayNote').value;$('#noteCount').textContent=$('#dayNote').value.length+'/1000';saveState();});
-
   const app=$('.app-shell');const sub=$('#subview');
   function showView(view){if(view==='day'){sub.hidden=true;app.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view==='day'));return;}app.hidden=true;sub.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));const titles={history:'История',stats:'Прогресс',settings:'Настройки'};$('#subviewTitle').textContent=titles[view];const content=$('#subviewContent');content.innerHTML='';
     if(view==='history') renderHistory(content);
