@@ -425,3 +425,55 @@ dialog::backdrop{transition:background-color 180ms ease}
 .catalogue-item-title b small{font-size:8px;color:var(--muted);font-weight:500}
 .tier-item>small{display:block}
 @media(max-width:360px){.avatar-wrap,.avatar-wrap .profile-avatar{width:42px;height:42px;flex-basis:42px}.player-xp-track{max-width:45px}.player-level-line{gap:4px}.inventory-item{padding:9px}.sell-item{padding:8px}}
+
+
+/* Roulette UX polish: stable layout, smooth easing, no content jumps */
+.roulette-hero{padding:clamp(15px,4vw,22px);overflow:hidden}
+.roulette-hero h2{font-size:clamp(22px,6vw,27px);line-height:1.12}
+.roulette-hero>p{font-size:12px;line-height:1.5}
+.roulette-stage{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:232px;margin:18px 0 14px;padding:22px 14px 14px;border-radius:22px;overflow:hidden;border:1px solid #343438;background:radial-gradient(ellipse at 50% 38%,rgba(245,197,66,.08),transparent 53%),linear-gradient(155deg,#202023,#141416 78%);transition:border-color .35s ease,background .35s ease}
+.roulette-stage:before,.roulette-stage:after{content:"";position:absolute;z-index:-1;pointer-events:none;border-radius:50%;border:1px solid rgba(245,197,66,.08);width:230px;height:230px;transition:transform 2s cubic-bezier(.16,1,.3,1),opacity .35s ease}
+.roulette-stage:before{width:185px;height:185px}
+.roulette-stage:after{width:145px;height:145px}
+.roulette-stage.is-spinning{border-color:rgba(245,197,66,.4);background:radial-gradient(ellipse at 50% 38%,rgba(245,197,66,.14),transparent 60%),linear-gradient(155deg,#242426,#141416 78%)}
+.roulette-stage.is-spinning:before{transform:rotate(180deg) scale(1.1);border-color:rgba(245,197,66,.2)}
+.roulette-stage.is-spinning:after{transform:rotate(-180deg) scale(1.15);border-color:rgba(245,197,66,.16)}
+.roulette-result{position:relative;z-index:1;width:100%;min-height:166px;height:166px;flex:0 0 166px;margin:0;padding:14px 8px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;border:0;background:transparent;overflow:hidden}
+.roulette-result .roulette-tier{width:56px;height:56px;flex:0 0 56px;border-radius:17px;font-size:25px;box-shadow:0 6px 22px rgba(0,0,0,.24);transition:transform .2s cubic-bezier(.16,1,.3,1),filter .2s ease}
+.roulette-result strong{display:block;width:100%;max-width:100%;font-size:clamp(17px,4.8vw,22px);line-height:1.2;letter-spacing:-.35px;overflow-wrap:anywhere;transition:opacity .12s ease}
+.roulette-result small{display:block;width:100%;max-width:290px;min-height:28px;font-size:10px;line-height:1.4;overflow-wrap:anywhere;transition:opacity .12s ease}
+.roulette-result.roulette-pop .roulette-tier{animation:rouletteReveal .48s cubic-bezier(.16,1,.3,1)}
+@keyframes rouletteReveal{0%{transform:scale(.78) rotate(-8deg);filter:brightness(1)}65%{transform:scale(1.1) rotate(2deg);filter:brightness(1.25)}100%{transform:scale(1);filter:brightness(1)}}
+.roulette-status{position:relative;z-index:1;min-height:12px;margin-top:3px;font-size:8px;line-height:1.3;letter-spacing:1.5px;font-weight:800;color:#96969d;text-align:center}
+.roulette-stage.is-spinning .roulette-status{color:#f5c542}
+.roulette-stage.has-result .roulette-status{color:#c9a64b}
+.roulette-hero #spinRoulette{min-height:48px;margin-top:0;border-radius:14px;font-size:13px;letter-spacing:.1px;transition:transform .2s ease,opacity .2s ease,filter .2s ease}
+.roulette-hero #spinRoulette:not(:disabled):active{transform:scale(.985)}
+.roulette-hero #spinRoulette:disabled{opacity:.65;filter:saturate(.6)}
+.roulette-disclaimer{font-size:10px!important;line-height:1.5;margin-top:14px!important}
+.game-wallet{padding:15px 16px;border-radius:18px;transition:border-color .25s ease}
+.wallet-balance strong{font-size:clamp(21px,6vw,25px);font-variant-numeric:tabular-nums}
+.wallet-xp-track i{transition:width .35s cubic-bezier(.16,1,.3,1)}
+.inventory-panel{padding:clamp(14px,4vw,18px);min-width:0}
+.inventory-item{min-width:0;transition:border-color .2s ease,background .2s ease}
+.inventory-item-copy{overflow:hidden}
+.inventory-item-copy>small{overflow-wrap:anywhere}
+.sell-item{transition:background .18s ease,transform .18s ease;white-space:nowrap}
+.tier-details>summary{transition:border-color .2s ease,background .2s ease}
+.tier-details[open]>summary{border-color:#444449}
+@media(max-width:380px){
+  .roulette-stage{min-height:216px;padding:16px 10px 12px;margin:14px 0 12px}
+  .roulette-result{height:156px;min-height:156px;flex-basis:156px;padding:10px 5px;gap:7px}
+  .roulette-result .roulette-tier{width:49px;height:49px;flex-basis:49px;border-radius:15px;font-size:23px}
+  .roulette-result strong{font-size:18px}
+  .roulette-result small{font-size:9px}
+  .roulette-status{font-size:7px;letter-spacing:1.2px}
+  .wallet-meta,.wallet-xp-copy{font-size:9px}
+  .inventory-item{gap:7px;padding:10px}
+  .inventory-item-main{gap:8px}
+  .inventory-item-copy>strong{font-size:11px}
+  .sell-item{padding:8px;font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .roulette-stage,.roulette-stage:before,.roulette-stage:after,.roulette-result .roulette-tier,.roulette-result strong,.roulette-result small,.roulette-hero #spinRoulette,.wallet-xp-track i,.inventory-item,.sell-item{transition:none!important;animation:none!important}
+}
