@@ -158,6 +158,8 @@ dialog::backdrop{transition:background-color 180ms ease}
 .bottom-nav{position:fixed;isolation:isolate}
 .bottom-nav .nav-indicator{
   position:absolute;
+  left:0;
+  top:0;
   z-index:0;
   left:0;
   top:0;
