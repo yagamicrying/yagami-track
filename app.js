@@ -229,9 +229,12 @@
   function moveNavIndicator(view){
     const target=$('.nav-item[data-view="'+view+'"]');
     if(!target)return;
-    navIndicator.style.width=target.offsetWidth+'px';
-    navIndicator.style.height=target.offsetHeight+'px';
-    navIndicator.style.transform='translate3d('+target.offsetLeft+'px,'+target.offsetTop+'px,0)';
+    const navRect=nav.getBoundingClientRect();
+    const targetRect=target.getBoundingClientRect();
+    const insetX=3, insetY=5;
+    navIndicator.style.width=Math.max(0,targetRect.width-insetX*2)+'px';
+    navIndicator.style.height=Math.max(0,targetRect.height-insetY*2)+'px';
+    navIndicator.style.transform='translate3d('+(targetRect.left-navRect.left+insetX)+'px,'+(targetRect.top-navRect.top+insetY)+'px,0)';
     navIndicator.style.opacity='1';
   }
   function animateView(element,direction){
@@ -266,11 +269,19 @@
       },280);
       return;
     }
-    const titles={history:'История',stats:'Прогресс',roulette:'Рулетка',settings:'Настройки'};
+    const titles={stats:'Прогресс',roulette:'Рулетка',settings:'Настройки'};
     $('#subviewTitle').textContent=titles[view];
     const content=$('#subviewContent');content.innerHTML='';
-    if(view==='history') renderHistory(content);
-    if(view==='stats') renderStats(content);
+    if(view==='stats'){
+      renderStats(content);
+      const historySection=document.createElement('section');
+      historySection.className='history-section';
+      historySection.innerHTML='<div class="section-heading" style="margin:22px 2px 10px"><div><span class="eyebrow">ЖУРНАЛ</span><h2>История записей</h2></div></div>';
+      const historyList=document.createElement('div');
+      historySection.append(historyList);
+      renderHistory(historyList);
+      content.append(historySection);
+    }
     if(view==='roulette') renderRoulette(content);
     if(view==='settings') renderSettings(content);
     if(previous==='day'){
@@ -285,6 +296,7 @@
     activeView=view;
   }
   window.addEventListener('resize',()=>moveNavIndicator(activeView));
+  requestAnimationFrame(()=>moveNavIndicator(activeView));
   function renderRoulette(content){
     const items=[
       {name:'Протеин',tier:'S',detail:'Белок для добора суточной нормы'},
