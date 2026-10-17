@@ -108,3 +108,47 @@ dialog{background:#1c1c1e;border-color:#38383c}
   .bottom-nav{width:calc(100% - 22px);padding:5px;gap:2px}
   .nav-item{min-height:42px;padding:7px 2px;font-size:10px}
 }
+
+/* Consistent tactile motion and native-feeling view transitions */
+:root{--motion-fast:150ms;--motion-medium:240ms;--motion-ease:cubic-bezier(.2,.75,.25,1);--motion-spring:cubic-bezier(.22,1,.36,1)}
+button,.card,.stat-card,.add-chip,.primary-button,.secondary-button,.text-button,.date-arrow,.icon-button,.inline-edit,.settings-row button,.nav-item,.tier-row,.tier-item{
+  -webkit-tap-highlight-color:transparent;
+}
+button{
+  transition:transform var(--motion-fast) var(--motion-ease),background-color var(--motion-fast) ease,border-color var(--motion-fast) ease,color var(--motion-fast) ease,box-shadow var(--motion-fast) ease,opacity var(--motion-fast) ease;
+  transform-origin:center;
+}
+button:active{transform:scale(.965)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{
+  outline:2px solid #0a84ff;outline-offset:3px;
+}
+.card,.stat-card,.tier-row{
+  transition:border-color var(--motion-medium) ease,background-color var(--motion-medium) ease,transform var(--motion-medium) var(--motion-ease),box-shadow var(--motion-medium) ease;
+}
+.add-chip:active,.primary-button:active,.secondary-button:active,.text-button:active,.date-arrow:active,.icon-button:active,.settings-row button:active{
+  transform:scale(.95);
+}
+.primary-button:active{box-shadow:0 0 0 4px rgba(10,132,255,.14)}
+.nav-item{position:relative;isolation:isolate;overflow:hidden;transition:background var(--motion-medium) var(--motion-ease),color var(--motion-medium) ease,box-shadow var(--motion-medium) ease,transform var(--motion-fast) var(--motion-ease)}
+.nav-item::after{content:"";position:absolute;inset:2px;border-radius:inherit;background:rgba(255,255,255,0);z-index:-1;transition:background var(--motion-medium) ease,transform var(--motion-medium) var(--motion-spring);transform:scale(.88)}
+.nav-item.active::after{background:rgba(255,255,255,.075);transform:scale(1)}
+.bottom-nav{transition:background var(--motion-medium) ease,box-shadow var(--motion-medium) ease}
+.subview[hidden],.app-shell[hidden]{display:none!important}
+.subview{will-change:transform,opacity;transform:translateX(0);opacity:1}
+.view-enter{animation:viewEnter var(--motion-medium) var(--motion-spring) both}
+.view-enter-back{animation:viewEnterBack var(--motion-medium) var(--motion-spring) both}
+.view-exit{animation:viewExit 180ms cubic-bezier(.4,0,1,1) both;pointer-events:none}
+@keyframes viewEnter{from{opacity:0;transform:translateX(22px) scale(.99)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes viewEnterBack{from{opacity:0;transform:translateX(-16px) scale(.99)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes viewExit{from{opacity:1;transform:translateX(0) scale(1)}to{opacity:0;transform:translateX(-12px) scale(.995)}}
+.progress-fill{transition:width 420ms var(--motion-spring)}
+.toast{transition:opacity 220ms ease,transform 260ms var(--motion-spring)}
+dialog[open]{animation:dialogEnter 220ms var(--motion-spring) both}
+dialog::backdrop{transition:background-color 180ms ease}
+@keyframes dialogEnter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.roulette-result{transition:transform 220ms var(--motion-spring),border-color 220ms ease,background 220ms ease}
+.tier-item{transition:transform 180ms var(--motion-spring),background 180ms ease}
+.tier-item:active{transform:scale(.985)}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
