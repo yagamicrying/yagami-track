@@ -152,3 +152,38 @@ dialog::backdrop{transition:background-color 180ms ease}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Smooth, sliding tab indicator and softer screen transitions */
+.bottom-nav{position:fixed;isolation:isolate}
+.bottom-nav .nav-indicator{
+  position:absolute;
+  z-index:0;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+  border-radius:999px;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(180deg,#4b4b50 0%,#353538 100%);
+  border:1px solid rgba(255,255,255,.26);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 2px 6px rgba(0,0,0,.18);
+  transform:translate3d(0,0,0);
+  transition:transform 420ms cubic-bezier(.22,1,.36,1),width 420ms cubic-bezier(.22,1,.36,1),height 420ms cubic-bezier(.22,1,.36,1),opacity 160ms ease;
+  will-change:transform,width;
+}
+.bottom-nav .nav-item{z-index:1;background:transparent;border-color:transparent;box-shadow:none}
+.bottom-nav .nav-item.active{background:transparent;border-color:transparent;box-shadow:none;color:#fff}
+.bottom-nav .nav-item::after{display:none}
+#subviewContent{will-change:opacity,transform}
+.view-content-enter{animation:contentFadeIn 360ms cubic-bezier(.22,1,.36,1) both}
+@keyframes contentFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.subview.view-enter{animation:viewEnter 340ms cubic-bezier(.22,1,.36,1) both}
+.subview.view-enter-back{animation:viewEnterBack 320ms cubic-bezier(.22,1,.36,1) both}
+.app-shell.view-enter-back{animation:viewEnterBack 320ms cubic-bezier(.22,1,.36,1) both}
+.view-exit{animation-duration:280ms}
+@media(prefers-reduced-motion:reduce){
+  .bottom-nav .nav-indicator{transition:none}
+  .view-content-enter{animation:none}
+}
