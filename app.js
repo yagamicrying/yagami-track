@@ -36,7 +36,7 @@
     } else {
       avatar.style.backgroundImage = '';
       avatar.classList.remove('has-photo');
-      avatar.textContent = profile.name.split(/\\s+/).map(part => part[0] || '').slice(0,2).join('').toUpperCase() || '?';
+      avatar.textContent = profile.name.split(/\s+/).map(part => part[0] || '').slice(0,2).join('').toUpperCase() || '?';
     }
     const d = state.days[currentDate] || {};
     const checks = d.checks || {};
