@@ -1,4 +1,4 @@
-# Yagami Track — Telegram Mini App
+# Kairo — Telegram Mini App
 
 Адаптивный веб-трекер для iPhone 11 и других устройств. Работает на Windows для разработки и открывается на iPhone через Safari после публикации по HTTPS.
 
