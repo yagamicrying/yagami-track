@@ -14,6 +14,37 @@
   let cloudReady = false;
   let cloudSaveTimer = null;
   let cloudStatus = 'Локальное сохранение';
+  function getTelegramProfile(){
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (!user) return { name: 'Твой профиль', photo: '', username: '' };
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+    return { name: fullName || (user.username ? '@' + user.username : 'Пользователь'), photo: user.photo_url || '', username: user.username || '' };
+  }
+  function updateProfile(){
+    const profile = getTelegramProfile();
+    const avatar = $('#profileAvatar');
+    const name = $('#profileName');
+    const status = $('#profileStatus');
+    if (!avatar || !name || !status) return;
+    name.textContent = profile.name;
+    if (profile.username) name.title = '@' + profile.username;
+    if (profile.photo) {
+      avatar.textContent = '';
+      avatar.style.backgroundImage = 'url("' + profile.photo.replace(/["\\\\]/g, '') + '")';
+      avatar.classList.add('has-photo');
+    } else {
+      avatar.style.backgroundImage = '';
+      avatar.classList.remove('has-photo');
+      avatar.textContent = profile.name.split(/\\s+/).map(part => part[0] || '').slice(0,2).join('').toUpperCase() || '?';
+    }
+    const d = state.days[currentDate] || {};
+    const checks = d.checks || {};
+    const activeToday = Number(d.calories) > 0 || (d.weight !== undefined && d.weight !== '') || (d.sleep !== undefined && d.sleep !== '') || !!d.note || Object.values(checks).some(Boolean);
+    const label = status.querySelector('span');
+    label.textContent = activeToday ? 'Активность сегодня' : 'Сегодня ещё не начинал';
+    status.classList.toggle('is-active', activeToday);
+  }
 
   function loadState(){ try { const saved = JSON.parse(localStorage.getItem(STORE) || '{}'); return {...defaultState, ...saved, days: saved.days && typeof saved.days === 'object' ? saved.days : {}}; } catch { return {...defaultState}; } }
   function saveState(){
@@ -92,6 +123,7 @@
   function fmtNum(n){return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(n);}
   function toast(message){const t=$('#toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1900);}
   function render(){
+    updateProfile();
     const d=dayData(); const calories=Number(d.calories)||0; const goal=Number(state.goal)||3500; const remaining=goal-calories; const pct=Math.min(100,Math.round(calories/goal*100));
     $('#dayName').textContent=formatDay(currentDate); $('#dateTitle').textContent=formatDate(currentDate);
     $('#goalLabel').textContent=fmtNum(goal); $('#caloriesValue').textContent=fmtNum(calories); $('#remainingValue').textContent=fmtNum(remaining); $('#calorieProgress').style.width=pct+'%'; $('#progressPercent').textContent=pct+'% от цели';
