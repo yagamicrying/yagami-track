@@ -346,7 +346,7 @@
     const tierGlow={S:'#ffb84d',A:'#bf78ff',B:'#5798ff',C:'#48d6a0',D:'#8d8d98'};
     const setDropGlow=tier=>stage.style.setProperty('--drop-glow',tierGlow[tier]||'#f5c542');
     setDropGlow(currentDrop&&currentDrop.tier||'D');
-    const bindCaseButtons=()=>$$('[data-case-id]',content).forEach(caseButton=>caseButton.addEventListener('click',()=>{if(rouletteIsSpinning)return;selectedCaseId=caseButton.dataset.caseId;triggerHaptic('selection');$('[data-case-id]',content).forEach(node=>{const active=node.dataset.caseId===selectedCaseId;node.classList.toggle('is-selected',active);node.setAttribute('aria-pressed',String(active));});updateButton();}));
+    const bindCaseButtons=()=>$$('[data-case-id]',content).forEach(caseButton=>caseButton.addEventListener('click',()=>{if(rouletteIsSpinning)return;selectedCaseId=caseButton.dataset.caseId;triggerHaptic('selection');$$('[data-case-id]',content).forEach(node=>{const active=node.dataset.caseId===selectedCaseId;node.classList.toggle('is-selected',active);node.setAttribute('aria-pressed',String(active));});updateButton();}));
     const updateButton=()=>{
       if(!button.isConnected)return;
       const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt));
