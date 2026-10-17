@@ -34,9 +34,9 @@
   ];
 
   const GAME_CASES = [
-    {id:'forbidden',name:'Запретный кейс',price:650,subtitle:'Тренболон и гормон роста',filter:item=>item.key.startsWith('tren-')||item.key.startsWith('gh-')},
-    {id:'medium',name:'Средний кейс',price:300,subtitle:'Предтрен, протеин, креатин и добавки',filter:item=>['B','C'].includes(item.tier)},
-    {id:'useless',name:'Бесполезный кейс',price:150,subtitle:'Только предметы ранга D',filter:item=>item.tier==='D'}
+    {id:'forbidden',name:'Чёрный протокол',price:650,subtitle:'Тренболон и гормон роста',filter:item=>item.key.startsWith('tren-')||item.key.startsWith('gh-')},
+    {id:'medium',name:'Золотой стандарт',price:300,subtitle:'Предтрен, протеин, креатин и добавки',filter:item=>['B','C'].includes(item.tier)},
+    {id:'useless',name:'Складской остаток',price:150,subtitle:'Только предметы ранга D',filter:item=>item.tier==='D'}
   ];
   let selectedCaseId = 'medium';
   let rouletteAnimationTimer = null;
@@ -110,6 +110,19 @@
   function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(100*Math.pow(level,1.6));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(100*Math.pow(level,1.6));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
   function inventoryCapacity(){return 2+playerLevelInfo().level-1;}
   function sellValue(item){return Math.max(1,Math.floor(Number(item.price)*0.5));}
+  function triggerHaptic(kind='impact',style='light'){
+    try{
+      const tg=window.Telegram&&window.Telegram.WebApp;
+      const h=tg&&tg.HapticFeedback;
+      if(h){
+        if(kind==='selection'&&typeof h.selectionChanged==='function')h.selectionChanged();
+        else if(kind==='notification'&&typeof h.notificationOccurred==='function')h.notificationOccurred(style);
+        else if(typeof h.impactOccurred==='function')h.impactOccurred(style);
+        return;
+      }
+      if(navigator.vibrate)navigator.vibrate(kind==='notification'?[22,35,32]:kind==='selection'?8:style==='heavy'?28:12);
+    }catch(_){}
+  }
   function markGameChanged(){
     state.game.updatedAt=Math.max(Date.now(),(Number(state.game.updatedAt)||0)+1);
     saveState();updateProfile();
@@ -330,7 +343,10 @@
     '<section class="card inventory-panel"><div class="inventory-heading"><div><span class="eyebrow">ТВОИ ПРЕДМЕТЫ</span><h2>Инвентарь</h2></div><span class="inventory-capacity" id="inventoryCapacity">'+game.inventory.length+' / '+capacity+'</span></div><div id="inventoryContents">'+inventoryMarkup()+'</div></section>'+
     '<details class="tier-details"><summary>Каталог предметов <span>Название · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+fmtNum(item.price)+' <small>монет</small></b></div><small>'+escapeHtml(item.company)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
     const button=$('#spinRoulette',content),result=$('#rouletteResult',content),stage=$('#rouletteStage',content),status=$('#rouletteStatus',content);
-    const bindCaseButtons=()=>$('[data-case-id]',content).forEach(caseButton=>caseButton.addEventListener('click',()=>{if(rouletteIsSpinning)return;selectedCaseId=caseButton.dataset.caseId;$('[data-case-id]',content).forEach(node=>{const active=node.dataset.caseId===selectedCaseId;node.classList.toggle('is-selected',active);node.setAttribute('aria-pressed',String(active));});updateButton();}));
+    const tierGlow={S:'#ffb84d',A:'#bf78ff',B:'#5798ff',C:'#48d6a0',D:'#8d8d98'};
+    const setDropGlow=tier=>stage.style.setProperty('--drop-glow',tierGlow[tier]||'#f5c542');
+    setDropGlow(currentDrop&&currentDrop.tier||'D');
+    const bindCaseButtons=()=>$$('[data-case-id]',content).forEach(caseButton=>caseButton.addEventListener('click',()=>{if(rouletteIsSpinning)return;selectedCaseId=caseButton.dataset.caseId;triggerHaptic('selection');$('[data-case-id]',content).forEach(node=>{const active=node.dataset.caseId===selectedCaseId;node.classList.toggle('is-selected',active);node.setAttribute('aria-pressed',String(active));});updateButton();}));
     const updateButton=()=>{
       if(!button.isConnected)return;
       const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt));
@@ -356,7 +372,7 @@
         if(rouletteIsSpinning)return;
         const index=state.game.inventory.findIndex(item=>String(item.instanceId)===sellButton.dataset.sellId);if(index<0)return;
         const item=state.game.inventory[index],oldLevel=playerLevelInfo().level;
-        state.game.money+=sellValue(item);state.game.xp+=5;state.game.inventory.splice(index,1);markGameChanged();
+        triggerHaptic('impact','light');state.game.money+=sellValue(item);state.game.xp+=5;state.game.inventory.splice(index,1);markGameChanged();
         const inventoryContents=$('#inventoryContents',content);if(inventoryContents)inventoryContents.innerHTML=inventoryMarkup();
         bindSellButtons();refreshWallet();updateButton();
         const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Продано за '+fmtNum(sellValue(item))+' монет · +5 XP');
@@ -370,6 +386,7 @@
       const activeCase=GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1];
       if(state.game.money<activeCase.price){toast('Не хватает монет');updateButton();return;}
       const oldLevel=playerLevelInfo().level;
+      triggerHaptic('impact','medium');
       state.game.money-=activeCase.price;state.game.lastSpinAt=now;state.game.xp+=15;
       const item=pickGameItem(activeCase.id),owned={...item,instanceId:state.game.nextItemId++,acquiredAt:now};
       state.game.inventory.push(owned);state.game.lastDrop={...item};markGameChanged();
@@ -379,7 +396,7 @@
       let step=0;
       const roll=()=>{
         if(!result.isConnected){rouletteIsSpinning=false;return;}
-        const preview=pickGameItem(activeCase.id);
+        const preview=pickGameItem(activeCase.id);setDropGlow(preview.tier);
         result.querySelector('.roulette-tier').className='roulette-tier tier-'+preview.tier.toLowerCase();
         result.querySelector('.roulette-tier').textContent=preview.tier;
         result.querySelector('strong').textContent=preview.name;
@@ -388,6 +405,7 @@
         step++;
         const progress=step/totalSteps;
         if(step>=totalSteps){
+          setDropGlow(item.tier);triggerHaptic('notification','success');
           result.querySelector('.roulette-tier').className='roulette-tier tier-'+item.tier.toLowerCase();
           result.querySelector('.roulette-tier').textContent=item.tier;
           result.querySelector('strong').textContent=item.name;
