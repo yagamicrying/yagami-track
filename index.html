@@ -17,10 +17,11 @@
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <div class="profile-avatar" id="profileAvatar" aria-hidden="true">?</div>
+      <div class="avatar-wrap"><div class="profile-avatar" id="profileAvatar" aria-hidden="true">?</div><span class="avatar-level" id="avatarLevel">LVL 1</span></div>
       <div class="profile-copy">
         <strong id="profileName">Пользователь</strong>
         <span class="profile-status" id="profileStatus"><i></i><span>Сегодня ещё не начинал</span></span>
+        <div class="player-level-line"><span id="playerLevel">Уровень 1</span><div class="player-xp-track"><i id="playerXpFill"></i></div><small id="playerXpText">0 / 100 XP</small></div>
       </div>
       <button class="icon-button today-button" id="todayBtn" aria-label="Перейти к сегодняшнему дню" title="Сегодня">↻</button>
       <button class="icon-button settings-gear" id="openSettings" aria-label="Настройки" title="Настройки">⚙</button>
