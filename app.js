@@ -94,10 +94,10 @@
   function normalizeGame(value){
     const source=value&&typeof value==='object'&&!Array.isArray(value)?value:{};
     const inventory=Array.isArray(source.inventory)?source.inventory.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&typeof item.tier==='string'&&Number.isFinite(Number(item.price))).map(item=>({
-      instanceId:Number.isFinite(Number(item.instanceId))?Number(item.instanceId):0,key:String(item.key||'legacy-item'),name:String(item.name),company:String(item.company||'Неизвестная компания'),tier:['S','A','B','C','D'].includes(item.tier)?item.tier:'D',
+      instanceId:Number.isFinite(Number(item.instanceId))?Number(item.instanceId):0,key:String(item.key||'legacy-item'),name:String(item.name),company:String(item.company||'Неизвестная компания').replace(/ · (?:вымышленный бренд|сомнительный игровой бренд)/g,''),tier:['S','A','B','C','D'].includes(item.tier)?item.tier:'D',
       price:Math.max(1,Math.round(Number(item.price))),weight:Math.max(1,Number(item.weight)||1),detail:String(item.detail||''),acquiredAt:Number(item.acquiredAt)||0
     })).slice(0,100):[];
-    const lastDrop=source.lastDrop&&typeof source.lastDrop==='object'&&typeof source.lastDrop.name==='string'?source.lastDrop:null;
+    const lastDrop=source.lastDrop&&typeof source.lastDrop==='object'&&typeof source.lastDrop.name==='string'?{...source.lastDrop,company:String(source.lastDrop.company||'Неизвестная компания').replace(/ · (?:вымышленный бренд|сомнительный игровой бренд)/g,''),detail:''}:null;
     return {money:Number.isFinite(Number(source.money))?Math.max(0,Math.floor(Number(source.money))):500,xp:Number.isFinite(Number(source.xp))?Math.max(0,Math.floor(Number(source.xp))):0,inventory,lastSpinAt:Math.max(0,Number(source.lastSpinAt)||0),nextItemId:Math.max(1,Math.floor(Number(source.nextItemId)||1),...inventory.map(item=>item.instanceId+1)),updatedAt:Math.max(0,Number(source.updatedAt)||0),lastDrop};
   }
   function normalizeState(value){
