@@ -220,11 +220,47 @@
   $$('.add-chip[data-add]').forEach(btn=>btn.addEventListener('click',()=>{dayData().calories+=Number(btn.dataset.add);saveState();render();toast('Добавлено '+btn.dataset.add+' ккал');}));
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();toast('Калории сброшены');}});
   const app=$('.app-shell');const sub=$('#subview');
-  function showView(view){if(view==='day'){sub.hidden=true;app.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view==='day'));return;}app.hidden=true;sub.hidden=false;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));const titles={history:'История',stats:'Прогресс',roulette:'Рулетка',settings:'Настройки'};$('#subviewTitle').textContent=titles[view];const content=$('#subviewContent');content.innerHTML='';
+  let activeView='day', viewTransitionTimer=null;
+  function animateView(element,direction){
+    element.classList.remove('view-enter','view-exit','view-enter-back');
+    void element.offsetWidth;
+    element.classList.add(direction==='back'?'view-enter-back':direction==='exit'?'view-exit':'view-enter');
+  }
+  function showView(view){
+    if(view===activeView && !(view==='day' && sub.hidden)) return;
+    const previous=activeView;
+    clearTimeout(viewTransitionTimer);
+    $('.nav-item').forEach(b=>{
+      const active=b.dataset.view===view;
+      b.classList.toggle('active',active);
+      b.setAttribute('aria-current',active?'page':'false');
+    });
+    if(view==='day'){
+      if(sub.hidden){activeView='day';app.hidden=false;return;}
+      sub.classList.remove('view-enter','view-enter-back');
+      sub.classList.add('view-exit');
+      viewTransitionTimer=setTimeout(()=>{
+        sub.hidden=true;sub.classList.remove('view-exit');
+        app.hidden=false;animateView(app,'back');activeView='day';
+      },190);
+      return;
+    }
+    const titles={history:'История',stats:'Прогресс',roulette:'Рулетка',settings:'Настройки'};
+    $('#subviewTitle').textContent=titles[view];
+    const content=$('#subviewContent');content.innerHTML='';
     if(view==='history') renderHistory(content);
     if(view==='stats') renderStats(content);
     if(view==='roulette') renderRoulette(content);
     if(view==='settings') renderSettings(content);
+    if(previous==='day'){
+      app.classList.remove('view-enter','view-enter-back');
+      app.classList.add('view-exit');
+      sub.hidden=false;animateView(sub,'forward');
+      viewTransitionTimer=setTimeout(()=>{app.hidden=true;app.classList.remove('view-exit');},190);
+    }else{
+      animateView(sub,'forward');
+    }
+    activeView=view;
   }
   function renderRoulette(content){
     const items=[
