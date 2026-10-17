@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Yagami Track — ежедневный трекер",
-  "short_name": "Yagami Track",
+  "name": "Kairo — ежедневный трекер",
+  "short_name": "Kairo",
   "description": "Ежедневный трекер калорий, веса, сна и привычек.",
   "lang": "ru",
   "start_url": "./",
