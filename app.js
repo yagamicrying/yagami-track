@@ -193,6 +193,10 @@
       cloudStatus = 'Локальное сохранение · открой приложение внутри Telegram для синхронизации';
     }
     render();
+    renderStats($('#progressContent'));
+    renderHistory($('#historyContent'));
+    renderRoulette($('#rouletteContent'));
+    renderSettings($('#settingsContent'));
     refreshSyncStatus();
   }
   function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -212,91 +216,18 @@
     $('#weightNote').textContent=d.weight===''?'Отслеживай динамику':'Записано за этот день'; $('#sleepNote').textContent=d.sleep===''?'Цель — 8 часов':Number(d.sleep)>=8?'Цель по сну достигнута':'До цели: '+fmtNum(8-Number(d.sleep))+' ч';
     
   }
+  function refreshPageSections(){
+    const progress=$('#progressContent'),history=$('#historyContent');
+    if(progress)renderStats(progress);
+    if(history)renderHistory(history);
+  }
   function shiftDay(delta){const d=dateFromKey(currentDate);d.setDate(d.getDate()+delta);currentDate=dateKey(d);render();}
   function openEditor(type){editType=type;const config={goal:['Дневная цель','Калории в день','3500','Укажи цель в ккал.'],weight:['Записать вес','Вес в килограммах',dayData().weight||'','Например, 78.5 кг.'],sleep:['Записать сон','Часов сна',dayData().sleep||'','Можно указать дробное значение, например 7.5.'],custom:['Добавить калории','Количество ккал','','Укажи число больше нуля.']}[type];$('#dialogTitle').textContent=config[0];$('#fieldLabel').textContent=config[1];$('#fieldInput').value=config[2];$('#fieldInput').placeholder=type==='weight'?'78.5':type==='sleep'?'7.5':'0';$('#fieldInput').step=type==='weight'||type==='sleep'?'0.1':'1';$('#fieldInput').min='0';$('#fieldHint').textContent=config[3];$('#editDialog').showModal();setTimeout(()=>$('#fieldInput').focus(),100);}
   $('#editForm').addEventListener('submit',e=>{e.preventDefault();const val=Number($('#fieldInput').value);if(!Number.isFinite(val)||val<0||$('#fieldInput').value.trim()===''){toast('Введи корректное число');return;}if(editType==='goal'){if(val<=0){toast('Цель должна быть больше нуля');return;}state.goal=Math.round(val);}else if(editType==='weight'){dayData().weight=Math.round(val*10)/10;}else if(editType==='sleep'){if(val>24){toast('Сон не может быть больше 24 часов');return;}dayData().sleep=Math.round(val*10)/10;}else if(editType==='custom'){dayData().calories+=Math.round(val);}saveState();$('#editDialog').close();render();toast('Данные сохранены');});
   $('#prevDay').addEventListener('click',()=>shiftDay(-1));$('#nextDay').addEventListener('click',()=>shiftDay(1));$('#todayBtn').addEventListener('click',()=>{currentDate=dateKey(new Date());render();toast('Сегодняшний день');});
   $('#editGoal').addEventListener('click',()=>openEditor('goal'));$('#editWeight').addEventListener('click',()=>openEditor('weight'));$('#editSleep').addEventListener('click',()=>openEditor('sleep'));$('#customAdd').addEventListener('click',()=>openEditor('custom'));
-  $$('.add-chip[data-add]').forEach(btn=>btn.addEventListener('click',()=>{dayData().calories+=Number(btn.dataset.add);saveState();render();toast('Добавлено '+btn.dataset.add+' ккал');}));
-  $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();toast('Калории сброшены');}});
-  const app=$('.app-shell');const sub=$('#subview');
-  const nav=$('.bottom-nav');
-  let activeView='day', viewTransitionTimer=null;
-  const navIndicator=document.createElement('span');
-  navIndicator.className='nav-indicator';
-  navIndicator.setAttribute('aria-hidden','true');
-  nav.prepend(navIndicator);
-  function moveNavIndicator(view){
-    const target=$('.nav-item[data-view="'+view+'"]');
-    if(!target)return;
-    const navRect=nav.getBoundingClientRect();
-    const targetRect=target.getBoundingClientRect();
-    const insetX=3, insetY=5;
-    navIndicator.style.width=Math.max(0,targetRect.width-insetX*2)+'px';
-    navIndicator.style.height=Math.max(0,targetRect.height-insetY*2)+'px';
-    navIndicator.style.transform='translate3d('+(targetRect.left-navRect.left+insetX)+'px,'+(targetRect.top-navRect.top+insetY)+'px,0)';
-    navIndicator.style.opacity='1';
-  }
-  function animateView(element,direction){
-    element.classList.remove('view-enter','view-exit','view-enter-back');
-    void element.offsetWidth;
-    element.classList.add(direction==='back'?'view-enter-back':direction==='exit'?'view-exit':'view-enter');
-  }
-  function animateSubviewContent(){
-    const content=$('#subviewContent');
-    content.classList.remove('view-content-enter');
-    void content.offsetWidth;
-    content.classList.add('view-content-enter');
-  }
-  function showView(view){
-    if(view===activeView && !(view==='day' && sub.hidden)) return;
-    const previous=activeView;
-    clearTimeout(viewTransitionTimer);
-    $('.nav-item').forEach(b=>{
-      const active=b.dataset.view===view;
-      b.classList.toggle('active',active);
-      if(active)b.setAttribute('aria-current','page');
-      else b.removeAttribute('aria-current');
-    });
-    moveNavIndicator(view);
-    if(view==='day'){
-      if(sub.hidden){activeView='day';app.hidden=false;animateView(app,'back');return;}
-      sub.classList.remove('view-enter','view-enter-back');
-      sub.classList.add('view-exit');
-      viewTransitionTimer=setTimeout(()=>{
-        sub.hidden=true;sub.classList.remove('view-exit');
-        app.hidden=false;animateView(app,'back');activeView='day';
-      },280);
-      return;
-    }
-    const titles={stats:'Прогресс',roulette:'Рулетка',settings:'Настройки'};
-    $('#subviewTitle').textContent=titles[view];
-    const content=$('#subviewContent');content.innerHTML='';
-    if(view==='stats'){
-      renderStats(content);
-      const historySection=document.createElement('section');
-      historySection.className='history-section';
-      historySection.innerHTML='<div class="section-heading" style="margin:22px 2px 10px"><div><span class="eyebrow">ЖУРНАЛ</span><h2>История записей</h2></div></div>';
-      const historyList=document.createElement('div');
-      historySection.append(historyList);
-      renderHistory(historyList);
-      content.append(historySection);
-    }
-    if(view==='roulette') renderRoulette(content);
-    if(view==='settings') renderSettings(content);
-    if(previous==='day'){
-      app.classList.remove('view-enter','view-enter-back');
-      app.classList.add('view-exit');
-      sub.hidden=false;animateView(sub,'forward');animateSubviewContent();
-      viewTransitionTimer=setTimeout(()=>{app.hidden=true;app.classList.remove('view-exit');},280);
-    }else{
-      animateView(sub,'forward');
-      animateSubviewContent();
-    }
-    activeView=view;
-  }
-  window.addEventListener('resize',()=>moveNavIndicator(activeView));
-  requestAnimationFrame(()=>moveNavIndicator(activeView));
+  $$('.add-chip[data-add]').forEach(btn=>btn.addEventListener('click',()=>{dayData().calories+=Number(btn.dataset.add);saveState();render();refreshPageSections();toast('Добавлено '+btn.dataset.add+' ккал');}));
+  $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();refreshPageSections();toast('Калории сброшены');}});
   function renderRoulette(content){
     const items=[
       {name:'Протеин',tier:'S',detail:'Белок для добора суточной нормы'},
@@ -325,22 +256,19 @@
       },90);
     });
   }
-  function renderHistory(content){const keys=Object.keys(state.days).filter(k=>{const d=state.days[k];return d.calories||d.weight!==''||d.sleep!==''||d.note||(d.checks&&Object.values(d.checks).some(Boolean));}).sort().reverse();if(!keys.length){content.innerHTML='<div class="card empty-state">Здесь появятся дни, в которые ты вносил данные.<br>Начни с сегодняшнего дня.</div>';return;}keys.forEach(key=>{const d=state.days[key];const row=document.createElement('button');row.className='history-row';row.style.cssText='width:100%;background:transparent;border:0;color:inherit;text-align:left';row.innerHTML=`<span><strong>${formatDate(key)}</strong><small>${formatDay(key)}</small></span><span class="history-value">${fmtNum(d.calories||0)} <small>ккал</small></span>`;row.addEventListener('click',()=>{currentDate=key;showView('day');render();});content.append(row);});}
+  function renderHistory(content){const keys=Object.keys(state.days).filter(k=>{const d=state.days[k];return d.calories||d.weight!==''||d.sleep!==''||d.note||(d.checks&&Object.values(d.checks).some(Boolean));}).sort().reverse();if(!keys.length){content.innerHTML='<div class="card empty-state">Здесь появятся дни, в которые ты вносил данные.<br>Начни с сегодняшнего дня.</div>';return;}keys.forEach(key=>{const d=state.days[key];const row=document.createElement('button');row.className='history-row';row.style.cssText='width:100%;background:transparent;border:0;color:inherit;text-align:left';row.innerHTML=`<span><strong>${formatDate(key)}</strong><small>${formatDay(key)}</small></span><span class="history-value">${fmtNum(d.calories||0)} <small>ккал</small></span>`;row.addEventListener('click',()=>{currentDate=key;$('#settingsPanel').hidden=true;render();});content.append(row);});}
   function renderStats(content){const entries=Object.entries(state.days).sort(([a],[b])=>a.localeCompare(b));const weights=entries.filter(([,d])=>d.weight!==''&&Number.isFinite(Number(d.weight)));const sleeps=entries.filter(([,d])=>d.sleep!==''&&Number.isFinite(Number(d.sleep)));const cal=entries.filter(([,d])=>Number(d.calories)>0);const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;const avgCal=avg(cal.map(([,d])=>Number(d.calories)));const avgSleep=avg(sleeps.map(([,d])=>Number(d.sleep)));const latestWeight=weights.at(-1);content.innerHTML=`<div class="stats-grid"><article class="card stat-card"><span class="eyebrow">СРЕДНИЕ КАЛОРИИ</span><div class="stat-value">${cal.length?fmtNum(avgCal):'—'}<small>ккал</small></div><div class="stat-note">По ${cal.length} ${plural(cal.length,'дню','дням','дням')} с записями</div></article><article class="card stat-card"><span class="eyebrow">СРЕДНИЙ СОН</span><div class="stat-value">${sleeps.length?fmtNum(avgSleep):'—'}<small>ч</small></div><div class="stat-note">По ${sleeps.length} ${plural(sleeps.length,'ночи','ночам','ночам')} с записями</div></article><article class="card stat-card"><span class="eyebrow">ПОСЛЕДНИЙ ВЕС</span><div class="stat-value">${latestWeight?fmtNum(latestWeight[1].weight):'—'}<small>кг</small></div><div class="stat-note">${latestWeight?formatDate(latestWeight[0]):'Добавь первую запись'}</div></article><article class="card stat-card"><span class="eyebrow">ДНЕЙ С ДАННЫМИ</span><div class="stat-value">${entries.length}</div><div class="stat-note">Записи сохраняются на этом устройстве</div></article></div><div class="card"><div class="section-heading"><div><span class="eyebrow">ПОДСКАЗКА</span><h2>Стабильность важнее идеала</h2></div></div><p class="settings-copy">Вноси данные каждый день — со временем здесь появится полезная динамика. Средние значения считаются только по дням, где есть записи.</p></div>`;}
   function plural(n,one,few,many){const x=n%100;return x>=11&&x<=14?many:n%10===1?one:n%10>=2&&n%10<=4?few:many;}
   function renderSettings(content){content.innerHTML=`<div class="card"><div class="section-heading"><div><span class="eyebrow">ЦЕЛИ</span><h2>Твои настройки</h2></div></div><div class="settings-row"><span>Калории в день</span><button id="settingsGoal">${fmtNum(state.goal)} ккал · Изменить</button></div><div class="settings-row"><span>Синхронизация Telegram</span><button id="syncNow">Синхронизировать</button></div><div class="settings-row"><span>Данные</span><button id="exportData">Экспорт JSON</button></div><div class="settings-row"><span>Резервная копия</span><button id="importData">Импорт JSON</button></div><div class="settings-row"><span>Удаление данных</span><button id="clearData">Сбросить всё</button></div><p class="settings-copy" id="syncStatus">Хранение: ${cloudStatus}. В Telegram Mini App данные синхронизируются через Telegram CloudStorage для твоего аккаунта. Вне Telegram используется локальное хранилище браузера.</p><p class="settings-copy">Экспорт JSON можно использовать как резервную копию. Yagami Track · версия 1.1</p></div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
-    $('#settingsGoal').addEventListener('click',()=>{showView('day');openEditor('goal');});$('#syncNow').addEventListener('click',syncNow);$('#exportData').addEventListener('click',exportData);$('#importData').addEventListener('click',()=>$('#importFile').click());$('#importFile').addEventListener('change',importData);$('#clearData').addEventListener('click',()=>{if(confirm('Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state={...defaultState,days:{}};saveState();currentDate=dateKey(new Date());render();showView('day');toast('Данные удалены');}});}
+    $('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});$('#syncNow').addEventListener('click',syncNow);$('#exportData').addEventListener('click',exportData);$('#importData').addEventListener('click',()=>$('#importFile').click());$('#importFile').addEventListener('change',importData);$('#clearData').addEventListener('click',()=>{if(confirm('Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state={...defaultState,days:{}};saveState();currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные удалены');}});}
   function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='yagami-track-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
-  function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state={goal:Number(parsed.goal)>0?Number(parsed.goal):3500,days:parsed.days};saveState();render();showView('day');toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
-  // Delegate navigation clicks at document level so the controls keep working
-  // even if the indicator or navigation markup is recreated.
-  document.addEventListener('click',event=>{
-    const btn=event.target.closest('.bottom-nav .nav-item[data-view]');
-    if(!btn)return;
-    event.preventDefault();
-    showView(btn.dataset.view);
-  },true);
-  $('#backToDay').addEventListener('click',()=>showView('day'));
+  function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state={goal:Number(parsed.goal)>0?Number(parsed.goal):3500,days:parsed.days};saveState();render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
+  $('#openSettings').addEventListener('click',()=>{
+    const panel=$('#settingsPanel');
+    panel.hidden=!panel.hidden;
+    if(!panel.hidden) panel.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  $('#closeSettings').addEventListener('click',()=>$('#settingsPanel').hidden=true);
   initializeStorage();
   if('serviceWorker' in navigator && location.protocol.startsWith('http')) window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
