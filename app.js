@@ -14,9 +14,9 @@
     {key:'gh-medaxis',name:'Гормон роста',company:'MedAxis Labs',tier:'A',price:3000,weight:8,detail:''},
     {key:'pre-ironpeak',name:'Предтрен',company:'IronPeak Nutrition',tier:'A',price:3000,weight:8,detail:''},
     {key:'pre-forgefuel',name:'Предтрен',company:'ForgeFuel',tier:'B',price:1400,weight:25,detail:''},
-    {key:'protein-primewhey',name:'Протеин',company:'PrimeWhey',tier:'B',price:1400,weight:25,detail:''},
+    {key:'protein-primewhey',name:'Протеин',company:'PrimeWhey',tier:'B',price:1800,weight:25,detail:''},
     {key:'creatine-pureform',name:'Креатин',company:'PureForm Certified',tier:'B',price:1400,weight:25,detail:''},
-    {key:'protein-core',name:'Протеин',company:'Core Nutrition',tier:'C',price:1100,weight:48,detail:''},
+    {key:'protein-core',name:'Протеин',company:'Core Nutrition',tier:'C',price:1500,weight:48,detail:''},
     {key:'creatine-budget',name:'Креатин',company:'BudgetSport',tier:'C',price:1100,weight:48,detail:''},
     {key:'electrolytes-hydrate',name:'Электролиты',company:'HydratePro',tier:'C',price:950,weight:48,detail:''},
     {key:'omega-ocean',name:'Омега-3',company:'OceanPure',tier:'C',price:1100,weight:48,detail:''},
@@ -25,7 +25,7 @@
     {key:'tren-blackline',name:'Тренболон',company:'Blackline Underground',tier:'D',price:650,weight:72,detail:''},
     {key:'gh-greylabel',name:'Гормон роста',company:'GreyLabel Labs',tier:'D',price:600,weight:72,detail:''},
     {key:'pre-unmarked',name:'Предтрен',company:'Unmarked Mix',tier:'D',price:550,weight:72,detail:''},
-    {key:'protein-unknown',name:'Протеин',company:'Unknown Batch',tier:'D',price:600,weight:72,detail:''},
+    {key:'protein-unknown',name:'Протеин',company:'Unknown Batch',tier:'D',price:800,weight:72,detail:''},
     {key:'creatine-loose',name:'Креатин',company:'Loose Powder Co.',tier:'D',price:500,weight:72,detail:''},
     {key:'electrolytes-generic',name:'Электролиты',company:'Generic Mix',tier:'D',price:450,weight:72,detail:''},
     {key:'omega-unverified',name:'Омега-3',company:'Unverified Oil',tier:'D',price:500,weight:72,detail:''},
@@ -35,9 +35,9 @@
 
   const GAME_CASES = [
     {id:'starter',name:'Первый шаг',price:0,subtitle:'Один бесплатный бокс для каждого игрока',tierOdds:{S:1,A:4,B:15,C:30,D:50}},
-    {id:'forbidden',name:'Чёрный протокол',price:2500,subtitle:'Высокий риск · шанс S-ранга 25%',tierOdds:{S:25,A:30,B:25,C:10,D:10}},
-    {id:'medium',name:'Золотой стандарт',price:1500,subtitle:'Сбалансированный кейс',tierOdds:{S:15,A:25,B:30,C:15,D:15}},
-    {id:'useless',name:'Складской остаток',price:1000,subtitle:'Доступный кейс · шанс S-ранга 5%',tierOdds:{S:5,A:15,B:30,C:20,D:30}}
+    {id:'forbidden',name:'Чёрный протокол',price:2500,subtitle:'Высокий риск · шанс S-ранга 20%',tierOdds:{S:20,A:25,B:30,C:15,D:10}},
+    {id:'medium',name:'Золотой стандарт',price:1500,subtitle:'Сбалансированный кейс · шанс B и выше 60%',tierOdds:{S:10,A:20,B:30,C:25,D:15}},
+    {id:'useless',name:'Складской остаток',price:1000,subtitle:'Доступный кейс · шанс B и выше 50%',tierOdds:{S:5,A:15,B:30,C:25,D:25}}
   ];
   let selectedCaseId = 'medium';
   let selectedOpenCount = 1;
@@ -115,7 +115,7 @@
   function mergeGameStates(localGame,remoteGame){const local=normalizeGame(localGame),remote=normalizeGame(remoteGame);return remote.updatedAt>local.updatedAt?remote:local;}
   function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(150*Math.pow(level,1.7));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(150*Math.pow(level,1.7));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
   function inventoryCapacity(){return 10+playerLevelInfo().level-1;}
-  function sellValue(item){return Math.max(1,Math.floor(Number(item.price)*0.5));}
+  function sellValue(item){const rate=({D:0.40,C:0.45,B:0.55,A:0.60,S:0.65})[item&&item.tier]||0.40;return Math.max(1,Math.floor(Number(item&&item.price||0)*rate));}
 
   const GAME_DOLLAR_RATE = 90;
   function formatMoney(value){
@@ -124,30 +124,28 @@
     return new Intl.NumberFormat('ru-RU',{style:'currency',currency,minimumFractionDigits:currency==='USD'?2:0,maximumFractionDigits:currency==='USD'?2:0}).format(amount);
   }
   function fixedPrice(item){return Math.max(1,Math.round(Number(item&&item.price)||1));}
-  function formatIncomeRate(value){
-    const currency=state.game.currency==='USD'?'USD':'RUB';
-    const amount=Number(value||0)/(currency==='USD'?GAME_DOLLAR_RATE:1);
-    return new Intl.NumberFormat('ru-RU',{style:'currency',currency,minimumFractionDigits:currency==='USD'?5:3,maximumFractionDigits:currency==='USD'?5:3}).format(amount);
-  }
-  function passiveIncomePerSecond(){
+  function formatIncomeRate(value){return formatMoney(Math.max(0,Math.round(Number(value)||0)));}
+  function itemIncomeRate(item){return ({D:50,C:200,B:600,A:1600,S:4000})[item&&item.tier]||50;}
+  function passiveIncomePerHour(){
     const inventory=state.game.inventory||[];
-    if(!inventory.length)return 0.002;
-    const rates={D:0.003,C:0.005,B:0.009,A:0.015,S:0.025};
-    return inventory.reduce((sum,item)=>sum+(rates[item.tier]||0.003),0);
+    if(!inventory.length)return 1;
+    return inventory.reduce((sum,item)=>sum+itemIncomeRate(item),0);
   }
-  let passiveTickCount=0,lastPassiveCloudSave=Date.now();
+  let lastPassiveCloudSave=Date.now();
   function accruePassiveIncome(){
     const now=Date.now(),previous=Number(state.game.lastIncomeAt)||now;
-    let seconds=Math.floor((now-previous)/1000);
-    if(seconds<=0)return;
-    seconds=Math.min(seconds,86400);
-    state.game.lastIncomeAt=now;
-    state.game.money+=passiveIncomePerSecond()*seconds;
-    const moneyNode=$('#gameMoney');if(moneyNode)moneyNode.textContent=formatMoney(state.game.money);if(gameUiRefresh)gameUiRefresh();
-    const incomeNode=$('#gameIncomeRate');if(incomeNode)incomeNode.textContent='+'+formatIncomeRate(passiveIncomePerSecond())+'/сек';
-    passiveTickCount+=seconds;
-    if(passiveTickCount>=10){passiveTickCount=0;try{localStorage.setItem(STORE,JSON.stringify(state));}catch(error){console.warn('Local passive-income save failed',error);}}
+    const elapsedHours=Math.floor((now-previous)/3600000);
+    if(elapsedHours<=0)return;
+    const hours=Math.min(elapsedHours,12);
+    state.game.money+=passiveIncomePerHour()*hours;
+    state.game.lastIncomeAt=elapsedHours>12?now:previous+hours*3600000;
+    const moneyNode=$('#gameMoney');if(moneyNode)moneyNode.textContent=formatMoney(state.game.money);
+    if(gameUiRefresh)gameUiRefresh();
+    const incomeNode=$('#gameIncomeRate');if(incomeNode)incomeNode.textContent='+'+formatIncomeRate(passiveIncomePerHour())+' / час';
+    const floatingIncome=$('#floatingGameIncome');if(floatingIncome)floatingIncome.textContent='+'+formatIncomeRate(passiveIncomePerHour())+' / час';
+    try{localStorage.setItem(STORE,JSON.stringify(state));}catch(error){console.warn('Local passive-income save failed',error);}
     if(now-lastPassiveCloudSave>=15000){lastPassiveCloudSave=now;markGameChanged();}
+    else markGameChanged();
   }
 
   function triggerHaptic(kind='impact',style='light'){
@@ -174,7 +172,6 @@
       });
     }
   }
-  function itemIncomeRate(item){return ({D:20,C:40,B:70,A:100,S:150})[item&&item.tier]||20;}
   function chanceLabel(value){return value<0.1?value.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':value.toLocaleString('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:2})+'%';}
   function tierOddsMarkup(caseEntry){
     const labels={S:'S · Легендарный',A:'A · Эпический',B:'B · Редкий',C:'C · Необычный',D:'D · Обычный'};
@@ -374,8 +371,8 @@
     if(rouletteCooldownTimer){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;}
     const game=state.game,level=playerLevelInfo(),capacity=inventoryCapacity(),currentDrop=game.lastDrop;
     const tierGlow={S:'#ffb84d',A:'#bf78ff',B:'#5798ff',C:'#48d6a0',D:'#8d8d98'};
-    const resultMarkup=currentDrop?'<span class="roulette-tier tier-'+String(currentDrop.tier||'D').toLowerCase()+'">'+escapeHtml(currentDrop.tier||'D')+'</span><strong>'+escapeHtml(currentDrop.name)+'</strong><div class="roulette-income">+'+formatIncomeRate(itemIncomeRate(currentDrop))+' / сек</div><small>'+escapeHtml(currentDrop.company||'')+' · цена '+formatMoney(currentDrop.price)+'</small>':'<span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><div class="roulette-income">Пассивный доход</div><small>Выбери кейс и попробуй удачу</small>';
-    const inventoryMarkup=()=>state.game.inventory.length?'<div class="inventory-list">'+state.game.inventory.map(item=>'<article class="inventory-item tier-border-'+item.tier.toLowerCase()+'"><div class="inventory-item-main"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="inventory-item-copy"><strong>'+escapeHtml(item.name)+'</strong><div class="item-income-main">+'+formatIncomeRate(itemIncomeRate(item))+' / сек</div><small>'+escapeHtml(item.company)+'</small><span class="inventory-prices">Цена '+formatMoney(item.price)+' · продажа '+formatMoney(sellValue(item))+'</span></div></div><button class="sell-item" data-sell-id="'+item.instanceId+'">Продать</button></article>').join('')+'</div>':'<div class="inventory-empty">Пока пусто. Доход '+formatIncomeRate(0.002)+'/сек поможет накопить на первый кейс.</div>';
+    const resultMarkup=currentDrop?'<span class="roulette-tier tier-'+String(currentDrop.tier||'D').toLowerCase()+'">'+escapeHtml(currentDrop.tier||'D')+'</span><strong>'+escapeHtml(currentDrop.name)+'</strong><div class="roulette-income">+'+formatIncomeRate(itemIncomeRate(currentDrop))+' / час</div><small>'+escapeHtml(currentDrop.company||'')+' · цена '+formatMoney(currentDrop.price)+'</small>':'<span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><div class="roulette-income">Пассивный доход</div><small>Выбери кейс и попробуй удачу</small>';
+    const inventoryMarkup=()=>state.game.inventory.length?'<div class="inventory-list">'+state.game.inventory.map(item=>'<article class="inventory-item tier-border-'+item.tier.toLowerCase()+'"><div class="inventory-item-main"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="inventory-item-copy"><strong>'+escapeHtml(item.name)+'</strong><div class="item-income-main">+'+formatIncomeRate(itemIncomeRate(item))+' / час</div><small>'+escapeHtml(item.company)+'</small><span class="inventory-prices">Цена '+formatMoney(item.price)+' · продажа '+formatMoney(sellValue(item))+'</span></div></div><button class="sell-item" data-sell-id="'+item.instanceId+'">Продать</button></article>').join('')+'</div>':'<div class="inventory-empty">Пока пусто. Доход '+formatIncomeRate(1)+' / час поможет накопить на первый кейс.</div>';
     const selectedCase=()=>GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1];
     const batchControls=()=>'<div class="batch-open-controls"><div class="batch-open-heading"><strong>Массовое открытие</strong><span>Выбери количество</span></div><div class="batch-open-options" role="group" aria-label="Количество кейсов">'+[1,3,5,10].map(count=>'<button type="button" class="batch-count'+(count===selectedOpenCount?' is-selected':'')+'" data-open-count="'+count+'" aria-pressed="'+(selectedOpenCount===1&&count===1)+'" '+(selectedCase().id==='starter'&&count!==1?'disabled':'')+'>'+count+'×</button>').join('')+'</div><div class="batch-total"><span>Стоимость открытия</span><strong id="batchTotalCost">'+formatMoney(selectedCase().price*selectedOpenCount)+'</strong></div><p class="batch-debt-note">Открытие доступно только при достаточном балансе. Первый стартовый бокс бесплатный.</p></div>';
     const dailyRewardSchedule=[{type:'money',amount:1000,label:'+1 000'},{type:'item',tier:'B',amount:0,label:'Предмет B-ранга'},{type:'money',amount:1500,label:'+1 500'},{type:'item',tier:'A',amount:0,label:'Предмет A-ранга'},{type:'money',amount:2000,label:'+2 000'},{type:'mixed',amount:2500,tier:'C',label:'+2 500 и предмет C'},{type:'mixed',amount:4000,tier:'S',label:'+4 000 и предмет S'}];
@@ -392,15 +389,15 @@
       if(!rows.length)return '<section class="card crafting-panel" id="craftingPanel"><div class="inventory-heading"><div><span class="eyebrow">МАСТЕРСКАЯ · LVL 2+</span><h2>Крафт предметов</h2></div><span class="craft-lock">3 → 1</span></div><p>Три одинаковых предмета превращаются в один более редкий. Иногда можно перепрыгнуть через ранг.</p><div class="inventory-empty">Пока нечего улучшать. Собери три одинаковых предмета.</div></section>';
       return '<section class="card crafting-panel" id="craftingPanel"><div class="inventory-heading"><div><span class="eyebrow">МАСТЕРСКАЯ · LVL 2+</span><h2>Крафт предметов</h2></div><span class="craft-lock">3 → 1</span></div><p>Три одинаковых предмета превращаются в один более редкий. Для рангов D и C есть 15% шанс на дополнительное повышение.</p><div class="crafting-list">'+rows.map(group=>'<article class="crafting-item tier-border-'+group.tier.toLowerCase()+'"><div class="crafting-item-info"><span class="inventory-rank tier-'+group.tier.toLowerCase()+'">'+group.tier+'</span><div><strong>'+escapeHtml(group.name)+'</strong><small>'+escapeHtml(group.company)+'</small><span class="craft-count">'+group.count+' / 3 предмета</span></div></div><button class="craft-button" data-craft-key="'+escapeHtml(group.key)+'" '+(group.count<3?'disabled':'')+'>'+(group.count<3?'Ещё '+(3-group.count):'Скрафтить')+'</button></article>').join('')+'</div></section>';
     };
-    const batchResultsMarkup=()=>{const drops=state.game.pendingDrops||[];if(!drops.length)return '';return '<section class="batch-results"><div class="batch-results-heading"><div><span class="eyebrow">РЕЗУЛЬТАТ ОТКРЫТИЯ</span><h3>Выпало '+drops.length+' '+plural(drops.length,'предмет','предмета','предметов')+'</h3></div><span class="batch-results-total">'+formatMoney(drops.reduce((sum,item)=>sum+item.price,0))+'</span></div><div class="batch-drop-grid">'+drops.map(item=>'<article class="batch-drop tier-border-'+item.tier.toLowerCase()+'"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="batch-drop-copy"><strong>'+escapeHtml(item.name)+'</strong><b>+'+formatIncomeRate(itemIncomeRate(item))+' / сек</b><small>'+escapeHtml(item.company)+'</small><span>Цена '+formatMoney(item.price)+' · продажа '+formatMoney(sellValue(item))+'</span></div></article>').join('')+'</div><div class="batch-result-actions"><button type="button" class="secondary-button" data-batch-action="sell">Продать все · '+formatMoney(drops.reduce((sum,item)=>sum+sellValue(item),0))+'</button><button type="button" class="primary-button" data-batch-action="keep">Оставить лучшие</button></div><p class="batch-result-note">Если места не хватит, останутся предметы с более высоким рангом. Остальные автоматически продадутся за половину цены.</p></section>';};
-    content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+formatMoney(game.money)+'</span></strong><div class="wallet-income"><span>Пассивный доход</span><strong id="gameIncomeRate">+'+formatIncomeRate(passiveIncomePerSecond())+'/сек</strong></div></div><div class="wallet-meta"><span id="walletLevel">Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячеек</span></div><div class="wallet-xp-track"><i id="walletXpFill" style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span id="walletXpText">'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section><div class="game-floating-balance" id="gameFloatingBalance"><span>Баланс</span><strong id="floatingGameMoney">'+formatMoney(game.money)+'</strong><small id="floatingGameIncome">+'+formatIncomeRate(passiveIncomePerSecond())+'/сек</small></div>'+
+    const batchResultsMarkup=()=>{const drops=state.game.pendingDrops||[];if(!drops.length)return '';return '<section class="batch-results"><div class="batch-results-heading"><div><span class="eyebrow">РЕЗУЛЬТАТ ОТКРЫТИЯ</span><h3>Выпало '+drops.length+' '+plural(drops.length,'предмет','предмета','предметов')+'</h3></div><span class="batch-results-total">'+formatMoney(drops.reduce((sum,item)=>sum+item.price,0))+'</span></div><div class="batch-drop-grid">'+drops.map(item=>'<article class="batch-drop tier-border-'+item.tier.toLowerCase()+'"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="batch-drop-copy"><strong>'+escapeHtml(item.name)+'</strong><b>+'+formatIncomeRate(itemIncomeRate(item))+' / час</b><small>'+escapeHtml(item.company)+'</small><span>Цена '+formatMoney(item.price)+' · продажа '+formatMoney(sellValue(item))+'</span></div></article>').join('')+'</div><div class="batch-result-actions"><button type="button" class="secondary-button" data-batch-action="sell">Продать все · '+formatMoney(drops.reduce((sum,item)=>sum+sellValue(item),0))+'</button><button type="button" class="primary-button" data-batch-action="keep">Оставить лучшие</button></div><p class="batch-result-note">Если места не хватит, останутся предметы с более высоким рангом. Остальные автоматически продадутся за половину цены.</p></section>';};
+    content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+formatMoney(game.money)+'</span></strong><div class="wallet-income"><span>Пассивный доход</span><strong id="gameIncomeRate">+'+formatIncomeRate(passiveIncomePerHour())+' / час</strong></div></div><div class="wallet-meta"><span id="walletLevel">Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячеек</span></div><div class="wallet-xp-track"><i id="walletXpFill" style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span id="walletXpText">'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section><div class="game-floating-balance" id="gameFloatingBalance"><span>Баланс</span><strong id="floatingGameMoney">'+formatMoney(game.money)+'</strong><small id="floatingGameIncome">+'+formatIncomeRate(passiveIncomePerHour())+' / час</small></div>'+
       dailyRewardMarkup()+dailyRewardDialogMarkup()+'<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Выбери кейс и количество открытий. После прокрутки можно продать весь дроп или оставить самые редкие предметы.</p>'+caseButtons()+'<div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-reel-window" id="rouletteReelWindow" aria-label="Лента выпадающих предметов"><div class="roulette-reel-track" id="rouletteReelTrack"></div><span class="roulette-center-marker" aria-hidden="true"><i></i></span></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Открыть ×'+selectedOpenCount+' · '+formatMoney(selectedCase().price*selectedOpenCount)+'</button><div id="batchResults">'+batchResultsMarkup()+'</div></section>'+
       '<details class="game-collapsible inventory-collapsible" open><summary><span><small>ТВОИ ПРЕДМЕТЫ</small><strong>Инвентарь</strong></span><span class="game-collapsible-meta" id="inventoryCapacity">'+game.inventory.length+' / '+capacity+'</span></summary><div class="game-collapsible-body"><div id="inventoryContents">'+inventoryMarkup()+'</div></div></details>'+ '<details class="game-collapsible crafting-collapsible"><summary><span><small>УЛУЧШЕНИЕ ПРЕДМЕТОВ</small><strong>Мастерская</strong></span><span class="game-collapsible-meta">3 → 1</span></summary><div class="game-collapsible-body" id="craftingDetails">'+craftMarkup()+'</div></details>'+
       '<details class="tier-details"><summary>Каталог предметов <span>Название · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+formatMoney(item.price)+'</b></div><small>'+escapeHtml(item.company)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
     const button=$('#spinRoulette',content),result=$('#rouletteResult',content),stage=$('#rouletteStage',content),status=$('#rouletteStatus',content);
     const setDropGlow=tier=>stage.style.setProperty('--drop-glow',tierGlow[tier]||'#f5c542');setDropGlow(currentDrop&&currentDrop.tier||'D');if(currentDrop)stage.classList.add('has-result');
     const updateButton=()=>{if(!button.isConnected)return;const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt)),cost=selectedCase().price*selectedOpenCount,isStarter=selectedCase().id==='starter';if(rouletteIsSpinning){button.disabled=true;button.textContent='Крутится…';return;}if((state.game.pendingDrops||[]).length){button.disabled=true;button.textContent='Сначала разбери дроп';return;}if(isStarter&&state.game.starterBoxClaimed){button.disabled=true;button.textContent='Стартовый бокс уже получен';return;}if(state.game.money<cost){button.disabled=true;button.textContent='Не хватает денег · '+formatMoney(cost);return;}if(remaining>0){button.disabled=true;button.textContent='Перезарядка '+Math.ceil(remaining/1000)+' с';return;}button.disabled=false;button.textContent=isStarter?'Забрать бесплатный бокс':'Открыть ×'+selectedOpenCount+' · '+formatMoney(cost);};
-    const refreshWallet=()=>{const info=playerLevelInfo(),cap=inventoryCapacity(),money=$('#gameMoney',content),walletLevel=$('#walletLevel',content),count=$('#inventoryCount',content),capNode=$('#inventoryCapacity',content),xpFill=$('#walletXpFill',content),xpText=$('#walletXpText',content),income=$('#gameIncomeRate',content),floatingMoney=$('#floatingGameMoney',content),floatingIncome=$('#floatingGameIncome',content);if(money)money.textContent=formatMoney(state.game.money);if(floatingMoney)floatingMoney.textContent=formatMoney(state.game.money);if(floatingIncome)floatingIncome.textContent='+'+formatIncomeRate(passiveIncomePerSecond())+'/сек';if(income)income.textContent='+'+formatIncomeRate(passiveIncomePerSecond())+'/сек';if(walletLevel)walletLevel.textContent='Уровень '+info.level;if(count)count.textContent=state.game.inventory.length+' / '+cap+' ячеек';if(capNode)capNode.textContent=state.game.inventory.length+' / '+cap;if(xpFill)xpFill.style.width=Math.min(100,Math.round(info.xpIntoLevel/info.xpNeeded*100))+'%';if(xpText)xpText.textContent=fmtNum(info.xpIntoLevel)+' / '+fmtNum(info.xpNeeded)+' XP';};
+    const refreshWallet=()=>{const info=playerLevelInfo(),cap=inventoryCapacity(),money=$('#gameMoney',content),walletLevel=$('#walletLevel',content),count=$('#inventoryCount',content),capNode=$('#inventoryCapacity',content),xpFill=$('#walletXpFill',content),xpText=$('#walletXpText',content),income=$('#gameIncomeRate',content),floatingMoney=$('#floatingGameMoney',content),floatingIncome=$('#floatingGameIncome',content);if(money)money.textContent=formatMoney(state.game.money);if(floatingMoney)floatingMoney.textContent=formatMoney(state.game.money);if(floatingIncome)floatingIncome.textContent='+'+formatIncomeRate(passiveIncomePerHour())+' / час';if(income)income.textContent='+'+formatIncomeRate(passiveIncomePerHour())+' / час';if(walletLevel)walletLevel.textContent='Уровень '+info.level;if(count)count.textContent=state.game.inventory.length+' / '+cap+' ячеек';if(capNode)capNode.textContent=state.game.inventory.length+' / '+cap;if(xpFill)xpFill.style.width=Math.min(100,Math.round(info.xpIntoLevel/info.xpNeeded*100))+'%';if(xpText)xpText.textContent=fmtNum(info.xpIntoLevel)+' / '+fmtNum(info.xpNeeded)+' XP';};
     const bindCaseButtons=()=>$$('[data-case-id]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning||(state.game.pendingDrops||[]).length)return;selectedCaseId=node.dataset.caseId;if(selectedCaseId==='starter')selectedOpenCount=1;triggerHaptic('selection');$$('[data-case-id]',content).forEach(btn=>{const active=btn.dataset.caseId===selectedCaseId;btn.classList.toggle('is-selected',active);btn.setAttribute('aria-pressed',String(active));});const oddsNode=$('#caseOdds',content),activeCase=selectedCase();if(oddsNode)oddsNode.innerHTML=tierOddsMarkup(activeCase);const total=$('#batchTotalCost',content);if(total)total.textContent=formatMoney(activeCase.price*selectedOpenCount);$$('[data-open-count]',content).forEach(btn=>{const count=Number(btn.dataset.openCount);btn.classList.toggle('is-selected',count===selectedOpenCount);btn.disabled=activeCase.id==='starter'&&count!==1;btn.setAttribute('aria-pressed',String(count===selectedOpenCount));});updateButton();}));
     const bindOpenCountButtons=()=>$$('[data-open-count]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning||(state.game.pendingDrops||[]).length||selectedCase().id==='starter')return;selectedOpenCount=Number(node.dataset.openCount)||1;$$('[data-open-count]',content).forEach(btn=>{const active=Number(btn.dataset.openCount)===selectedOpenCount;btn.classList.toggle('is-selected',active);btn.setAttribute('aria-pressed',String(active));});const total=$('#batchTotalCost',content);if(total)total.textContent=formatMoney(selectedCase().price*selectedOpenCount);triggerHaptic('selection');updateButton();}));
     const bindBatchButtons=()=>$$('[data-batch-action]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning)return;const drops=state.game.pendingDrops||[];if(!drops.length)return;if(node.dataset.batchAction==='sell'){const total=drops.reduce((sum,item)=>sum+sellValue(item),0);state.game.money+=total;state.game.pendingDrops=[];markGameChanged();refreshBatchResults();refreshWallet();updateButton();triggerHaptic('impact','light');toast('Продано '+drops.length+' предметов за '+formatMoney(total));return;}const capacity=inventoryCapacity(),rarity={S:5,A:4,B:3,C:2,D:1};const combined=[...state.game.inventory,...drops].sort((a,b)=>(rarity[b.tier]||0)-(rarity[a.tier]||0)||Number(b.price||0)-Number(a.price||0)||Number(a.acquiredAt||0)-Number(b.acquiredAt||0));const kept=combined.slice(0,capacity),overflow=combined.slice(capacity),autoSold=overflow.reduce((sum,item)=>sum+sellValue(item),0);state.game.inventory=kept;state.game.money+=autoSold;state.game.pendingDrops=[];markGameChanged();refreshInventoryAndCraft();refreshBatchResults();triggerHaptic('notification','success');toast('Оставлено '+kept.length+' предметов'+(overflow.length?' · автоматически продано '+overflow.length+' за '+formatMoney(autoSold):''));}));
@@ -470,13 +467,13 @@
         if(tierNode){tierNode.className='roulette-tier tier-'+item.tier.toLowerCase();tierNode.textContent=item.tier;}
         const nameNode=result.querySelector('strong');
         if(nameNode)nameNode.textContent=count>1?count+' '+plural(count,'предмет выпал','предмета выпало','предметов выпало'):item.name;
-        if(incomeNode)incomeNode.textContent='+'+formatIncomeRate(itemIncomeRate(item))+' / сек';
+        if(incomeNode)incomeNode.textContent='+'+formatIncomeRate(itemIncomeRate(item))+' / час';
         const smallNode=result.querySelector('small');
         if(smallNode)smallNode.textContent=count>1?'Последний предмет · '+item.company:item.company+' · цена '+formatMoney(item.price);
         result.classList.add('is-revealed','roulette-pop');
         stage.classList.remove('is-spinning');
         stage.classList.add('has-result');
-        status.textContent=count>1?'ВЫПАЛО '+count+' ПРЕДМЕТОВ':'ВЫПАЛ РАНГ '+item.tier+' · +'+formatIncomeRate(itemIncomeRate(item))+'/СЕК';
+        status.textContent=count>1?'ВЫПАЛО '+count+' ПРЕДМЕТОВ':'ВЫПАЛ РАНГ '+item.tier+' · +'+formatIncomeRate(itemIncomeRate(item))+' / ЧАС';
         rouletteIsSpinning=false;
         refreshWallet();
         refreshInventoryAndCraft();
