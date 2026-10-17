@@ -288,35 +288,96 @@
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();refreshPageSections();toast('Калории сброшены');}});
   function renderRoulette(content){
     if(rouletteCooldownTimer){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;}
-    const game=state.game,level=playerLevelInfo(),capacity=inventoryCapacity(),currentDrop=game.lastDrop;
-    const resultMarkup=currentDrop?'<span class="roulette-tier tier-'+currentDrop.tier.toLowerCase()+'">'+currentDrop.tier+'</span><strong>'+escapeHtml(currentDrop.name)+'</strong><small>'+escapeHtml(currentDrop.company)+' · цена '+fmtNum(currentDrop.price)+' монет</small>':'<span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><small>Крутка стоит '+fmtNum(SPIN_COST)+' монет · шанс зависит от ранга</small>';
-    content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+fmtNum(game.money)+'</span><small> монет</small></strong></div><div class="wallet-meta"><span>Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячейки</span></div><div class="wallet-xp-track"><i style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span>'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section>'+
-    '<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Получи предмет, храни его или продай за игровые монеты.</p><div class="roulette-result" id="rouletteResult">'+resultMarkup+'</div><button class="primary-button full-width" id="spinRoulette">Крутить · '+fmtNum(SPIN_COST)+' монет</button><p class="roulette-disclaimer">Все компании и цены вымышленные и существуют только в игре. Ранги обозначают игровую редкость, а не реальную безопасность. Тренболон и гормон роста — не обычные спортивные добавки.</p></section>'+
-    '<section class="card inventory-panel"><div class="inventory-heading"><div><span class="eyebrow">ТВОИ ПРЕДМЕТЫ</span><h2>Инвентарь</h2></div><span class="inventory-capacity">'+game.inventory.length+' / '+capacity+'</span></div>'+(game.inventory.length?'<div class="inventory-list">'+game.inventory.map(item=>'<article class="inventory-item tier-border-'+item.tier.toLowerCase()+'"><div class="inventory-item-main"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="inventory-item-copy"><strong>'+escapeHtml(item.name)+'</strong><small>'+escapeHtml(item.company)+'</small><span class="inventory-prices">Цена: '+fmtNum(item.price)+' · Продажа: '+fmtNum(sellValue(item))+'</span></div></div><button class="sell-item" data-sell-id="'+item.instanceId+'">Продать</button></article>').join('')+'</div>':'<div class="inventory-empty">Пока пусто. Крути рулетку, чтобы получить первый предмет.</div>')+'</section>'+
+    const game=state.game;
+    const level=playerLevelInfo();
+    const capacity=inventoryCapacity();
+    const currentDrop=game.lastDrop;
+    const resultMarkup=currentDrop
+      ? '<span class="roulette-tier tier-'+currentDrop.tier.toLowerCase()+'">'+currentDrop.tier+'</span><strong>'+escapeHtml(currentDrop.name)+'</strong><small>'+escapeHtml(currentDrop.company)+' · цена '+fmtNum(currentDrop.price)+' монет</small>'
+      : '<span class="roulette-tier tier-placeholder">?</span><strong>Что выпадет?</strong><small>Крутка стоит '+fmtNum(SPIN_COST)+' монет</small>';
+    const inventoryMarkup=()=>state.game.inventory.length
+      ? '<div class="inventory-list">'+state.game.inventory.map(item=>'<article class="inventory-item tier-border-'+item.tier.toLowerCase()+'"><div class="inventory-item-main"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="inventory-item-copy"><strong>'+escapeHtml(item.name)+'</strong><small>'+escapeHtml(item.company)+'</small><span class="inventory-prices">Цена: '+fmtNum(item.price)+' · Продажа: '+fmtNum(sellValue(item))+'</span></div></div><button class="sell-item" data-sell-id="'+item.instanceId+'">Продать</button></article>').join('')+'</div>'
+      : '<div class="inventory-empty">Пока пусто. Крути рулетку, чтобы получить первый предмет.</div>';
+    content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+fmtNum(game.money)+'</span><small> монет</small></strong></div><div class="wallet-meta"><span id="walletLevel">Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячеек</span></div><div class="wallet-xp-track"><i id="walletXpFill" style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span id="walletXpText">'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section>'+
+    '<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Получи предмет, храни его или продай за игровые монеты.</p><div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Крутить · '+fmtNum(SPIN_COST)+' монет</button><p class="roulette-disclaimer">Все компании и цены вымышленные и существуют только в игре. Ранги обозначают игровую редкость, а не реальную безопасность. Тренболон и гормон роста — не обычные спортивные добавки.</p></section>'+
+    '<section class="card inventory-panel"><div class="inventory-heading"><div><span class="eyebrow">ТВОИ ПРЕДМЕТЫ</span><h2>Инвентарь</h2></div><span class="inventory-capacity" id="inventoryCapacity">'+game.inventory.length+' / '+capacity+'</span></div><div id="inventoryContents">'+inventoryMarkup()+'</div></section>'+
     '<details class="tier-details"><summary>Каталог и ранги <span>Редкость · компания · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+fmtNum(item.price)+' <small>монет</small></b></div><small>'+escapeHtml(item.company)+'</small><small>'+escapeHtml(item.detail)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
-    const button=$('#spinRoulette',content),result=$('#rouletteResult',content);
-    const updateButton=()=>{if(!button.isConnected)return;const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt));if(rouletteIsSpinning){button.disabled=true;button.textContent='Крутится…';return;}if(state.game.inventory.length>=inventoryCapacity()){button.disabled=true;button.textContent='Инвентарь заполнен';return;}if(state.game.money<SPIN_COST){button.disabled=true;button.textContent='Не хватает монет';return;}if(remaining>0){button.disabled=true;button.textContent='Перезарядка '+(remaining/1000).toFixed(1)+' с';return;}button.disabled=false;button.textContent='Крутить · '+fmtNum(SPIN_COST)+' монет';};
-    updateButton();
+    const button=$('#spinRoulette',content),result=$('#rouletteResult',content),stage=$('#rouletteStage',content),status=$('#rouletteStatus',content);
+    const updateButton=()=>{
+      if(!button.isConnected)return;
+      const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt));
+      if(rouletteIsSpinning){button.disabled=true;button.textContent='Крутится…';return;}
+      if(state.game.inventory.length>=inventoryCapacity()){button.disabled=true;button.textContent='Инвентарь заполнен';return;}
+      if(state.game.money<SPIN_COST){button.disabled=true;button.textContent='Не хватает монет';return;}
+      if(remaining>0){button.disabled=true;button.textContent='Перезарядка '+(remaining/1000).toFixed(1)+' с';return;}
+      button.disabled=false;button.textContent='Крутить · '+fmtNum(SPIN_COST)+' монет';
+    };
+    const refreshWallet=()=>{
+      const info=playerLevelInfo(),cap=inventoryCapacity();
+      const money=$('#gameMoney',content),walletLevel=$('#walletLevel',content),count=$('#inventoryCount',content),capacityNode=$('#inventoryCapacity',content),xpFill=$('#walletXpFill',content),xpText=$('#walletXpText',content);
+      if(money)money.textContent=fmtNum(state.game.money);
+      if(walletLevel)walletLevel.textContent='Уровень '+info.level;
+      if(count)count.textContent=state.game.inventory.length+' / '+cap+' ячеек';
+      if(capacityNode)capacityNode.textContent=state.game.inventory.length+' / '+cap;
+      if(xpFill)xpFill.style.width=Math.min(100,Math.round(info.xpIntoLevel/info.xpNeeded*100))+'%';
+      if(xpText)xpText.textContent=fmtNum(info.xpIntoLevel)+' / '+fmtNum(info.xpNeeded)+' XP';
+    };
+    const bindSellButtons=()=>{
+      $$('[data-sell-id]',content).forEach(sellButton=>sellButton.addEventListener('click',()=>{
+        if(rouletteIsSpinning)return;
+        const index=state.game.inventory.findIndex(item=>String(item.instanceId)===sellButton.dataset.sellId);if(index<0)return;
+        const item=state.game.inventory[index],oldLevel=playerLevelInfo().level;
+        state.game.money+=sellValue(item);state.game.xp+=5;state.game.inventory.splice(index,1);markGameChanged();
+        const inventoryContents=$('#inventoryContents',content);if(inventoryContents)inventoryContents.innerHTML=inventoryMarkup();
+        bindSellButtons();refreshWallet();updateButton();
+        const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Продано за '+fmtNum(sellValue(item))+' монет · +5 XP');
+      }));
+    };
+    bindSellButtons();updateButton();
     if(Date.now()-game.lastSpinAt<2000)rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},100);
-    $$('[data-sell-id]',content).forEach(sellButton=>sellButton.addEventListener('click',()=>{
-      const index=state.game.inventory.findIndex(item=>String(item.instanceId)===sellButton.dataset.sellId);if(index<0)return;
-      const item=state.game.inventory[index],oldLevel=playerLevelInfo().level;
-      state.game.money+=sellValue(item);state.game.xp+=5;state.game.inventory.splice(index,1);markGameChanged();renderRoulette(content);
-      const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Продано за '+fmtNum(sellValue(item))+' монет · +5 XP');
-    }));
     button.addEventListener('click',()=>{
       const now=Date.now();if(rouletteIsSpinning)return;if(now-state.game.lastSpinAt<2000){updateButton();return;}
       if(state.game.inventory.length>=inventoryCapacity()){toast('Инвентарь заполнен — продай предмет');updateButton();return;}
       if(state.game.money<SPIN_COST){toast('Не хватает монет');updateButton();return;}
-      const oldLevel=playerLevelInfo().level;state.game.money-=SPIN_COST;state.game.lastSpinAt=now;state.game.xp+=15;
+      const oldLevel=playerLevelInfo().level;
+      state.game.money-=SPIN_COST;state.game.lastSpinAt=now;state.game.xp+=15;
       const item=pickGameItem(),owned={...item,instanceId:state.game.nextItemId++,acquiredAt:now};
-      state.game.inventory.push(owned);state.game.lastDrop={...item};markGameChanged();rouletteIsSpinning=true;updateButton();
-      if(rouletteAnimationTimer)clearInterval(rouletteAnimationTimer);let ticks=0;
-      rouletteAnimationTimer=setInterval(()=>{
-        const preview=pickGameItem();result.innerHTML='<span class="roulette-tier tier-'+preview.tier.toLowerCase()+'">'+preview.tier+'</span><strong>'+escapeHtml(preview.name)+'</strong><small>'+escapeHtml(preview.company)+'</small>';ticks++;
-        if(ticks>=14){clearInterval(rouletteAnimationTimer);rouletteAnimationTimer=null;rouletteIsSpinning=false;result.innerHTML='<span class="roulette-tier tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><strong>'+escapeHtml(item.name)+'</strong><small>'+escapeHtml(item.company)+' · цена '+fmtNum(item.price)+' монет</small>';result.classList.add('roulette-pop');renderRoulette(content);const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Выпало: '+item.name+' · '+item.tier+' ранг');}
-      },90);
-      if(rouletteCooldownTimer)clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},100);
+      state.game.inventory.push(owned);state.game.lastDrop={...item};markGameChanged();
+      rouletteIsSpinning=true;stage.classList.add('is-spinning');result.classList.remove('is-revealed','roulette-pop');status.textContent='ПОИСК ПРЕДМЕТА';updateButton();refreshWallet();
+      if(rouletteAnimationTimer)clearTimeout(rouletteAnimationTimer);
+      const totalSteps=22,startAt=performance.now(),duration=2350;
+      let step=0;
+      const roll=()=>{
+        if(!result.isConnected){rouletteIsSpinning=false;return;}
+        const preview=pickGameItem();
+        result.querySelector('.roulette-tier').className='roulette-tier tier-'+preview.tier.toLowerCase();
+        result.querySelector('.roulette-tier').textContent=preview.tier;
+        result.querySelector('strong').textContent=preview.name;
+        result.querySelector('small').textContent=preview.company;
+        result.classList.remove('roulette-pop');
+        step++;
+        const progress=step/totalSteps;
+        if(step>=totalSteps){
+          result.querySelector('.roulette-tier').className='roulette-tier tier-'+item.tier.toLowerCase();
+          result.querySelector('.roulette-tier').textContent=item.tier;
+          result.querySelector('strong').textContent=item.name;
+          result.querySelector('small').textContent=item.company+' · цена '+fmtNum(item.price)+' монет';
+          result.classList.add('is-revealed','roulette-pop');
+          stage.classList.remove('is-spinning');stage.classList.add('has-result');
+          status.textContent='ПРЕДМЕТ ПОЛУЧЕН · РАНГ '+item.tier;
+          rouletteIsSpinning=false;
+          const inventoryContents=$('#inventoryContents',content);if(inventoryContents)inventoryContents.innerHTML=inventoryMarkup();
+          bindSellButtons();refreshWallet();updateButton();
+          const newLevel=playerLevelInfo().level;
+          toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Выпало: '+item.name+' · '+item.tier+' ранг');
+          return;
+        }
+        const eased=progress*progress;
+        rouletteAnimationTimer=setTimeout(roll,55+Math.round(eased*155));
+      };
+      rouletteAnimationTimer=setTimeout(roll,55);
+      if(rouletteCooldownTimer)clearInterval(rouletteCooldownTimer);
+      rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},100);
     });
   }
   function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
