@@ -278,3 +278,39 @@ dialog::backdrop{transition:background-color 180ms ease}
 .history-page .history-row{padding:15px 4px}
 .roulette-page .roulette-hero{margin-bottom:14px}
 .app-shell{padding-bottom:calc(env(safe-area-inset-bottom) + 28px)}
+
+
+/* Weekly analysis, weight trend, streak, daily habits and notes */
+.daily-tools-card{margin-top:18px;padding:20px}
+.analysis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.analysis-metric{padding:15px;min-width:0}
+.analysis-metric>.eyebrow{display:block;min-height:25px;font-size:9px;letter-spacing:.7px}
+.analysis-metric>strong{display:block;font-size:27px;line-height:1.15;letter-spacing:-.8px;margin:7px 0 4px}
+.analysis-metric>strong small{font-size:13px;font-weight:600;letter-spacing:0;color:var(--text-secondary,#999)}
+.analysis-metric>small{display:block;color:var(--text-secondary,#999);font-size:11px}
+.analysis-metric p,.analysis-copy{color:var(--text-secondary,#a1a1a8);font-size:13px;line-height:1.5;margin:8px 0 0}
+.analysis-card{padding:18px;margin-bottom:12px}
+.analysis-card .section-heading{margin-bottom:10px}
+.weight-chart{width:100%;height:auto;display:block;overflow:visible}
+.weight-chart line{stroke:rgba(255,255,255,.10);stroke-width:1;stroke-dasharray:3 4}
+.weight-chart polyline{fill:none;stroke:#64a8ff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.weight-chart circle{fill:#64a8ff;stroke:#171719;stroke-width:1.5}
+.chart-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--text-secondary,#999)}
+.chart-meta strong{color:var(--text-primary,#f5f5f7);font-size:11px;white-space:nowrap}
+.chart-empty{padding:22px 12px;text-align:center;color:var(--text-secondary,#999);font-size:13px;line-height:1.5;background:rgba(255,255,255,.035);border-radius:14px}
+.habit-list{display:grid;gap:2px}
+.habit-row{display:flex;align-items:center;gap:12px;padding:13px 2px;cursor:pointer}
+.habit-row input{position:absolute;opacity:0;width:1px;height:1px}
+.habit-check{width:22px;height:22px;flex:0 0 22px;border:1.5px solid rgba(255,255,255,.26);border-radius:7px;display:grid;place-items:center;transition:background .18s ease,border-color .18s ease}
+.habit-row input:checked+.habit-check{background:#4b9bff;border-color:#4b9bff}
+.habit-row input:checked+.habit-check::after{content:'✓';font-size:14px;color:white;font-weight:700}
+.habit-row input:focus-visible+.habit-check{outline:2px solid #64a8ff;outline-offset:3px}
+.habit-copy{display:grid;gap:3px;min-width:0}
+.habit-copy strong{font-size:14px;font-weight:600}
+.habit-copy small{font-size:11px;color:var(--text-secondary,#999);line-height:1.4}
+.daily-note{border-top:1px solid rgba(255,255,255,.08);padding-top:16px;margin-top:8px;display:grid;gap:10px}
+.daily-note label{font-size:13px;font-weight:600}
+.daily-note textarea{width:100%;resize:vertical;min-height:82px;padding:12px 13px;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:inherit;font:inherit;font-size:13px;line-height:1.5;outline:none}
+.daily-note textarea:focus{border-color:rgba(100,168,255,.65)}
+.legacy-stats{margin-top:14px}
+@media(max-width:360px){.analysis-metric{padding:12px}.analysis-metric>strong{font-size:24px}.daily-tools-card{padding:16px}}
