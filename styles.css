@@ -703,3 +703,20 @@ dialog::backdrop{transition:background-color 180ms ease}
 @keyframes reelStatusPulse{from{opacity:.62}to{opacity:1;text-shadow:0 0 12px rgba(245,197,66,.45)}}
 @media(max-width:380px){.roulette-reel-window{height:120px}.roulette-reel-tile{flex-basis:88px;width:88px;min-width:88px;padding:8px 6px}.roulette-result{height:auto;min-height:112px;flex-basis:auto;padding:8px 10px 5px}.roulette-result .roulette-tier{width:39px;height:39px;flex-basis:39px}}
 @media(prefers-reduced-motion:reduce){.roulette-stage.is-spinning .roulette-status{animation:none}}
+
+
+/* Kairo game UI: fewer boxes, more continuous surfaces, stronger focus on the reel */
+.roulette-hero.card{padding:clamp(12px,3.8vw,20px);border:0;border-radius:20px;background:transparent;box-shadow:none}
+.game-wallet{border:0;border-radius:20px;background:linear-gradient(145deg,#202023,#151516 72%);box-shadow:none}
+.game-floating-balance{border:0;border-radius:999px;background:rgba(30,30,33,.94);box-shadow:0 5px 22px rgba(0,0,0,.18)}
+.case-choice{border:0;border-radius:16px;background:#1b1b1e;box-shadow:none;transition:transform .18s ease,background .2s ease}
+.case-choice.is-selected{border:0;box-shadow:inset 0 0 0 1px rgba(245,197,66,.48);background:linear-gradient(145deg,rgba(245,197,66,.12),#1b1b1e 72%)}
+.roulette-stage{border:0;border-radius:18px;background:radial-gradient(ellipse at 50% 0%,rgba(245,197,66,.09),transparent 60%),#151516;box-shadow:none}
+.roulette-stage.is-spinning{box-shadow:0 0 30px rgba(245,197,66,.08)}
+.game-collapsible{border:0;border-radius:15px;background:#171719}
+.game-collapsible>summary{padding:15px 12px}
+.inventory-item,.batch-drop,.daily-reward-launcher{border-color:rgba(255,255,255,.055);box-shadow:none}
+.case-odds-row{border:0;background:rgba(255,255,255,.035)}
+.primary-button,.secondary-button,.batch-count,.case-choice,.nav-item{ -webkit-tap-highlight-color:transparent; }
+.primary-button:active,.secondary-button:active,.batch-count:active,.case-choice:active{transform:scale(.985)}
+@media(prefers-reduced-motion:reduce){.primary-button:active,.secondary-button:active,.batch-count:active,.case-choice:active{transform:none}}
