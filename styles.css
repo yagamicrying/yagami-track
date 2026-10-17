@@ -477,3 +477,23 @@ dialog::backdrop{transition:background-color 180ms ease}
 @media(prefers-reduced-motion:reduce){
   .roulette-stage,.roulette-stage:before,.roulette-stage:after,.roulette-result .roulette-tier,.roulette-result strong,.roulette-result small,.roulette-hero #spinRoulette,.wallet-xp-track i,.inventory-item,.sell-item{transition:none!important;animation:none!important}
 }
+
+
+/* Minimal legal footer and dedicated privacy section */
+.app-footer{display:grid;gap:12px;margin:22px 0 max(18px,env(safe-area-inset-bottom));padding:0 2px;color:var(--muted)}
+.legal-disclosures{border-top:1px solid var(--line);padding-top:12px}
+.legal-disclosures>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;font-size:10px;color:#96969d;padding:5px 0}
+.legal-disclosures>summary::-webkit-details-marker{display:none}
+.legal-disclosures>summary:after{content:"+";font-size:14px;line-height:1;transition:transform .2s ease}
+.legal-disclosures[open]>summary:after{content:"−"}
+.legal-disclosures-content{padding:8px 0 2px;font-size:10px;line-height:1.55;color:#85858c}
+.legal-disclosures-content p{margin:0 0 9px}
+.app-footer>span{font-size:9px;letter-spacing:.25px;text-align:center;opacity:.65}
+.privacy-copy{padding:clamp(16px,4vw,22px);font-size:12px;line-height:1.65;color:var(--muted)}
+.privacy-copy h3{margin:19px 0 6px;color:var(--text);font-size:13px;line-height:1.35}
+.privacy-copy h3:first-of-type{margin-top:12px}
+.privacy-copy p{margin:0 0 10px}
+.privacy-copy .privacy-updated{font-size:10px;color:#898991;margin-bottom:14px}
+#openPrivacy{display:flex;align-items:center;gap:8px}
+#openPrivacy span{color:var(--muted)}
+#privacyPanel{scroll-margin-top:16px}
