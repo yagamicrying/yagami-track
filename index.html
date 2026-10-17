@@ -67,6 +67,35 @@
       <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2>Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
       <div id="settingsContent"></div>
     </section>
+    <section class="page-section privacy-page" id="privacyPanel" hidden>
+      <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ИНФОРМАЦИЯ</span><h2>Политика конфиденциальности</h2></div><button class="settings-close" id="closePrivacy" aria-label="Вернуться в настройки">×</button></div>
+      <article class="card privacy-copy">
+        <p class="privacy-updated">Последнее обновление: 17 октября 2026 г.</p>
+        <h3>Какие данные сохраняются</h3>
+        <p>Yagami Track сохраняет введённые тобой данные о калориях, весе, сне, дневной цели и игровой прогресс (баланс, опыт, уровень и предметы инвентаря).</p>
+        <h3>Где хранятся данные</h3>
+        <p>Вне Telegram данные хранятся в локальном хранилище браузера на устройстве. При запуске внутри Telegram приложение может использовать Telegram WebApp CloudStorage для синхронизации данных аккаунта. Доступность синхронизации зависит от среды запуска.</p>
+        <h3>Профиль Telegram</h3>
+        <p>Имя и изображение профиля, предоставленные Telegram WebApp, могут отображаться в интерфейсе. Приложение не должно использовать их как пароль или средство самостоятельной проверки личности.</p>
+        <h3>Передача третьим лицам</h3>
+        <p>В текущей реализации нет собственной аналитики или рекламного профилирования по замыслу приложения. Telegram и инфраструктура хостинга могут обрабатывать технические данные в соответствии со своими политиками.</p>
+        <h3>Резервные копии и удаление</h3>
+        <p>Ты можешь экспортировать данные в JSON, импортировать резервную копию или использовать «Сбросить всё» в настройках. Экспортированные файлы сохраняются на выбранном устройстве и находятся под твоим контролем.</p>
+        <h3>Ограничения</h3>
+        <p>Не используй приложение для хранения паролей, платёжных реквизитов или иной особо чувствительной информации. Эта политика описывает текущую реализацию и должна обновляться, если способы обработки данных изменятся.</p>
+      </article>
+    </section>
+    <footer class="app-footer">
+      <details class="legal-disclosures">
+        <summary>Правовая информация</summary>
+        <div class="legal-disclosures-content">
+          <p>Yagami Track — инструмент для личного учёта, а не медицинская рекомендация. Показатели калорий, веса и сна не заменяют консультацию специалиста.</p>
+          <p>Рулетка, монеты, цены, компании, ранги, уровни и предметы — игровые условности. Ранг обозначает только внутриигровую редкость и не подтверждает качество или безопасность реальных продуктов.</p>
+          <p>Названия препаратов, включая тренболон и гормон роста, используются как элементы игровой коллекции. Это не рекомендация к применению, покупке или хранению реальных препаратов.</p>
+        </div>
+      </details>
+      <span>Yagami Track · 2026</span>
+    </footer>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </main>
   <dialog id="editDialog"><form method="dialog" id="editForm"><div class="dialog-head"><h2 id="dialogTitle">Изменить</h2><button class="dialog-close" value="cancel" aria-label="Закрыть">×</button></div><label id="fieldLabel" for="fieldInput">Значение</label><input id="fieldInput" type="number" inputmode="decimal" min="0" step="any"><p id="fieldHint" class="dialog-hint"></p><div class="dialog-actions"><button class="secondary-button" value="cancel">Отмена</button><button class="primary-button" id="saveField" value="save">Сохранить</button></div></form></dialog>
