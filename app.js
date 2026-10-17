@@ -220,11 +220,30 @@
   $$('.add-chip[data-add]').forEach(btn=>btn.addEventListener('click',()=>{dayData().calories+=Number(btn.dataset.add);saveState();render();toast('Добавлено '+btn.dataset.add+' ккал');}));
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();toast('Калории сброшены');}});
   const app=$('.app-shell');const sub=$('#subview');
+  const nav=$('.bottom-nav');
   let activeView='day', viewTransitionTimer=null;
+  const navIndicator=document.createElement('span');
+  navIndicator.className='nav-indicator';
+  navIndicator.setAttribute('aria-hidden','true');
+  nav.prepend(navIndicator);
+  function moveNavIndicator(view){
+    const target=$('.nav-item[data-view="'+view+'"]');
+    if(!target)return;
+    navIndicator.style.width=target.offsetWidth+'px';
+    navIndicator.style.height=target.offsetHeight+'px';
+    navIndicator.style.transform='translate3d('+target.offsetLeft+'px,'+target.offsetTop+'px,0)';
+    navIndicator.style.opacity='1';
+  }
   function animateView(element,direction){
     element.classList.remove('view-enter','view-exit','view-enter-back');
     void element.offsetWidth;
     element.classList.add(direction==='back'?'view-enter-back':direction==='exit'?'view-exit':'view-enter');
+  }
+  function animateSubviewContent(){
+    const content=$('#subviewContent');
+    content.classList.remove('view-content-enter');
+    void content.offsetWidth;
+    content.classList.add('view-content-enter');
   }
   function showView(view){
     if(view===activeView && !(view==='day' && sub.hidden)) return;
@@ -233,16 +252,18 @@
     $('.nav-item').forEach(b=>{
       const active=b.dataset.view===view;
       b.classList.toggle('active',active);
-      b.setAttribute('aria-current',active?'page':'false');
+      if(active)b.setAttribute('aria-current','page');
+      else b.removeAttribute('aria-current');
     });
+    moveNavIndicator(view);
     if(view==='day'){
-      if(sub.hidden){activeView='day';app.hidden=false;return;}
+      if(sub.hidden){activeView='day';app.hidden=false;animateView(app,'back');return;}
       sub.classList.remove('view-enter','view-enter-back');
       sub.classList.add('view-exit');
       viewTransitionTimer=setTimeout(()=>{
         sub.hidden=true;sub.classList.remove('view-exit');
         app.hidden=false;animateView(app,'back');activeView='day';
-      },190);
+      },280);
       return;
     }
     const titles={history:'История',stats:'Прогресс',roulette:'Рулетка',settings:'Настройки'};
@@ -255,13 +276,15 @@
     if(previous==='day'){
       app.classList.remove('view-enter','view-enter-back');
       app.classList.add('view-exit');
-      sub.hidden=false;animateView(sub,'forward');
-      viewTransitionTimer=setTimeout(()=>{app.hidden=true;app.classList.remove('view-exit');},190);
+      sub.hidden=false;animateView(sub,'forward');animateSubviewContent();
+      viewTransitionTimer=setTimeout(()=>{app.hidden=true;app.classList.remove('view-exit');},280);
     }else{
       animateView(sub,'forward');
+      animateSubviewContent();
     }
     activeView=view;
   }
+  window.addEventListener('resize',()=>moveNavIndicator(activeView));
   function renderRoulette(content){
     const items=[
       {name:'Протеин',tier:'S',detail:'Белок для добора суточной нормы'},
