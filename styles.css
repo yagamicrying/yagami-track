@@ -375,3 +375,10 @@ dialog::backdrop{transition:background-color 180ms ease}
 .tier-row.tier-b{border-color:rgba(57,139,255,.3)}
 .tier-row.tier-c{border-color:rgba(53,183,121,.3)}
 .tier-row.tier-d{border-color:rgba(115,115,122,.3)}
+
+/* Match roulette result badges to the rarity guide */
+.roulette-tier.tier-s{background:#f5c542;color:#261b00;box-shadow:0 0 20px rgba(245,197,66,.2)}
+.roulette-tier.tier-a{background:#b56bff;color:#180c26}
+.roulette-tier.tier-b{background:#398bff;color:#fff}
+.roulette-tier.tier-c{background:#35b779;color:#071d12}
+.roulette-tier.tier-d{background:#73737a;color:#fff}
