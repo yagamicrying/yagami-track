@@ -657,3 +657,17 @@ dialog::backdrop{transition:background-color 180ms ease}
 .game-floating-balance span{font-size:9px;color:var(--muted)}
 .game-floating-balance strong{font-size:12px;color:#f5c542;font-weight:850;white-space:nowrap}
 .game-floating-balance small{font-size:9px;color:#82e5ac;white-space:nowrap}
+
+/* Progressive disclosure for secondary game panels */
+.game-collapsible{margin:0 0 12px;border:1px solid #252528;border-radius:17px;background:var(--panel);overflow:hidden}
+.game-collapsible>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;cursor:pointer}
+.game-collapsible>summary::-webkit-details-marker{display:none}
+.game-collapsible>summary:after{content:'⌄';font-size:18px;color:var(--muted);transition:transform .18s ease}
+.game-collapsible[open]>summary:after{transform:rotate(180deg)}
+.game-collapsible>summary>span:first-child{display:flex;flex-direction:column;gap:4px}
+.game-collapsible>summary small{font-size:9px;letter-spacing:1.3px;color:var(--muted);font-weight:700}
+.game-collapsible>summary strong{font-size:16px;letter-spacing:-.3px}
+.game-collapsible-meta{font-size:10px;color:var(--muted);white-space:nowrap;margin-left:auto}
+.game-collapsible-body{padding:0 12px 12px}
+.game-collapsible-body>.card{margin:0;border:0;padding:4px 2px 8px;background:transparent}
+.game-collapsible-body>.crafting-panel{margin:0;border:0;padding:4px 2px 8px;background:transparent}
