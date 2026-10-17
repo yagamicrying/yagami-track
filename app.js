@@ -8,30 +8,37 @@
   const defaultState = { goal: 3500, days: {}, game: { money: 500, xp: 0, inventory: [], lastSpinAt: 0, nextItemId: 1, updatedAt: 0, lastDrop: null } };
   const SPIN_COST = 100;
   const GAME_ITEMS = [
-    {key:'tren-titan',name:'Тренболон',company:'TitanCore Labs · вымышленный бренд',tier:'S',price:6000,weight:1,detail:'Ультраредкий игровой вариант'},
-    {key:'gh-northstar',name:'Гормон роста',company:'Northstar Biotech · вымышленный бренд',tier:'S',price:6000,weight:1,detail:'Ультраредкий игровой вариант'},
-    {key:'tren-apex',name:'Тренболон',company:'Apex Research · вымышленный бренд',tier:'A',price:2000,weight:8,detail:'Редкий игровой вариант'},
-    {key:'gh-medaxis',name:'Гормон роста',company:'MedAxis Labs · вымышленный бренд',tier:'A',price:2000,weight:8,detail:'Редкий игровой вариант'},
-    {key:'pre-ironpeak',name:'Предтрен',company:'IronPeak Nutrition · вымышленный бренд',tier:'A',price:2000,weight:8,detail:'Премиальный игровой вариант'},
-    {key:'pre-forgefuel',name:'Предтрен',company:'ForgeFuel · вымышленный бренд',tier:'B',price:800,weight:25,detail:'Стандартный игровой вариант'},
-    {key:'protein-primewhey',name:'Протеин',company:'PrimeWhey · вымышленный бренд',tier:'B',price:800,weight:25,detail:'Стандартный игровой вариант'},
-    {key:'creatine-pureform',name:'Креатин',company:'PureForm Certified · вымышленный бренд',tier:'B',price:800,weight:25,detail:'Стандартный игровой вариант'},
-    {key:'protein-core',name:'Протеин',company:'Core Nutrition · вымышленный бренд',tier:'C',price:300,weight:48,detail:'Бюджетный игровой вариант'},
-    {key:'creatine-budget',name:'Креатин',company:'BudgetSport · вымышленный бренд',tier:'C',price:300,weight:48,detail:'Бюджетный игровой вариант'},
-    {key:'electrolytes-hydrate',name:'Электролиты',company:'HydratePro · вымышленный бренд',tier:'C',price:300,weight:48,detail:'Базовый игровой вариант'},
-    {key:'omega-ocean',name:'Омега-3',company:'OceanPure · вымышленный бренд',tier:'C',price:300,weight:48,detail:'Базовый игровой вариант'},
-    {key:'bcaa-core',name:'BCAA',company:'Core Aminos · вымышленный бренд',tier:'C',price:300,weight:48,detail:'Бюджетный игровой вариант'},
-    {key:'glutamine-labline',name:'Глютамин',company:'Labline Nutrition · вымышленный бренд',tier:'C',price:300,weight:48,detail:'Бюджетный игровой вариант'},
-    {key:'tren-blackline',name:'Тренболон',company:'Blackline Underground · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'gh-greylabel',name:'Гормон роста',company:'GreyLabel Labs · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'pre-unmarked',name:'Предтрен',company:'Unmarked Mix · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'protein-unknown',name:'Протеин',company:'Unknown Batch · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'creatine-loose',name:'Креатин',company:'Loose Powder Co. · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'electrolytes-generic',name:'Электролиты',company:'Generic Mix · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'omega-unverified',name:'Омега-3',company:'Unverified Oil · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'bcaa-basic',name:'BCAA',company:'Basic Aminos · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'},
-    {key:'glutamine-generic',name:'Глютамин',company:'Generic Lab · сомнительный игровой бренд',tier:'D',price:200,weight:72,detail:'Низкое качество в игровой системе'}
+    {key:'tren-titan',name:'Тренболон',company:'TitanCore Labs',tier:'S',price:6000,weight:1,detail:''},
+    {key:'gh-northstar',name:'Гормон роста',company:'Northstar Biotech',tier:'S',price:6000,weight:1,detail:''},
+    {key:'tren-apex',name:'Тренболон',company:'Apex Research',tier:'A',price:2000,weight:8,detail:''},
+    {key:'gh-medaxis',name:'Гормон роста',company:'MedAxis Labs',tier:'A',price:2000,weight:8,detail:''},
+    {key:'pre-ironpeak',name:'Предтрен',company:'IronPeak Nutrition',tier:'A',price:2000,weight:8,detail:''},
+    {key:'pre-forgefuel',name:'Предтрен',company:'ForgeFuel',tier:'B',price:800,weight:25,detail:''},
+    {key:'protein-primewhey',name:'Протеин',company:'PrimeWhey',tier:'B',price:800,weight:25,detail:''},
+    {key:'creatine-pureform',name:'Креатин',company:'PureForm Certified',tier:'B',price:800,weight:25,detail:''},
+    {key:'protein-core',name:'Протеин',company:'Core Nutrition',tier:'C',price:300,weight:48,detail:''},
+    {key:'creatine-budget',name:'Креатин',company:'BudgetSport',tier:'C',price:300,weight:48,detail:''},
+    {key:'electrolytes-hydrate',name:'Электролиты',company:'HydratePro',tier:'C',price:300,weight:48,detail:''},
+    {key:'omega-ocean',name:'Омега-3',company:'OceanPure',tier:'C',price:300,weight:48,detail:''},
+    {key:'bcaa-core',name:'BCAA',company:'Core Aminos',tier:'C',price:300,weight:48,detail:''},
+    {key:'glutamine-labline',name:'Глютамин',company:'Labline Nutrition',tier:'C',price:300,weight:48,detail:''},
+    {key:'tren-blackline',name:'Тренболон',company:'Blackline Underground',tier:'D',price:200,weight:72,detail:''},
+    {key:'gh-greylabel',name:'Гормон роста',company:'GreyLabel Labs',tier:'D',price:200,weight:72,detail:''},
+    {key:'pre-unmarked',name:'Предтрен',company:'Unmarked Mix',tier:'D',price:200,weight:72,detail:''},
+    {key:'protein-unknown',name:'Протеин',company:'Unknown Batch',tier:'D',price:200,weight:72,detail:''},
+    {key:'creatine-loose',name:'Креатин',company:'Loose Powder Co.',tier:'D',price:200,weight:72,detail:''},
+    {key:'electrolytes-generic',name:'Электролиты',company:'Generic Mix',tier:'D',price:200,weight:72,detail:''},
+    {key:'omega-unverified',name:'Омега-3',company:'Unverified Oil',tier:'D',price:200,weight:72,detail:''},
+    {key:'bcaa-basic',name:'BCAA',company:'Basic Aminos',tier:'D',price:200,weight:72,detail:''},
+    {key:'glutamine-generic',name:'Глютамин',company:'Generic Lab',tier:'D',price:200,weight:72,detail:''}
   ];
+
+  const GAME_CASES = [
+    {id:'forbidden',name:'Запретный кейс',price:650,subtitle:'Тренболон и гормон роста',filter:item=>item.key.startsWith('tren-')||item.key.startsWith('gh-')},
+    {id:'medium',name:'Средний кейс',price:300,subtitle:'Предтрен, протеин, креатин и добавки',filter:item=>['B','C'].includes(item.tier)},
+    {id:'useless',name:'Бесполезный кейс',price:150,subtitle:'Только предметы ранга D',filter:item=>item.tier==='D'}
+  ];
+  let selectedCaseId = 'medium';
   let rouletteAnimationTimer = null;
   let rouletteCooldownTimer = null;
   let rouletteIsSpinning = false;
@@ -43,6 +50,7 @@
   let cloudStorage = null;
   let cloudReady = false;
   let cloudSaveTimer = null;
+  let cloudWriteQueue = Promise.resolve();
   let cloudStatus = 'Локальное сохранение';
   function getTelegramProfile(){
     const tg = window.Telegram && window.Telegram.WebApp;
@@ -102,8 +110,25 @@
   function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(100*Math.pow(level,1.6));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(100*Math.pow(level,1.6));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
   function inventoryCapacity(){return 2+playerLevelInfo().level-1;}
   function sellValue(item){return Math.max(1,Math.floor(Number(item.price)*0.5));}
-  function markGameChanged(){state.game.updatedAt=Date.now();saveState();updateProfile();}
-  function pickGameItem(){const total=GAME_ITEMS.reduce((sum,item)=>sum+item.weight,0);let roll=Math.random()*total;for(const item of GAME_ITEMS){roll-=item.weight;if(roll<0)return item;}return GAME_ITEMS[GAME_ITEMS.length-1];}
+  function markGameChanged(){
+    state.game.updatedAt=Math.max(Date.now(),(Number(state.game.updatedAt)||0)+1);
+    saveState();updateProfile();
+    if(cloudReady&&cloudStorage){
+      clearTimeout(cloudSaveTimer);
+      cloudWriteQueue=cloudWriteQueue.catch(()=>{}).then(()=>writeCloudState()).catch(error=>{
+        cloudStatus='Ошибка синхронизации — данные сохранены на устройстве';
+        console.warn('Game progress sync failed',error);refreshSyncStatus();
+      });
+    }
+  }
+  function pickGameItem(caseId=selectedCaseId){
+    const selected=GAME_CASES.find(entry=>entry.id===caseId)||GAME_CASES[1];
+    const pool=GAME_ITEMS.filter(selected.filter);
+    const total=pool.reduce((sum,item)=>sum+item.weight,0);
+    let roll=Math.random()*total;
+    for(const item of pool){roll-=item.weight;if(roll<0)return item;}
+    return pool[pool.length-1]||GAME_ITEMS[0];
+  }
   function saveState(){
     localStorage.setItem(STORE, JSON.stringify(state));
     if (cloudReady && cloudStorage) {
@@ -298,19 +323,23 @@
     const inventoryMarkup=()=>state.game.inventory.length
       ? '<div class="inventory-list">'+state.game.inventory.map(item=>'<article class="inventory-item tier-border-'+item.tier.toLowerCase()+'"><div class="inventory-item-main"><span class="inventory-rank tier-'+item.tier.toLowerCase()+'">'+item.tier+'</span><div class="inventory-item-copy"><strong>'+escapeHtml(item.name)+'</strong><small>'+escapeHtml(item.company)+'</small><span class="inventory-prices">Цена: '+fmtNum(item.price)+' · Продажа: '+fmtNum(sellValue(item))+'</span></div></div><button class="sell-item" data-sell-id="'+item.instanceId+'">Продать</button></article>').join('')+'</div>'
       : '<div class="inventory-empty">Пока пусто. Крути рулетку, чтобы получить первый предмет.</div>';
+    const selectedCase=()=>GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1];
+    const caseButtons=()=>'<div class="case-selector" role="group" aria-label="Выбор кейса">'+GAME_CASES.map(entry=>'<button type="button" class="case-choice'+(entry.id===selectedCaseId?' is-selected':'')+'" data-case-id="'+entry.id+'" aria-pressed="'+(entry.id===selectedCaseId)+'"><span class="case-choice-name">'+escapeHtml(entry.name)+'</span><strong>'+fmtNum(entry.price)+' <small>монет</small></strong><span class="case-choice-subtitle">'+escapeHtml(entry.subtitle)+'</span></button>').join('')+'</div>';
     content.innerHTML='<section class="game-wallet"><div class="wallet-balance"><span class="eyebrow">ТВОЙ БАЛАНС</span><strong><span id="gameMoney">'+fmtNum(game.money)+'</span><small> монет</small></strong></div><div class="wallet-meta"><span id="walletLevel">Уровень '+level.level+'</span><span id="inventoryCount">'+game.inventory.length+' / '+capacity+' ячеек</span></div><div class="wallet-xp-track"><i id="walletXpFill" style="width:'+Math.min(100,Math.round(level.xpIntoLevel/level.xpNeeded*100))+'%"></i></div><div class="wallet-xp-copy"><span id="walletXpText">'+fmtNum(level.xpIntoLevel)+' / '+fmtNum(level.xpNeeded)+' XP</span><span>+1 ячейка за уровень</span></div></section>'+
-    '<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Получи предмет, храни его или продай за игровые монеты.</p><div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Крутить · '+fmtNum(SPIN_COST)+' монет</button></section>'+
+    '<section class="roulette-hero card"><span class="eyebrow">ИГРОВАЯ ЭКОНОМИКА</span><h2>Рулетка спортпита</h2><p>Выбери кейс, получи предмет и реши — оставить его или продать.</p>'+caseButtons()+'<div class="roulette-stage" id="rouletteStage"><div class="roulette-sheen"></div><div class="roulette-result" id="rouletteResult" aria-live="polite">'+resultMarkup+'</div><span class="roulette-status" id="rouletteStatus">ГОТОВ К ПРОКРУТКЕ</span></div><button class="primary-button full-width" id="spinRoulette">Открыть · '+fmtNum(selectedCase().price)+' монет</button></section>'+
     '<section class="card inventory-panel"><div class="inventory-heading"><div><span class="eyebrow">ТВОИ ПРЕДМЕТЫ</span><h2>Инвентарь</h2></div><span class="inventory-capacity" id="inventoryCapacity">'+game.inventory.length+' / '+capacity+'</span></div><div id="inventoryContents">'+inventoryMarkup()+'</div></section>'+
-    '<details class="tier-details"><summary>Каталог и ранги <span>Редкость · компания · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+fmtNum(item.price)+' <small>монет</small></b></div><small>'+escapeHtml(item.company)+'</small><small>'+escapeHtml(item.detail)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
+    '<details class="tier-details"><summary>Каталог предметов <span>Название · цена</span></summary><section class="tier-list">'+['S','A','B','C','D'].map(tier=>'<div class="tier-row tier-'+tier.toLowerCase()+'"><span class="tier-label tier-'+tier.toLowerCase()+'">'+tier+'</span><div class="tier-items">'+GAME_ITEMS.filter(item=>item.tier===tier).map(item=>'<div class="tier-item"><div class="catalogue-item-title"><strong>'+escapeHtml(item.name)+'</strong><b>'+fmtNum(item.price)+' <small>монет</small></b></div><small>'+escapeHtml(item.company)+'</small></div>').join('')+'</div></div>').join('')+'</section></details>';
     const button=$('#spinRoulette',content),result=$('#rouletteResult',content),stage=$('#rouletteStage',content),status=$('#rouletteStatus',content);
+    const bindCaseButtons=()=>$('[data-case-id]',content).forEach(caseButton=>caseButton.addEventListener('click',()=>{if(rouletteIsSpinning)return;selectedCaseId=caseButton.dataset.caseId;$('[data-case-id]',content).forEach(node=>{const active=node.dataset.caseId===selectedCaseId;node.classList.toggle('is-selected',active);node.setAttribute('aria-pressed',String(active));});updateButton();}));
     const updateButton=()=>{
       if(!button.isConnected)return;
       const remaining=Math.max(0,2000-(Date.now()-state.game.lastSpinAt));
       if(rouletteIsSpinning){button.disabled=true;button.textContent='Крутится…';return;}
       if(state.game.inventory.length>=inventoryCapacity()){button.disabled=true;button.textContent='Инвентарь заполнен';return;}
-      if(state.game.money<SPIN_COST){button.disabled=true;button.textContent='Не хватает монет';return;}
+      const cost=(GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1]).price;
+      if(state.game.money<cost){button.disabled=true;button.textContent='Не хватает монет';return;}
       if(remaining>0){button.disabled=true;button.textContent='Перезарядка '+(remaining/1000).toFixed(1)+' с';return;}
-      button.disabled=false;button.textContent='Крутить · '+fmtNum(SPIN_COST)+' монет';
+      button.disabled=false;button.textContent='Открыть · '+fmtNum(cost)+' монет';
     };
     const refreshWallet=()=>{
       const info=playerLevelInfo(),cap=inventoryCapacity();
@@ -333,15 +362,16 @@
         const newLevel=playerLevelInfo().level;toast(newLevel>oldLevel?'Уровень '+newLevel+'! Открыта новая ячейка.':'Продано за '+fmtNum(sellValue(item))+' монет · +5 XP');
       }));
     };
-    bindSellButtons();updateButton();
+    bindCaseButtons();bindSellButtons();updateButton();
     if(Date.now()-game.lastSpinAt<2000)rouletteCooldownTimer=setInterval(()=>{updateButton();if(Date.now()-state.game.lastSpinAt>=2000){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;updateButton();}},100);
     button.addEventListener('click',()=>{
       const now=Date.now();if(rouletteIsSpinning)return;if(now-state.game.lastSpinAt<2000){updateButton();return;}
       if(state.game.inventory.length>=inventoryCapacity()){toast('Инвентарь заполнен — продай предмет');updateButton();return;}
-      if(state.game.money<SPIN_COST){toast('Не хватает монет');updateButton();return;}
+      const activeCase=GAME_CASES.find(entry=>entry.id===selectedCaseId)||GAME_CASES[1];
+      if(state.game.money<activeCase.price){toast('Не хватает монет');updateButton();return;}
       const oldLevel=playerLevelInfo().level;
-      state.game.money-=SPIN_COST;state.game.lastSpinAt=now;state.game.xp+=15;
-      const item=pickGameItem(),owned={...item,instanceId:state.game.nextItemId++,acquiredAt:now};
+      state.game.money-=activeCase.price;state.game.lastSpinAt=now;state.game.xp+=15;
+      const item=pickGameItem(activeCase.id),owned={...item,instanceId:state.game.nextItemId++,acquiredAt:now};
       state.game.inventory.push(owned);state.game.lastDrop={...item};markGameChanged();
       rouletteIsSpinning=true;stage.classList.add('is-spinning');result.classList.remove('is-revealed','roulette-pop');status.textContent='ПОИСК ПРЕДМЕТА';updateButton();refreshWallet();
       if(rouletteAnimationTimer)clearTimeout(rouletteAnimationTimer);
@@ -349,7 +379,7 @@
       let step=0;
       const roll=()=>{
         if(!result.isConnected){rouletteIsSpinning=false;return;}
-        const preview=pickGameItem();
+        const preview=pickGameItem(activeCase.id);
         result.querySelector('.roulette-tier').className='roulette-tier tier-'+preview.tier.toLowerCase();
         result.querySelector('.roulette-tier').textContent=preview.tier;
         result.querySelector('strong').textContent=preview.name;
