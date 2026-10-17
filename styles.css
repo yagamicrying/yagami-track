@@ -610,3 +610,5 @@ dialog::backdrop{transition:background-color 180ms ease}
 .batch-result-note{margin:9px 1px 0;color:var(--muted);font-size:10px;line-height:1.5}
 @media(max-width:360px){.batch-drop-grid{grid-template-columns:1fr}.batch-result-actions{grid-template-columns:1fr}.batch-open-controls{padding:10px}}
 @media(prefers-reduced-motion:reduce){.batch-count{transition:none!important}}
+
+.batch-debt-note{margin:9px 1px 0;color:var(--muted);font-size:10px;line-height:1.5}
