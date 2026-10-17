@@ -509,3 +509,22 @@ dialog::backdrop{transition:background-color 180ms ease}
 .case-choice>strong small{font-size:9px;color:var(--muted);font-weight:500}
 .case-choice-subtitle{font-size:9px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
 @media(max-width:360px){.case-selector{gap:5px}.case-choice{padding:9px 7px;min-height:112px}.case-choice-name{font-size:10px}.case-choice>strong{font-size:12px}.case-choice-subtitle{font-size:8px}}
+
+
+/* Refined case cards, rarity-matched glow, remove decorative rings */
+.roulette-stage:before,.roulette-stage:after{display:none!important;content:none!important}
+.roulette-stage{--drop-glow:#f5c542;background:radial-gradient(ellipse at 50% 46%,color-mix(in srgb,var(--drop-glow) 18%,transparent),transparent 66%),linear-gradient(155deg,#202023,#141416 78%);transition:border-color .35s ease,background .45s ease,box-shadow .45s ease}
+.roulette-stage.is-spinning{border-color:color-mix(in srgb,var(--drop-glow) 55%,#343438);box-shadow:inset 0 0 48px color-mix(in srgb,var(--drop-glow) 8%,transparent),0 0 28px color-mix(in srgb,var(--drop-glow) 8%,transparent)}
+.roulette-stage.has-result{border-color:color-mix(in srgb,var(--drop-glow) 36%,#343438);box-shadow:inset 0 0 54px color-mix(in srgb,var(--drop-glow) 10%,transparent)}
+.roulette-result .roulette-tier{box-shadow:0 0 28px color-mix(in srgb,var(--drop-glow) 35%,transparent),0 7px 22px rgba(0,0,0,.25)}
+.roulette-result strong{letter-spacing:-.45px}
+.case-selector{gap:9px;margin:17px 0 12px}
+.case-choice{position:relative;overflow:hidden;min-height:116px;padding:12px 10px;border-color:#303036;background:linear-gradient(155deg,#222226,#171719);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.case-choice:before{content:"";position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse at 50% 0%,rgba(245,197,66,.16),transparent 70%);transition:opacity .25s ease;pointer-events:none}
+.case-choice.is-selected:before{opacity:1}
+.case-choice.is-selected{border-color:#d5ad3b;box-shadow:inset 0 0 0 1px rgba(245,197,66,.12),0 8px 24px rgba(0,0,0,.18)}
+.case-choice-name,.case-choice>strong,.case-choice-subtitle{position:relative;z-index:1}
+.case-choice-name{font-size:11px;letter-spacing:-.1px}
+.case-choice>strong{font-size:14px;color:#f3d37a}
+.case-choice-subtitle{font-size:9px;line-height:1.4}
+@media(prefers-reduced-motion:reduce){.case-choice,.case-choice:before,.roulette-stage{transition:none!important}}
