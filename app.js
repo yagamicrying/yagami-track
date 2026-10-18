@@ -553,6 +553,23 @@
     $('#gameCurrency').addEventListener('change',e=>{state.game.currency=e.target.value==='USD'?'USD':'RUB';markGameChanged();renderRoulette($('#rouletteContent'));renderSettings($('#settingsContent'));toast('Валюта изменена');});$('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});$('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;$('#settingsPanel').hidden=true;panel.scrollIntoView({behavior:'smooth',block:'start'});});$('#syncNow').addEventListener('click',syncNow);$('#exportData').addEventListener('click',exportData);$('#importData').addEventListener('click',()=>$('#importFile').click());$('#importFile').addEventListener('change',importData);$('#clearData').addEventListener('click',()=>{if(confirm('Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные удалены');}});}
   function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kairo-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
   function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state=normalizeState(parsed);saveState();render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
+  const rouletteModal=$('#rouletteModal');
+  const openRoulette=()=>{
+    if(!rouletteModal)return;
+    rouletteModal.hidden=false;
+    document.body.classList.add('roulette-modal-open');
+    renderRoulette($('#rouletteContent'));
+    if(window.Telegram&&window.Telegram.WebApp&&typeof window.Telegram.WebApp.HapticFeedback?.impactOccurred==='function')window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+  };
+  const closeRoulette=()=>{
+    if(!rouletteModal)return;
+    rouletteModal.hidden=true;
+    document.body.classList.remove('roulette-modal-open');
+  };
+  $('#openRoulette')?.addEventListener('click',openRoulette);
+  $('#closeRoulette')?.addEventListener('click',closeRoulette);
+  $('#closeRouletteBackdrop')?.addEventListener('click',closeRoulette);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&rouletteModal&&!rouletteModal.hidden)closeRoulette();});
   $('#openSettings').addEventListener('click',()=>{
     const panel=$('#settingsPanel');
     panel.hidden=!panel.hidden;
