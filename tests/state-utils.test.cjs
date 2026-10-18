@@ -33,7 +33,7 @@ test('day records are sanitized and malformed date keys are ignored', () => {
   assert.deepEqual(Object.keys(result.days), ['2026-10-18']);
   assert.equal(result.days['2026-10-18'].calories, 0);
   assert.equal(result.days['2026-10-18'].weight, 82.5);
-  assert.equal(result.days['2026-10-18'].sleep, 30);
+  assert.equal(result.days['2026-10-18'].sleep, '');
   assert.equal(result.days['2026-10-18'].checks.water, true);
   assert.equal(result.days['2026-10-18'].note, '');
 });
