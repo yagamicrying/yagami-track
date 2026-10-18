@@ -885,3 +885,37 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
  #rouletteContent{max-width:560px}
  #rouletteContent .case-choice{min-height:76px}
 }
+
+
+/* Arm-wrestling equipment and expanded case collection */
+#rouletteContent .case-group:nth-of-type(2) .case-selector{grid-template-columns:repeat(2,minmax(0,1fr))}
+#rouletteContent .case-group:nth-of-type(2) .case-choice{min-height:72px}
+.arm-arena{margin:14px 0;padding:16px;background:#1c1c1e;border:0;border-radius:18px;color:#f5f5f7}
+.arm-arena-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.arm-arena-heading h3{margin:5px 0 0;font-size:21px;letter-spacing:-.5px}
+.arm-record{padding:6px 10px;border-radius:10px;background:#2c2c2e;color:#d1d1d6;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.arm-arena-intro{margin:10px 0 14px;color:#98989f;font-size:12px;line-height:1.5}
+.arm-slots{display:grid;gap:7px}
+.arm-slot{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;align-items:center;padding:10px;background:#2c2c2e;border-radius:13px;min-width:0}
+.arm-slot-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#3a3a3c;font-size:17px}
+.arm-slot-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.arm-slot-copy strong{font-size:12px}
+.arm-slot-copy small{font-size:10px;line-height:1.3;color:#98989f;overflow-wrap:anywhere}
+.arm-slot select{grid-column:1/-1;width:100%;min-width:0;padding:10px;border:0;border-radius:10px;background:#3a3a3c;color:#f5f5f7;font:inherit;font-size:12px}
+.arm-power-line{display:flex;justify-content:space-between;align-items:center;margin:13px 0;padding:12px 13px;background:#2c2c2e;border-radius:12px}
+.arm-power-line span{font-size:12px;color:#98989f}
+.arm-power-line strong{font-size:20px;font-variant-numeric:tabular-nums}
+.arm-arena-versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;margin:14px 0}
+.arm-arena-versus>div{display:grid;justify-items:center;gap:5px;padding:12px 6px;background:#242426;border-radius:13px;text-align:center;min-width:0}
+.arm-fighter{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#3a3a3c;color:#f5f5f7;font-size:11px;font-weight:800}
+.arm-fighter.opponent{background:#35353a}
+.arm-arena-versus strong{font-size:12px}
+.arm-arena-versus small{font-size:9px;line-height:1.3;color:#98989f}
+.arm-vs{font-size:11px;font-weight:800;color:#8e8e93}
+.arm-last-match{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding:12px;border-radius:12px;background:#2c2c2e}
+.arm-last-match strong{font-size:13px}
+.arm-last-match span{font-size:11px;color:#c7c7cc;line-height:1.4}
+.arm-last-match.won{box-shadow:inset 3px 0 #30d158}
+.arm-last-match.lost{box-shadow:inset 3px 0 #ff453a}
+@media(min-width:500px){.arm-slots{grid-template-columns:repeat(3,minmax(0,1fr))}.arm-slot{grid-template-columns:28px minmax(0,1fr);align-content:start}.arm-slot-icon{width:28px;height:28px}.arm-slot select{grid-column:1/-1}}
+@media(max-width:390px){.arm-arena{padding:12px}.arm-arena-heading h3{font-size:19px}.arm-arena-versus{gap:5px}.arm-arena-versus>div{padding:10px 4px}.arm-fighter{width:38px;height:38px}}
