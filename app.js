@@ -198,10 +198,10 @@
       } catch (error) { reject(error); }
     });
   }
-  function normalizeState(value){
-    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid saved state');
-    const days = value.days && typeof value.days === 'object' && !Array.isArray(value.days) ? value.days : {};
-    return { goal: Number(value.goal) > 0 ? Number(value.goal) : 3500, days };
+  function checksum(text){
+    let hash=2166136261;
+    for(let i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,16777619);}
+    return (hash>>>0).toString(16).padStart(8,'0');
   }
   async function readCloudState(){
     const metaRaw = await cloudCall('getItem', CLOUD_META_KEY);
