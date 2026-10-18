@@ -965,3 +965,7 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 @media(min-width:600px){.roulette-modal-panel #rouletteContent{padding-left:12px;padding-right:12px}.gear-case-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:360px){.gear-open-row{align-items:stretch;flex-direction:column}.gear-open-row .primary-button{max-width:none;width:100%}.gear-case-card{padding:7px}.gear-case-name{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.gear-case-card{transition:none}}
+
+.gear-arena-banner{display:block;width:100%;max-height:150px;object-fit:cover;border-radius:15px;margin:0 0 14px;border:1px solid rgba(245,197,66,.12)}
+.roulette-launcher-icon{width:78px;height:62px;flex:0 0 78px;overflow:hidden;border-radius:13px}
+.roulette-launcher-icon img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
