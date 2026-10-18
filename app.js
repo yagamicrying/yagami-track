@@ -577,6 +577,25 @@
   });
   $('#closeSettings').addEventListener('click',()=>$('#settingsPanel').hidden=true);
   $('#closePrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=true;$('#settingsPanel').hidden=false;$('#settingsPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+  function persistRouletteProgress(){
+    try{
+      localStorage.setItem(STORE,JSON.stringify(state));
+    }catch(error){
+      console.warn('Local progress save failed',error);
+    }
+    if(cloudReady&&cloudStorage){
+      clearTimeout(cloudSaveTimer);
+      cloudWriteQueue=cloudWriteQueue.catch(()=>{}).then(()=>writeCloudState()).catch(error=>{
+        cloudStatus='Не удалось синхронизировать прогресс — сохранён на устройстве';
+        console.warn('Progress cloud save failed',error);
+        refreshSyncStatus();
+      });
+    }
+  }
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden')persistRouletteProgress();
+  });
+  window.addEventListener('pagehide',persistRouletteProgress);
   initializeStorage().finally(()=>setInterval(accruePassiveIncome,1000));
   if('serviceWorker' in navigator && location.protocol.startsWith('http')) window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
