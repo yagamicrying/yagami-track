@@ -206,7 +206,7 @@
   function normalizeState(value){
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid saved state');
     const days = value.days && typeof value.days === 'object' && !Array.isArray(value.days) ? value.days : {};
-    return { goal: Number(value.goal) > 0 ? Number(value.goal) : 3500, days };
+    return { goal: Number(value.goal) > 0 ? Number(value.goal) : 3500, days, game: normalizeGame(value.game) };
   }
   async function readCloudState(){
     const metaRaw = await cloudCall('getItem', CLOUD_META_KEY);
