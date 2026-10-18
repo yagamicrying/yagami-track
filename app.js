@@ -249,9 +249,11 @@
   function scheduleCloudSave(){
     clearTimeout(cloudSaveTimer);
     cloudSaveTimer = setTimeout(async () => {
-      try { await writeCloudState(); }
-      catch (error) {
-        cloudStatus = 'Ошибка синхронизации — данные пока только на устройстве';
+      try {
+        cloudWriteQueue = cloudWriteQueue.catch(() => {}).then(() => writeCloudState());
+        await cloudWriteQueue;
+      } catch (error) {
+        cloudStatus = 'Ошибка синхронизации — данные сохранены локально';
         console.warn('Telegram CloudStorage save failed', error);
       }
       refreshSyncStatus();
