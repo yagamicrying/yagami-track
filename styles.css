@@ -845,3 +845,43 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 .inventory-rank.tier-d,.reel-tile-rank.tier-d,.tier-label.tier-d,.roulette-tier.tier-d{background:#73737a!important;color:#fff!important}
 .tier-border-s{border-left-color:#f5c542!important}.tier-border-a{border-left-color:#b56bff!important}.tier-border-b{border-left-color:#398bff!important}.tier-border-c{border-left-color:#35b779!important}.tier-border-d{border-left-color:#73737a!important}
 .tier-row.tier-s{border-color:rgba(245,197,66,.38)!important}.tier-row.tier-a{border-color:rgba(181,107,255,.3)!important}.tier-row.tier-b{border-color:rgba(57,139,255,.3)!important}.tier-row.tier-c{border-color:rgba(53,183,121,.3)!important}.tier-row.tier-d{border-color:rgba(115,115,122,.3)!important}
+
+
+/* Focused layout repair for the sports-nutrition roulette window */
+#rouletteContent{width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+#rouletteContent>h1,#rouletteContent>h2,#rouletteContent>.eyebrow,
+#rouletteContent>.roulette-intro{max-width:100%;overflow-wrap:anywhere}
+#rouletteContent .case-picker-heading{margin:12px 0 8px;letter-spacing:.02em}
+#rouletteContent .case-group{margin:0 0 12px}
+#rouletteContent .case-group-title{margin:0 0 6px 3px;font-size:10px}
+#rouletteContent .case-selector{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;
+ padding:0;background:transparent;border-radius:0;overflow:visible
+}
+#rouletteContent .case-choice{
+ display:grid;grid-template-columns:26px minmax(0,1fr) auto;grid-template-rows:auto auto;
+ align-content:center;align-items:center;column-gap:8px;row-gap:3px;
+ min-width:0;min-height:72px;height:auto;padding:10px;
+ border:0!important;border-radius:13px!important;background:#1c1c1e!important;
+ box-shadow:none!important;text-align:left
+}
+#rouletteContent .case-choice-icon{grid-column:1;grid-row:1 / span 2;font-size:20px;filter:grayscale(.35)}
+#rouletteContent .case-choice-copy{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;gap:4px;min-width:0}
+#rouletteContent .case-choice-name{font-size:12px;line-height:1.2;overflow-wrap:anywhere}
+#rouletteContent .case-choice-subtitle{font-size:10px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#rouletteContent .case-choice-price{grid-column:3;grid-row:1;align-self:start;font-size:11px;white-space:nowrap}
+#rouletteContent .case-choice-check{grid-column:3;grid-row:2;justify-self:end;font-size:12px}
+#rouletteContent .case-choice.is-selected{background:#2c2c2e!important;outline:1px solid rgba(10,132,255,.72);outline-offset:-1px}
+#rouletteContent .case-odds-sheet{margin:0 0 12px;padding:12px}
+#rouletteContent .batch-controls,#rouletteContent .batch-control,#rouletteContent .batch-counts{max-width:100%;min-width:0}
+#rouletteContent .batch-controls{margin-top:12px}
+@media(max-width:390px){
+ #rouletteContent .case-selector{grid-template-columns:minmax(0,1fr);gap:5px}
+ #rouletteContent .case-choice{min-height:62px;grid-template-columns:25px minmax(0,1fr) auto;padding:9px 10px}
+ #rouletteContent .case-choice-name{font-size:12px}
+ #rouletteContent .case-choice-subtitle{-webkit-line-clamp:1}
+}
+@media(min-width:700px){
+ #rouletteContent{max-width:560px}
+ #rouletteContent .case-choice{min-height:76px}
+}
