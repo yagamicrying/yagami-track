@@ -68,18 +68,19 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache-first for static same-origin assets. Never answer a JS/CSS request with HTML.
+  // Network-first for local assets: deployed fixes become visible immediately;
+  // a cached response is used only when the network is unavailable.
   event.respondWith((async () => {
-    const cached = await caches.match(request);
-    if (cached) return cached;
     try {
-      const response = await fetch(request);
+      const response = await fetch(request, { cache: 'no-cache' });
       if (response && response.ok && response.type !== 'opaque') {
         const cache = await caches.open(CACHE_NAME);
-        event.waitUntil(cache.put(request, response.clone()));
+        await cache.put(request, response.clone());
       }
       return response;
     } catch (_) {
+      const cached = await caches.match(request);
+      if (cached) return cached;
       return new Response('Ресурс недоступен офлайн.', {
         status: 503,
         headers: { 'Content-Type': 'text/plain; charset=utf-8' }
