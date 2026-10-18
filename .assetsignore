@@ -1,0 +1,23 @@
+# Never upload installed dependencies or build tooling as public site assets
+node_modules/
+.wrangler/
+.git/
+.github/
+tests/
+coverage/
+
+# Repository and deployment metadata
+.gitignore
+.assetsignore
+wrangler.jsonc
+package.json
+package-lock.json
+bun.lock
+bun.lockb
+yarn.lock
+pnpm-lock.yaml
+README.md
+*.log
+.env
+.env.*
+.dev.vars
