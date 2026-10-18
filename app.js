@@ -116,6 +116,22 @@
 
   function createDefaultState(){ return KairoState.createDefaultState(); }
   function normalizeGame(value){ return KairoState.normalizeGame(value); }
+  function normalizeState(value){ return KairoState.normalizeState(value); }
+  function loadState(){
+    try {
+      const raw = localStorage.getItem(STORE);
+      return normalizeState(raw ? JSON.parse(raw) : {});
+    } catch (error) {
+      try {
+        const raw = localStorage.getItem(STORE);
+        if (raw) localStorage.setItem(STORE + '-recovery-' + Date.now(), raw);
+      } catch (backupError) {
+        console.warn('Unable to preserve damaged local state', backupError);
+      }
+      console.warn('Saved state was invalid; starting with defaults', error);
+      return createDefaultState();
+    }
+  }
   function mergeGameStates(localGame,remoteGame){ return KairoState.mergeGameStates(localGame,remoteGame); }
   function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(150*Math.pow(level,1.7));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(150*Math.pow(level,1.7));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
   function inventoryCapacity(){return 10+playerLevelInfo().level-1;}
