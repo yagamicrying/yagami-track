@@ -61,7 +61,21 @@
       lastDrop: lastDrop ? { ...lastDrop, detail: '' } : null,
       starterBoxClaimed: source.starterBoxClaimed === true,
       lastDailyClaimDate: typeof source.lastDailyClaimDate === 'string' ? source.lastDailyClaimDate : '',
-      dailyStreak: Math.max(0, Math.min(7, Math.floor(finiteNonNegative(source.dailyStreak))))
+      dailyStreak: Math.max(0, Math.min(7, Math.floor(finiteNonNegative(source.dailyStreak)))),
+      armEquipment: Object.fromEntries(['wrist', 'grip', 'strap'].map(slot => [
+        slot,
+        inventory.some(item => item.instanceId === Number(source.armEquipment && source.armEquipment[slot]))
+          ? Number(source.armEquipment[slot]) : null
+      ])),
+      armWins: Math.floor(finiteNonNegative(source.armWins)),
+      armLosses: Math.floor(finiteNonNegative(source.armLosses)),
+      lastArmMatch: source.lastArmMatch && isRecord(source.lastArmMatch) ? {
+        result: source.lastArmMatch.result === 'win' ? 'win' : 'loss',
+        power: finiteNonNegative(source.lastArmMatch.power),
+        opponentPower: finiteNonNegative(source.lastArmMatch.opponentPower),
+        reward: finiteNonNegative(source.lastArmMatch.reward),
+        at: finiteNonNegative(source.lastArmMatch.at)
+      } : null
     };
   }
 
