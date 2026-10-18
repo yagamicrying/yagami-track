@@ -71,7 +71,7 @@ test('game merge chooses the newer revision timestamp', () => {
 
 test('normalization preserves arm-wrestling progress and valid equipment references', () => {
   const result = state.normalizeState({ game: {
-    inventory: [{ instanceId: 7, name: 'Grip', tier: 'B', price: 100 }],
+    inventory: [{ instanceId: 7, name: 'Grip', tier: 'B', price: 100, kind: 'equipment', slot: 'wrist' }],
     armEquipment: { wrist: 7, grip: 999, strap: null },
     armWins: 4,
     armLosses: 2,
@@ -82,4 +82,31 @@ test('normalization preserves arm-wrestling progress and valid equipment referen
   assert.equal(result.game.armWins, 4);
   assert.equal(result.game.armLosses, 2);
   assert.equal(result.game.lastArmMatch.result, 'win');
+});
+
+test('gear cannot occupy a mismatched slot and the same item cannot be equipped twice', () => {
+  const result = state.normalizeState({ game: {
+    inventory: [
+      { instanceId: 11, name: 'Wrist Wrap', tier: 'C', price: 500, kind: 'equipment', slot: 'wrist' },
+      { instanceId: 12, name: 'Grip', tier: 'C', price: 500, kind: 'equipment', slot: 'grip' }
+    ],
+    armEquipment: { wrist: 11, grip: 11, strap: 12 },
+    stamina: 140
+  }});
+  assert.deepEqual({ ...result.game.armEquipment }, { wrist: 11, grip: null, strap: null });
+  assert.equal(result.game.stamina, 100);
+});
+
+test('consumables preserve their use effect and equipment does not become passive income gear', () => {
+  const result = state.normalizeState({ game: {
+    inventory: [
+      { instanceId: 2, name: 'Bandage', tier: 'D', price: 180, kind: 'consumable', effect: 'stamina', amount: 35 },
+      { instanceId: 3, name: 'Wrist Wrap', tier: 'D', price: 280, kind: 'equipment', slot: 'wrist', power: 2 }
+    ]
+  }});
+  assert.equal(result.game.inventory[0].kind, 'consumable');
+  assert.equal(result.game.inventory[0].amount, 35);
+  assert.equal(result.game.inventory[1].kind, 'equipment');
+  assert.equal(result.game.inventory[1].slot, 'wrist');
+  assert.equal(result.game.inventory[1].power, 2);
 });
