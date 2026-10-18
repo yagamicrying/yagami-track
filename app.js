@@ -303,7 +303,8 @@
       }
       localStorage.setItem(STORE, JSON.stringify(state));
       cloudReady = true;
-      await writeCloudState();
+      cloudWriteQueue = cloudWriteQueue.catch(() => {}).then(() => writeCloudState());
+      await cloudWriteQueue;
       render();
       refreshPageSections();
       toast('Данные синхронизированы');
@@ -333,7 +334,8 @@
         }
         localStorage.setItem(STORE, JSON.stringify(state));
         cloudReady = true;
-        await writeCloudState();
+        cloudWriteQueue = cloudWriteQueue.catch(() => {}).then(() => writeCloudState());
+        await cloudWriteQueue;
       } catch (error) {
         cloudReady = false;
         cloudStatus = 'Ошибка Telegram CloudStorage — данные на этом устройстве сохранены';
