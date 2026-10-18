@@ -994,3 +994,10 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 @media(min-width:600px){.arena-hero{min-height:290px;padding:28px}.arena-hero-art{width:72%}.arena-hero-copy{max-width:520px}.arena-hero h1{max-width:410px}}
 @media(max-width:380px){.arena-hero{min-height:218px;padding:17px 13px}.arena-hero-art{right:-23%;width:105%;opacity:.72}.arena-hero:after{background:linear-gradient(90deg,rgba(12,13,18,.96),rgba(12,13,18,.72) 68%,rgba(12,13,18,.28))}.arena-hero h1{max-width:260px;font-size:27px}.arena-hero-tags span{font-size:8px;padding:6px 7px}.inventory-item-art{width:42px;height:42px;flex-basis:42px}.inventory-item-main{gap:7px}}
 @media(prefers-reduced-motion:reduce){.arena-hero,.inventory-item-art{transition:none!important}}
+
+.arena-hero-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:15px;padding:11px 15px;border:1px solid rgba(245,197,66,.42);border-radius:12px;background:linear-gradient(120deg,#f5c542,#c38b27);color:#19140a;font-size:11px;font-weight:950;box-shadow:0 7px 22px rgba(245,197,66,.12)}
+.arena-hero-cta:active{transform:translateY(1px) scale(.99)}
+.arena-hero-cta:focus-visible{outline:2px solid #fff0ae;outline-offset:3px}
+.gear-case-card .gear-case-art img{transition:transform .25s ease}
+.gear-case-card:active .gear-case-art img{transform:scale(1.04)}
+@media(prefers-reduced-motion:reduce){.arena-hero-cta,.gear-case-card .gear-case-art img{transition:none}}
