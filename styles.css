@@ -819,3 +819,29 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 .roulette-center-marker:before{background:#8e8e93!important;box-shadow:0 0 8px rgba(255,255,255,.12)!important}
 .roulette-center-marker i,.roulette-center-marker:after{background:#8e8e93!important;filter:none!important}
 .case-choice.is-selected{border-color:transparent!important;background:#2c2c2e!important;box-shadow:none!important}
+
+
+/* Targeted repair: compact the game economy panels and restore rarity colors. */
+#gameEconomy,.game-economy,#gameEconomyPanel{min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+.game-collapsible{width:100%;max-width:100%;box-sizing:border-box}
+.game-collapsible-body{min-width:0;max-width:100%;overflow:hidden}
+.game-collapsible-body>.card,.game-collapsible-body>.crafting-panel{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.inventory-list,.crafting-list,.batch-drop-grid,.tier-list{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.inventory-item,.crafting-item,.batch-drop{min-width:0;max-width:100%;box-sizing:border-box}
+.inventory-item-copy,.crafting-item-info>div,.batch-drop-copy,.tier-items{min-width:0}
+.inventory-item-copy strong,.crafting-item-info strong,.batch-drop-copy strong{overflow-wrap:anywhere}
+@media(max-width:420px){
+ .game-collapsible>summary{padding:13px 14px}
+ .game-collapsible-body{padding:0 10px 10px}
+ .game-collapsible-body>.card,.game-collapsible-body>.crafting-panel{padding:4px 0 8px}
+ .inventory-item{gap:8px;padding:10px}
+ .inventory-item-main{min-width:0;gap:8px}
+ .inventory-prices{overflow-wrap:anywhere}
+}
+.inventory-rank.tier-s,.reel-tile-rank.tier-s,.tier-label.tier-s,.roulette-tier.tier-s{background:#f5c542!important;color:#211900!important;box-shadow:0 0 12px rgba(245,197,66,.14)!important}
+.inventory-rank.tier-a,.reel-tile-rank.tier-a,.tier-label.tier-a,.roulette-tier.tier-a{background:#b56bff!important;color:#180c26!important}
+.inventory-rank.tier-b,.reel-tile-rank.tier-b,.tier-label.tier-b,.roulette-tier.tier-b{background:#398bff!important;color:#fff!important}
+.inventory-rank.tier-c,.reel-tile-rank.tier-c,.tier-label.tier-c,.roulette-tier.tier-c{background:#35b779!important;color:#071d12!important}
+.inventory-rank.tier-d,.reel-tile-rank.tier-d,.tier-label.tier-d,.roulette-tier.tier-d{background:#73737a!important;color:#fff!important}
+.tier-border-s{border-left-color:#f5c542!important}.tier-border-a{border-left-color:#b56bff!important}.tier-border-b{border-left-color:#398bff!important}.tier-border-c{border-left-color:#35b779!important}.tier-border-d{border-left-color:#73737a!important}
+.tier-row.tier-s{border-color:rgba(245,197,66,.38)!important}.tier-row.tier-a{border-color:rgba(181,107,255,.3)!important}.tier-row.tier-b{border-color:rgba(57,139,255,.3)!important}.tier-row.tier-c{border-color:rgba(53,183,121,.3)!important}.tier-row.tier-d{border-color:rgba(115,115,122,.3)!important}
