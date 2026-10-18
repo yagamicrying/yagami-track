@@ -1,8 +1,8 @@
 'use strict';
 
 const CACHE_PREFIX = 'kairo-cache-';
-const CACHE_NAME = 'kairo-cache-v30';
-const APP_SHELL = ['./', './index.html', './styles.css', './state-utils.js', './app.js', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png'];
+const CACHE_NAME = 'kairo-cache-v31';
+const APP_SHELL = ['./', './index.html', './styles.css', './state-utils.js', './app.js', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/gear-glove.svg', './icons/gear-bandage.svg', './icons/gear-strap.svg', './icons/gear-arena.svg'];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
