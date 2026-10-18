@@ -791,3 +791,31 @@ input,textarea,select{background:var(--ios-fill)!important;color:var(--ios-text)
 .roulette-stage.is-spinning{box-shadow:none!important;border-color:var(--ios-separator)!important}
 button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 @media(max-width:420px){.roulette-modal-panel{padding-left:12px;padding-right:12px}.case-choice{grid-template-columns:28px minmax(0,1fr) auto 10px;gap:8px;padding:10px}.case-choice-name{font-size:14px}.case-choice-price{font-size:12px}}
+
+
+/* Audit fix: keep rarity meaning, remove gold and multicolour decoration */
+:root{--accent:#0a84ff;--ios-blue:#0a84ff}
+.tier-label.tier-s,.roulette-tier.tier-s,.inventory-rank.tier-s,
+.tier-label.tier-a,.roulette-tier.tier-a,.inventory-rank.tier-a,
+.tier-label.tier-b,.roulette-tier.tier-b,.inventory-rank.tier-b,
+.tier-label.tier-c,.roulette-tier.tier-c,.inventory-rank.tier-c,
+.tier-label.tier-d,.roulette-tier.tier-d,.inventory-rank.tier-d{
+ background:#2c2c2e!important;color:#f5f5f7!important;border-color:rgba(255,255,255,.1)!important;box-shadow:none!important
+}
+.tier-border-s,.tier-border-a,.tier-border-b,.tier-border-c,.tier-border-d,
+.tier-row.tier-s,.tier-row.tier-a,.tier-row.tier-b,.tier-row.tier-c,.tier-row.tier-d{
+ border-color:rgba(255,255,255,.1)!important;border-left-color:rgba(255,255,255,.14)!important
+}
+.avatar-level,.player-level-line>span,.player-xp-track i,.wallet-xp-track i,
+.wallet-balance strong,.wallet-meta span:first-child,.catalogue-item-title b,
+.game-floating-balance strong,.roulette-launcher-icon{
+ color:#f5f5f7!important
+}
+.avatar-level{background:#3a3a3c!important;border:0!important}
+.player-xp-track i,.wallet-xp-track i{background:#8e8e93!important}
+.game-wallet{border:0!important;background:#1c1c1e!important}
+.wallet-balance strong{color:#f5f5f7!important}
+.roulette-stage{--drop-glow:rgba(255,255,255,.1)!important;background:#1c1c1e!important}
+.roulette-center-marker:before{background:#8e8e93!important;box-shadow:0 0 8px rgba(255,255,255,.12)!important}
+.roulette-center-marker i,.roulette-center-marker:after{background:#8e8e93!important;filter:none!important}
+.case-choice.is-selected{border-color:transparent!important;background:#2c2c2e!important;box-shadow:none!important}
