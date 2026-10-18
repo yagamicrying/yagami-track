@@ -67,3 +67,18 @@ test('game merge chooses the newer revision timestamp', () => {
   const result = state.mergeGameStates({ money: 100, updatedAt: 1 }, { money: 900, updatedAt: 2 });
   assert.equal(result.money, 900);
 });
+
+test('normalization preserves arm-wrestling progress and valid equipment references', () => {
+  const result = state.normalizeState({ game: {
+    inventory: [{ instanceId: 7, name: 'Grip', tier: 'B', price: 100 }],
+    armEquipment: { wrist: 7, grip: 999, strap: null },
+    armWins: 4,
+    armLosses: 2,
+    lastArmMatch: { result: 'win', power: 100, opponentPower: 90, reward: 25, at: 123 }
+  }});
+  assert.equal(result.game.armEquipment.wrist, 7);
+  assert.equal(result.game.armEquipment.grip, null);
+  assert.equal(result.game.armWins, 4);
+  assert.equal(result.game.armLosses, 2);
+  assert.equal(result.game.lastArmMatch.result, 'win');
+});
