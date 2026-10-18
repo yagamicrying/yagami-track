@@ -59,9 +59,19 @@
       <div class="page-section-heading"><div><span class="eyebrow">ЖУРНАЛ</span><h2>История записей</h2></div></div>
       <div id="historyContent"></div>
     </section>
-    <section class="page-section roulette-page">
-      <div class="page-section-heading"><div><span class="eyebrow">ДЛЯ ИНТЕРЕСА</span><h2>Рулетка добавок</h2></div></div>
-      <div id="rouletteContent"></div>
+    <section class="page-section roulette-launcher-section">
+      <button type="button" class="roulette-launcher card" id="openRoulette">
+        <span class="roulette-launcher-icon" aria-hidden="true">✦</span>
+        <span class="roulette-launcher-copy"><small>ИГРОВОЙ РЕЖИМ</small><strong>Рулетка добавок</strong><span>Кейсы, коллекция и улучшения предметов</span></span>
+        <span class="roulette-launcher-arrow" aria-hidden="true">↗</span>
+      </button>
+    </section>
+    <section class="roulette-modal" id="rouletteModal" hidden aria-modal="true" role="dialog" aria-labelledby="rouletteModalTitle">
+      <div class="roulette-modal-backdrop" id="closeRouletteBackdrop"></div>
+      <div class="roulette-modal-panel">
+        <header class="roulette-modal-header"><button type="button" class="roulette-back-button" id="closeRoulette">‹ Назад</button><div><small>ИГРОВОЙ РЕЖИМ</small><h2 id="rouletteModalTitle">Рулетка</h2></div><span class="roulette-modal-spacer"></span></header>
+        <div id="rouletteContent"></div>
+      </div>
     </section>
     <section class="page-section settings-page" id="settingsPanel" hidden>
       <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2>Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
