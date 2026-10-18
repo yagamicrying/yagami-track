@@ -720,3 +720,28 @@ dialog::backdrop{transition:background-color 180ms ease}
 .primary-button,.secondary-button,.batch-count,.case-choice,.nav-item{ -webkit-tap-highlight-color:transparent; }
 .primary-button:active,.secondary-button:active,.batch-count:active,.case-choice:active{transform:scale(.985)}
 @media(prefers-reduced-motion:reduce){.primary-button:active,.secondary-button:active,.batch-count:active,.case-choice:active{transform:none}}
+
+
+/* Dedicated roulette window */
+.roulette-launcher{width:100%;display:flex;align-items:center;gap:14px;padding:18px;text-align:left;color:inherit;cursor:pointer;border:0;background:linear-gradient(115deg,#202024,#151517);border-radius:20px}
+.roulette-launcher-icon{width:48px;height:48px;display:grid;place-items:center;flex:none;border-radius:15px;background:rgba(255,255,255,.07);font-size:27px;color:#f5c542}
+.roulette-launcher-copy{display:grid;gap:4px;min-width:0;flex:1}
+.roulette-launcher-copy small,.roulette-modal-header small{font-size:10px;letter-spacing:.12em;color:var(--muted,#96969e);font-weight:800}
+.roulette-launcher-copy strong{font-size:18px;line-height:1.2}
+.roulette-launcher-copy>span{font-size:12px;color:var(--muted,#96969e)}
+.roulette-launcher-arrow{font-size:25px;color:#aaa}
+.roulette-modal[hidden]{display:none!important}
+.roulette-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:stretch;justify-content:center}
+.roulette-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:rouletteBackdropIn .2s ease both}
+.roulette-modal-panel{position:relative;width:100%;max-width:720px;height:100%;height:100dvh;overflow:auto;overscroll-behavior:contain;background:#080809;color:#f7f7f8;padding:calc( max(14px, env(safe-area-inset-top)) + 4px) 16px calc( max(20px, env(safe-area-inset-bottom)) + 12px);animation:roulettePanelIn .24s cubic-bezier(.2,.75,.25,1) both}
+.roulette-modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:20;margin:-4px -16px 12px;padding:12px 16px 14px;background:rgba(8,8,9,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.roulette-back-button{border:0;background:transparent;color:#f5f5f7;font:inherit;font-weight:700;white-space:nowrap;padding:8px 0;cursor:pointer}
+.roulette-modal-header>div{text-align:center;flex:1}
+.roulette-modal-header h2{margin:3px 0 0;font-size:21px}
+.roulette-modal-spacer{width:55px;flex:none}
+.roulette-modal-panel #rouletteContent{padding-bottom:24px}
+body.roulette-modal-open{overflow:hidden}
+@keyframes rouletteBackdropIn{from{opacity:0}to{opacity:1}}
+@keyframes roulettePanelIn{from{opacity:.65;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:700px){.roulette-modal{align-items:center;padding:24px}.roulette-modal-panel{height:min(92dvh,900px);border:1px solid #303034;border-radius:24px;padding:20px 24px 28px}.roulette-modal-header{margin:-4px -24px 12px;padding:14px 24px;background:rgba(8,8,9,.94)}}
+@media(prefers-reduced-motion:reduce){.roulette-modal-backdrop,.roulette-modal-panel{animation:none}}
