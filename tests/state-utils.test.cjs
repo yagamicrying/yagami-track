@@ -8,6 +8,7 @@ const source = fs.readFileSync(require('node:path').join(__dirname, '..', 'state
 const context = {};
 vm.runInNewContext(source, context, { filename: 'state-utils.js' });
 const state = context.KairoState;
+const appSource = fs.readFileSync(require('node:path').join(__dirname, '..', 'app.js'), 'utf8');
 
 test('normalizing a legacy state restores the complete game shape', () => {
   const result = state.normalizeState({ goal: 2400, days: {} });
@@ -109,4 +110,14 @@ test('consumables preserve their use effect and equipment does not become passiv
   assert.equal(result.game.inventory[1].kind, 'equipment');
   assert.equal(result.game.inventory[1].slot, 'wrist');
   assert.equal(result.game.inventory[1].power, 2);
+});
+
+test('all supplement, equipment and recovery cases have valid 100% odds tables', () => {
+  const tables = [...appSource.matchAll(/tierOdds:\{([^}]+)\}/g)];
+  assert.equal(tables.length, 30);
+  for (const table of tables) {
+    const values = [...table[1].matchAll(/(?:S|A|B|C|D):([\d.]+)/g)].map(match => Number(match[1]));
+    assert.equal(values.length, 5);
+    assert.ok(Math.abs(values.reduce((sum, value) => sum + value, 0) - 100) < 0.001);
+  }
 });
