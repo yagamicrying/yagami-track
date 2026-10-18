@@ -33,7 +33,7 @@
     {key:'glutamine-generic',name:'Глютамин',company:'Generic Lab',tier:'D',price:400,weight:72,detail:''}
   ];
 
-  const GAME_CASES = [
+  const SUPPLEMENT_CASES = [
     {id:'starter',name:'Первый шаг',price:0,subtitle:'Бесплатный старт · редкие машины остаются редкими',tierOdds:{S:0.38,A:5.62,B:28,C:65,D:1}},
     {id:'forbidden',name:'Чёрный протокол',price:2500,subtitle:'Премиальный кейс · общая кривая редкости',tierOdds:{S:0.38,A:5.62,B:28,C:65,D:1}},
     {id:'medium',name:'Золотой стандарт',price:1500,subtitle:'Сбалансированный кейс · общая кривая редкости',tierOdds:{S:0.38,A:5.62,B:28,C:65,D:1}},
@@ -59,6 +59,39 @@
     {id:'last-stand',name:'Последний рубеж',price:100000,subtitle:'Кейс для решающей ставки',tierOdds:{S:8,A:32,B:40,C:10,D:10}},
     {id:'godhand',name:'Рука бога',price:150000,subtitle:'Самый дорогой кейс коллекции',tierOdds:{S:10,A:35,B:40,C:10,D:5}}
   ];
+
+  const GEAR_ITEMS = [
+    {key:'gear-wrist-wrap',name:'Бинты для кисти',company:'Iron Table',tier:'D',price:280,weight:1,kind:'equipment',slot:'wrist',power:2},
+    {key:'gear-basic-grip',name:'Резиновый эспандер',company:'Grip Lab',tier:'D',price:350,weight:1,kind:'equipment',slot:'grip',power:2},
+    {key:'gear-training-strap',name:'Тренировочный ремень',company:'Pull Forge',tier:'D',price:420,weight:1,kind:'equipment',slot:'strap',power:2},
+    {key:'gear-leather-wrist',name:'Кожаная фиксация',company:'Iron Table',tier:'C',price:850,weight:1,kind:'equipment',slot:'wrist',power:5},
+    {key:'gear-pro-grip',name:'Стальной хват',company:'Grip Lab',tier:'C',price:1100,weight:1,kind:'equipment',slot:'grip',power:6},
+    {key:'gear-pro-strap',name:'Усиленный ремень',company:'Pull Forge',tier:'C',price:1250,weight:1,kind:'equipment',slot:'strap',power:6},
+    {key:'gear-carbon-wrist',name:'Карбоновый фиксатор',company:'Titan Table',tier:'B',price:2800,weight:1,kind:'equipment',slot:'wrist',power:12},
+    {key:'gear-titan-grip',name:'Титановый хват',company:'Titan Table',tier:'B',price:3600,weight:1,kind:'equipment',slot:'grip',power:14},
+    {key:'gear-titan-strap',name:'Титановый ремень',company:'Titan Table',tier:'B',price:3900,weight:1,kind:'equipment',slot:'strap',power:14},
+    {key:'gear-legend-wrist',name:'Кистевой замок «Феникс»',company:'Apex Arena',tier:'A',price:9500,weight:1,kind:'equipment',slot:'wrist',power:25},
+    {key:'gear-legend-grip',name:'Хват «Разрушитель»',company:'Apex Arena',tier:'A',price:12000,weight:1,kind:'equipment',slot:'grip',power:28},
+    {key:'gear-legend-strap',name:'Ремень чемпиона',company:'Apex Arena',tier:'A',price:13500,weight:1,kind:'equipment',slot:'strap',power:28},
+    {key:'gear-myth-wrist',name:'Наруч «Монолит»',company:'Mythic Forge',tier:'S',price:40000,weight:1,kind:'equipment',slot:'wrist',power:55},
+    {key:'gear-myth-grip',name:'Гравитационный хват',company:'Mythic Forge',tier:'S',price:50000,weight:1,kind:'equipment',slot:'grip',power:60},
+    {key:'gear-myth-strap',name:'Ремень абсолютного чемпиона',company:'Mythic Forge',tier:'S',price:55000,weight:1,kind:'equipment',slot:'strap',power:60}
+  ];
+  const CONSUMABLE_ITEMS = [
+    {key:'cons-bandage',name:'Бинты восстановления ×1',company:'Arena Supply',tier:'D',price:180,weight:1,kind:'consumable',effect:'stamina',amount:35},
+    {key:'cons-recovery-kit',name:'Комплект восстановления ×1',company:'Arena Supply',tier:'C',price:600,weight:1,kind:'consumable',effect:'stamina',amount:70},
+    {key:'cons-champion-kit',name:'Комплект чемпиона ×1',company:'Apex Arena',tier:'B',price:1600,weight:1,kind:'consumable',effect:'stamina',amount:100}
+  ];
+  const GEAR_CASES = [
+    {id:'gear-starter',name:'Первая экипировка',price:300,subtitle:'Базовый набор · D–C',tierOdds:{D:72,C:28,B:0,A:0,S:0},pool:'gear'},
+    {id:'gear-pro',name:'Кейс «Стальной хват»',price:1600,subtitle:'Экипировка для серьёзных боёв',tierOdds:{D:30,C:55,B:15,A:0,S:0},pool:'gear'},
+    {id:'gear-elite',name:'Кейс «Зал чемпионов»',price:6500,subtitle:'Редкое снаряжение B–A',tierOdds:{D:10,C:35,B:45,A:10,S:0},pool:'gear'},
+    {id:'gear-legend',name:'Кейс «Миф арены»',price:18000,subtitle:'Высокий риск · легендарный верх',tierOdds:{D:3,C:17,B:45,A:30,S:5},pool:'gear'},
+    {id:'med-basic',name:'Аптечка новичка',price:450,subtitle:'Бинты и восстановление',tierOdds:{D:75,C:25,B:0,A:0,S:0},pool:'consumable'},
+    {id:'med-pro',name:'Медкейс бойца',price:1800,subtitle:'Больше восстановления',tierOdds:{D:35,C:50,B:15,A:0,S:0},pool:'consumable'}
+  ];
+  let selectedGearCaseId = 'gear-starter';
+
   let selectedCaseId = 'medium';
   let selectedOpenCount = 1;
   let rouletteAnimationTimer = null;
