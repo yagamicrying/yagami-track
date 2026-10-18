@@ -919,3 +919,85 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 .arm-last-match.lost{box-shadow:inset 3px 0 #ff453a}
 @media(min-width:500px){.arm-slots{grid-template-columns:repeat(3,minmax(0,1fr))}.arm-slot{grid-template-columns:28px minmax(0,1fr);align-content:start}.arm-slot-icon{width:28px;height:28px}.arm-slot select{grid-column:1/-1}}
 @media(max-width:390px){.arm-arena{padding:12px}.arm-arena-heading h3{font-size:19px}.arm-arena-versus{gap:5px}.arm-arena-versus>div{padding:10px 4px}.arm-fighter{width:38px;height:38px}}
+
+
+/* Arena expansion: illustrated gear, clear progression, and a denser full-screen game feel */
+.roulette-modal-panel{background:radial-gradient(ellipse at 50% -10%,rgba(245,197,66,.09),transparent 34%),#09090b}
+.roulette-modal-header h2{font-size:clamp(23px,5vw,30px);letter-spacing:-.8px}
+.roulette-modal-panel #rouletteContent{max-width:760px;margin:0 auto;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+.roulette-launcher{min-height:106px}
+.roulette-launcher-icon{font-size:38px}
+.roulette-hero.card{padding:clamp(15px,4vw,25px);background:linear-gradient(150deg,rgba(245,197,66,.055),rgba(16,16,18,.25) 48%,transparent);border:1px solid rgba(245,197,66,.1)}
+.roulette-hero>h2{font-size:clamp(25px,6vw,36px);letter-spacing:-1px;margin:8px 0}
+.roulette-hero>p{font-size:12px;line-height:1.65;color:#a6a6af;max-width:54ch}
+.gear-collapsible{margin:14px 0 16px;background:linear-gradient(145deg,#19191d,#111113);border:1px solid rgba(245,197,66,.13)}
+.gear-collapsible>summary{padding:18px 16px;background:linear-gradient(90deg,rgba(245,197,66,.065),transparent 72%)}
+.gear-collapsible>summary strong{font-size:18px}
+.gear-intro{font-size:12px;line-height:1.65;color:#b4b4bd;margin:0 2px 14px}
+.gear-case-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gear-case-card{display:flex;min-width:0;flex-direction:column;align-items:stretch;gap:7px;padding:9px;border:1px solid #303036;border-radius:16px;background:linear-gradient(155deg,#242429,#151518);color:var(--text);text-align:left;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.gear-case-card.is-selected{border-color:rgba(245,197,66,.7);background:linear-gradient(150deg,rgba(245,197,66,.12),#19191d 78%);box-shadow:inset 0 0 0 1px rgba(245,197,66,.08)}
+.gear-case-card:active{transform:scale(.985)}
+.gear-case-art{display:block;overflow:hidden;border-radius:11px;background:#111113;aspect-ratio:4/2.1}
+.gear-case-art img{display:block;width:100%;height:100%;object-fit:cover}
+.gear-case-name{font-size:12px;font-weight:850;line-height:1.3}
+.gear-case-card small{font-size:10px;line-height:1.45;color:#9e9ea8;min-height:28px}
+.gear-case-card>strong{font-size:14px;color:#f5d778;font-variant-numeric:tabular-nums}
+.gear-open-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px;border-radius:14px;background:#111113;border:1px solid #29292f}
+.gear-open-row>span{font-size:10px;color:#a3a3ad;line-height:1.45}
+.gear-open-row>span strong{display:block;color:#f5f5f7;font-size:12px;margin-top:4px}
+.gear-open-row .primary-button{width:auto;max-width:55%;min-height:42px;padding:10px 13px;font-size:11px}
+.gear-note{font-size:10px;line-height:1.5;color:#85858f;margin:12px 2px 0}
+.item-type-label{font-size:8px;letter-spacing:.1em;font-weight:850;color:#d7b85f}
+.use-consumable{border-color:rgba(255,142,158,.35);background:rgba(255,113,136,.1);color:#ff9eae}
+.arm-stamina-line{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:13px 14px;margin:14px 0;border:1px solid rgba(96,165,250,.18);border-radius:13px;background:linear-gradient(100deg,rgba(96,165,250,.08),rgba(17,17,19,.4))}
+.arm-stamina-line>span{font-size:11px;color:#b9d9ff;font-weight:750}
+.arm-stamina-line>strong{font-size:15px;color:#93c5fd;font-variant-numeric:tabular-nums}
+.arm-stamina-track{grid-column:1/-1;height:6px;border-radius:10px;background:#2b2d35;overflow:hidden}
+.arm-stamina-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#60a5fa,#93c5fd);box-shadow:0 0 12px #60a5fa55}
+.arm-stamina-line small{grid-column:1/-1;font-size:9px;color:#9297a6}
+.arm-arena{background:radial-gradient(ellipse at 50% 0,rgba(96,165,250,.075),transparent 65%),linear-gradient(150deg,#1a1a1e,#121214);border:1px solid rgba(96,165,250,.12)}
+.arm-arena-heading h3{font-size:clamp(22px,5vw,28px)}
+.arm-arena-versus{padding:18px 12px;border:1px solid #2d2d33;border-radius:16px;background:linear-gradient(90deg,rgba(96,165,250,.045),rgba(255,255,255,.012),rgba(248,113,113,.045))}
+.arm-fighter{display:grid;place-items:center;width:58px;height:58px;border:1px solid rgba(96,165,250,.3);border-radius:17px;background:linear-gradient(145deg,#27384e,#151d2a);font-size:17px;font-weight:950;color:#b8d9ff;margin:0 auto 8px}
+.arm-fighter.opponent{border-color:rgba(248,113,113,.25);background:linear-gradient(145deg,#47272d,#241619);color:#ffb2b8}
+.game-collapsible>summary:focus-visible,.gear-case-card:focus-visible,.primary-button:focus-visible{outline:2px solid #f5c542;outline-offset:3px}
+@media(min-width:600px){.roulette-modal-panel #rouletteContent{padding-left:12px;padding-right:12px}.gear-case-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:360px){.gear-open-row{align-items:stretch;flex-direction:column}.gear-open-row .primary-button{max-width:none;width:100%}.gear-case-card{padding:7px}.gear-case-name{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.gear-case-card{transition:none}}
+
+
+/* Arena refresh: illustrated hero, compact drawers, and item art */
+.arena-hero{position:relative;isolation:isolate;display:flex;align-items:flex-end;min-height:230px;overflow:hidden;margin:0 0 15px;padding:22px 18px;border:1px solid rgba(245,197,66,.18);border-radius:22px;background:linear-gradient(115deg,#171b25 0%,#111217 55%,#21171b 100%);box-shadow:0 14px 36px rgba(0,0,0,.2)}
+.arena-hero:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(12,13,18,.98) 0%,rgba(12,13,18,.82) 43%,rgba(12,13,18,.06) 100%)}
+.arena-hero-art{position:absolute;z-index:-2;right:-4%;top:0;width:78%;height:100%;object-fit:cover;object-position:center;opacity:.94}
+.arena-hero-copy{position:relative;max-width:470px}
+.arena-season{display:inline-flex;align-items:center;gap:6px;color:#f5d778;font-size:9px;letter-spacing:1.7px;font-weight:900}
+.arena-hero h1{margin:10px 0 7px;max-width:330px;color:#fff;font-size:clamp(27px,7vw,39px);line-height:1.02;letter-spacing:-1.2px;font-weight:950}
+.arena-hero p{max-width:300px;margin:0;color:#c0c4ce;font-size:12px;line-height:1.6}
+.arena-hero-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:15px}
+.arena-hero-tags span{padding:7px 9px;border:1px solid rgba(255,255,255,.1);border-radius:99px;background:rgba(9,10,14,.72);color:#e4e6eb;font-size:9px;font-weight:750}
+.supplement-cases-collapsible{margin:14px 0;background:linear-gradient(145deg,#1a1a1e,#111113);border:1px solid rgba(245,197,66,.1)}
+.supplement-cases-collapsible>summary{padding:16px 14px}
+.supplement-cases-collapsible>summary strong{font-size:15px}
+.supplement-cases-collapsible .game-collapsible-body{padding:0 12px 14px}
+.gear-odds{display:flex;flex-wrap:wrap;gap:6px;margin:12px 1px 4px}
+.gear-odds .tier-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border-radius:8px;background:#111114;border:1px solid rgba(255,255,255,.07);font-size:10px;color:#b8b8c1}
+.gear-odds .tier-chip b{font-size:11px}
+.inventory-item-art{width:54px;height:54px;flex:0 0 54px;object-fit:cover;border-radius:12px;background:#15151a;border:1px solid rgba(255,255,255,.08)}
+.inventory-item-main{align-items:center}
+.inventory-item-copy{flex:1}
+.gear-collapsible .game-collapsible-body,.inventory-collapsible .game-collapsible-body{padding-bottom:15px}
+.game-collapsible>summary .game-collapsible-meta{max-width:48%;overflow:hidden;text-overflow:ellipsis}
+.roulette-launcher-section{margin-top:16px}
+.roulette-launcher{background:linear-gradient(110deg,rgba(245,197,66,.11),rgba(22,22,25,.98) 65%);border:1px solid rgba(245,197,66,.2)}
+@media(min-width:600px){.arena-hero{min-height:290px;padding:28px}.arena-hero-art{width:72%}.arena-hero-copy{max-width:520px}.arena-hero h1{max-width:410px}}
+@media(max-width:380px){.arena-hero{min-height:218px;padding:17px 13px}.arena-hero-art{right:-23%;width:105%;opacity:.72}.arena-hero:after{background:linear-gradient(90deg,rgba(12,13,18,.96),rgba(12,13,18,.72) 68%,rgba(12,13,18,.28))}.arena-hero h1{max-width:260px;font-size:27px}.arena-hero-tags span{font-size:8px;padding:6px 7px}.inventory-item-art{width:42px;height:42px;flex-basis:42px}.inventory-item-main{gap:7px}}
+@media(prefers-reduced-motion:reduce){.arena-hero,.inventory-item-art{transition:none!important}}
+
+.arena-hero-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:15px;padding:11px 15px;border:1px solid rgba(245,197,66,.42);border-radius:12px;background:linear-gradient(120deg,#f5c542,#c38b27);color:#19140a;font-size:11px;font-weight:950;box-shadow:0 7px 22px rgba(245,197,66,.12)}
+.arena-hero-cta:active{transform:translateY(1px) scale(.99)}
+.arena-hero-cta:focus-visible{outline:2px solid #fff0ae;outline-offset:3px}
+.gear-case-card .gear-case-art img{transition:transform .25s ease}
+.gear-case-card:active .gear-case-art img{transform:scale(1.04)}
+@media(prefers-reduced-motion:reduce){.arena-hero-cta,.gear-case-card .gear-case-art img{transition:none}}
