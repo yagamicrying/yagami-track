@@ -83,13 +83,16 @@
 
   function normalizeDay(value) {
     const source = isRecord(value) ? value : {};
-    const numericOrEmpty = value => value === '' || value === null || value === undefined
-      ? '' : (Number.isFinite(Number(value)) && Number(value) >= 0 ? Number(value) : '');
+    const numericOrEmpty = (value, maximum = Number.MAX_SAFE_INTEGER) => {
+      if (value === '' || value === null || value === undefined) return '';
+      const number = Number(value);
+      return Number.isFinite(number) && number >= 0 && number <= maximum ? number : '';
+    };
     const checks = isRecord(source.checks) ? source.checks : {};
     return {
       calories: finiteNonNegative(source.calories),
-      weight: numericOrEmpty(source.weight),
-      sleep: numericOrEmpty(source.sleep),
+      weight: numericOrEmpty(source.weight, 1000),
+      sleep: numericOrEmpty(source.sleep, 24),
       checks: {
         water: checks.water === true,
         activity: checks.activity === true,
