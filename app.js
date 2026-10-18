@@ -266,11 +266,12 @@
     const json = JSON.stringify(snapshot);
     const chunks = [];
     for (let i = 0; i < json.length; i += CLOUD_CHUNK_SIZE) chunks.push(json.slice(i, i + CLOUD_CHUNK_SIZE));
+    // A failed metadata read must abort the write: otherwise we might overwrite the
+    // currently active slot while believing no previous snapshot exists.
+    const previousRaw = await cloudCall('getItem', CLOUD_META_KEY);
     let previousMeta = null;
-    try {
-      const previousRaw = await cloudCall('getItem', CLOUD_META_KEY);
-      if (previousRaw) previousMeta = JSON.parse(previousRaw);
-    } catch (_) {}
+    try { previousMeta = previousRaw ? JSON.parse(previousRaw) : null; }
+    catch (_) { previousMeta = null; }
     // Alternate bounded slots; interrupted writes leave the previous metadata valid.
     const slot = previousMeta && previousMeta.version >= 2 && previousMeta.slot === 'a' ? 'b' : 'a';
     for (let i = 0; i < chunks.length; i++) {
