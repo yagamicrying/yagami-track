@@ -114,25 +114,25 @@
     if(xpText)xpText.textContent=fmtNum(levelInfo.xpIntoLevel)+' / '+fmtNum(levelInfo.xpNeeded)+' XP';
   }
 
-  function createDefaultState(){ return {goal:3500,days:{},game:{money:1500,currency:'RUB',xp:0,inventory:[],pendingDrops:[],lastSpinAt:0,lastIncomeAt:Date.now(),nextItemId:1,updatedAt:0,lastDrop:null,starterBoxClaimed:false,lastDailyClaimDate:'',dailyStreak:0}}; }
-  function normalizeGame(value){
-    const source=value&&typeof value==='object'&&!Array.isArray(value)?value:{};
-    const inventory=Array.isArray(source.inventory)?source.inventory.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&typeof item.tier==='string'&&Number.isFinite(Number(item.price))).map(item=>({
-      instanceId:Number.isFinite(Number(item.instanceId))?Number(item.instanceId):0,key:String(item.key||'legacy-item'),name:String(item.name),company:String(item.company||'Неизвестная компания').replace(/ · (?:вымышленный бренд|сомнительный игровой бренд)/g,''),tier:['S','A','B','C','D'].includes(item.tier)?item.tier:'D',
-      price:Math.max(1,Math.round(Number(item.price))),weight:Math.max(1,Number(item.weight)||1),detail:String(item.detail||''),acquiredAt:Number(item.acquiredAt)||0
-    })).slice(0,100):[];
-    const normalizeDrop=item=>({...item,instanceId:Number.isFinite(Number(item.instanceId))?Number(item.instanceId):0,key:String(item.key||'legacy-item'),name:String(item.name),company:String(item.company||'Неизвестная компания').replace(/ · (?:вымышленный бренд|сомнительный игровой бренд)/g,''),tier:['S','A','B','C','D'].includes(item.tier)?item.tier:'D',price:Math.max(1,Math.round(Number(item.price)||1)),acquiredAt:Number(item.acquiredAt)||0});
-    const pendingDrops=Array.isArray(source.pendingDrops)?source.pendingDrops.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&typeof item.tier==='string'&&Number.isFinite(Number(item.price))).map(normalizeDrop).slice(0,10):[];
-    const lastDrop=source.lastDrop&&typeof source.lastDrop==='object'&&typeof source.lastDrop.name==='string'?{...source.lastDrop,company:String(source.lastDrop.company||'Неизвестная компания').replace(/ · (?:вымышленный бренд|сомнительный игровой бренд)/g,''),detail:''}:null;
-    return {money:Number.isFinite(Number(source.money))?Math.max(0,Math.floor(Number(source.money))):1500,currency:source.currency==='USD'?'USD':'RUB',xp:Number.isFinite(Number(source.xp))?Math.max(0,Math.floor(Number(source.xp))):0,inventory,pendingDrops,lastSpinAt:Math.max(0,Number(source.lastSpinAt)||0),lastIncomeAt:Math.max(0,Number(source.lastIncomeAt)||Date.now()),nextItemId:Math.max(1,Math.floor(Number(source.nextItemId)||1),...inventory.map(item=>item.instanceId+1),...pendingDrops.map(item=>item.instanceId+1)),updatedAt:Math.max(0,Number(source.updatedAt)||0),lastDrop,starterBoxClaimed:source.starterBoxClaimed===true,lastDailyClaimDate:typeof source.lastDailyClaimDate==='string'?source.lastDailyClaimDate:'',dailyStreak:Math.max(0,Math.min(7,Math.floor(Number(source.dailyStreak)||0))),armEquipment:Object.fromEntries(['wrist','grip','strap'].map(slot=>[slot,inventory.some(item=>item.instanceId===Number(source.armEquipment&&source.armEquipment[slot]))?Number(source.armEquipment[slot]):null])),armWins:Math.max(0,Math.floor(Number(source.armWins)||0)),armLosses:Math.max(0,Math.floor(Number(source.armLosses)||0)),lastArmMatch:source.lastArmMatch&&typeof source.lastArmMatch==='object'?{result:source.lastArmMatch.result==='win'?'win':'loss',power:Math.max(0,Number(source.lastArmMatch.power)||0),opponentPower:Math.max(0,Number(source.lastArmMatch.opponentPower)||0),reward:Math.max(0,Number(source.lastArmMatch.reward)||0),at:Math.max(0,Number(source.lastArmMatch.at)||0)}:null};
+  function createDefaultState(){ return KairoState.createDefaultState(); }
+  function normalizeGame(value){ return KairoState.normalizeGame(value); }
+  function normalizeState(value){ return KairoState.normalizeState(value); }
+  function loadState(){
+    try {
+      const raw = localStorage.getItem(STORE);
+      return normalizeState(raw ? JSON.parse(raw) : {});
+    } catch (error) {
+      try {
+        const raw = localStorage.getItem(STORE);
+        if (raw) localStorage.setItem(STORE + '-recovery-' + Date.now(), raw);
+      } catch (backupError) {
+        console.warn('Unable to preserve damaged local state', backupError);
+      }
+      console.warn('Saved state was invalid; starting with defaults', error);
+      return createDefaultState();
+    }
   }
-  function normalizeState(value){
-    if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid saved state');
-    const days=value.days&&typeof value.days==='object'&&!Array.isArray(value.days)?value.days:{};
-    return {goal:Number(value.goal)>0?Number(value.goal):3500,days,game:normalizeGame(value.game)};
-  }
-  function loadState(){try{return normalizeState(JSON.parse(localStorage.getItem(STORE)||'{}'));}catch{return createDefaultState();}}
-  function mergeGameStates(localGame,remoteGame){const local=normalizeGame(localGame),remote=normalizeGame(remoteGame);return remote.updatedAt>local.updatedAt?remote:local;}
+  function mergeGameStates(localGame,remoteGame){ return KairoState.mergeGameStates(localGame,remoteGame); }
   function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(150*Math.pow(level,1.7));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(150*Math.pow(level,1.7));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
   function inventoryCapacity(){return 10+playerLevelInfo().level-1;}
   function sellValue(item){const rate=({D:0.40,C:0.45,B:0.55,A:0.60,S:0.65})[item&&item.tier]||0.40;return Math.max(1,Math.floor(Number(item&&item.price||0)*rate));}
@@ -186,7 +186,7 @@
     saveState();updateProfile();
     if(cloudReady&&cloudStorage){
       clearTimeout(cloudSaveTimer);
-      cloudWriteQueue=cloudWriteQueue.catch(()=>{}).then(()=>writeCloudState()).catch(error=>{
+      writeCloudState().catch(error=>{
         cloudStatus='Ошибка синхронизации — данные сохранены на устройстве';
         console.warn('Game progress sync failed',error);refreshSyncStatus();
       });
@@ -206,11 +206,26 @@
     return pool[Math.floor(Math.random()*pool.length)]||GAME_ITEMS[0];
   }
   function saveState(){
-    localStorage.setItem(STORE, JSON.stringify(state));
+    let localSaved = true;
+    try { localStorage.setItem(STORE, JSON.stringify(state)); }
+    catch (error) {
+      localSaved = false;
+      cloudStatus = 'Браузер не смог сохранить данные локально';
+      console.warn('Local state save failed', error);
+    }
     if (cloudReady && cloudStorage) {
-      cloudStatus = 'Сохранено на устройстве · отправка в Telegram…';
+      cloudStatus = localSaved
+        ? 'Сохранено на устройстве · отправка в Telegram…'
+        : 'Локальное сохранение недоступно · отправка в Telegram…';
       scheduleCloudSave();
     }
+    if (!localSaved) {
+      refreshSyncStatus();
+      setTimeout(() => toast(cloudReady && cloudStorage
+        ? 'Не удалось сохранить локально — пробую синхронизировать с Telegram'
+        : 'Не удалось сохранить данные на устройстве'), 0);
+    }
+    return localSaved;
   }
   function cloudCall(method, ...args){
     return new Promise((resolve, reject) => {
@@ -223,33 +238,62 @@
       } catch (error) { reject(error); }
     });
   }
-  function normalizeState(value){
-    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid saved state');
-    const days = value.days && typeof value.days === 'object' && !Array.isArray(value.days) ? value.days : {};
-    return { goal: Number(value.goal) > 0 ? Number(value.goal) : 3500, days, game: normalizeGame(value.game) };
+  function checksum(text){
+    let hash=2166136261;
+    for(let i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,16777619);}
+    return (hash>>>0).toString(16).padStart(8,'0');
   }
   async function readCloudState(){
     const metaRaw = await cloudCall('getItem', CLOUD_META_KEY);
     if (!metaRaw) return null;
     const meta = JSON.parse(metaRaw);
-    if (!meta || !Number.isInteger(meta.chunks) || meta.chunks < 1 || meta.chunks > 1000) throw new Error('Invalid cloud metadata');
+    if (!meta || !Number.isInteger(meta.chunks) || meta.chunks < 1 || meta.chunks > 1000 ||
+        (meta.version >= 2 && (typeof meta.checksum !== 'string' ||
+          (!['a', 'b'].includes(meta.slot) && typeof meta.generation !== 'string')))) {
+      throw new Error('Invalid cloud metadata');
+    }
     let json = '';
     for (let i = 0; i < meta.chunks; i++) {
-      const chunk = await cloudCall('getItem', CLOUD_CHUNK_PREFIX + i);
+      const key = meta.version >= 2
+        ? (meta.slot ? CLOUD_CHUNK_PREFIX + 'snapshot_' + meta.slot + '_' + i : CLOUD_CHUNK_PREFIX + meta.generation + '_' + i)
+        : CLOUD_CHUNK_PREFIX + i;
+      const chunk = await cloudCall('getItem', key);
       if (typeof chunk !== 'string') throw new Error('Missing cloud data');
       json += chunk;
     }
+    if (meta.version >= 2 && (json.length !== meta.length || checksum(json) !== meta.checksum)) {
+      throw new Error('Cloud snapshot integrity check failed');
+    }
     return normalizeState(JSON.parse(json));
   }
-  async function writeCloudState(){
+  async function writeCloudSnapshot(){
     if (!cloudStorage || !cloudReady) return;
-    const json = JSON.stringify(state);
+    const snapshot = normalizeState(JSON.parse(JSON.stringify(state)));
+    const json = JSON.stringify(snapshot);
     const chunks = [];
     for (let i = 0; i < json.length; i += CLOUD_CHUNK_SIZE) chunks.push(json.slice(i, i + CLOUD_CHUNK_SIZE));
-    for (let i = 0; i < chunks.length; i++) await cloudCall('setItem', CLOUD_CHUNK_PREFIX + i, chunks[i]);
-    await cloudCall('setItem', CLOUD_META_KEY, JSON.stringify({ version: 1, chunks: chunks.length, updatedAt: Date.now() }));
+    // A failed metadata read must abort the write: otherwise we might overwrite the
+    // currently active slot while believing no previous snapshot exists.
+    const previousRaw = await cloudCall('getItem', CLOUD_META_KEY);
+    let previousMeta = null;
+    try { previousMeta = previousRaw ? JSON.parse(previousRaw) : null; }
+    catch (_) { previousMeta = null; }
+    // Alternate bounded slots; interrupted writes leave the previous metadata valid.
+    const slot = previousMeta && previousMeta.version >= 2 && previousMeta.slot === 'a' ? 'b' : 'a';
+    for (let i = 0; i < chunks.length; i++) {
+      await cloudCall('setItem', CLOUD_CHUNK_PREFIX + 'snapshot_' + slot + '_' + i, chunks[i]);
+    }
+    await cloudCall('setItem', CLOUD_META_KEY, JSON.stringify({
+      version: 2, slot, chunks: chunks.length, length: json.length,
+      checksum: checksum(json), updatedAt: Date.now()
+    }));
     cloudStatus = 'Синхронизировано с Telegram';
     refreshSyncStatus();
+  }
+  function writeCloudState(){
+    const operation = cloudWriteQueue.catch(() => {}).then(() => writeCloudSnapshot());
+    cloudWriteQueue = operation.catch(() => {});
+    return operation;
   }
   function refreshSyncStatus(){
     const status = $('#syncStatus');
