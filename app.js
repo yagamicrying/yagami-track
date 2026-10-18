@@ -206,20 +206,26 @@
     return pool[Math.floor(Math.random()*pool.length)]||GAME_ITEMS[0];
   }
   function saveState(){
-    try {
-      localStorage.setItem(STORE, JSON.stringify(state));
-    } catch (error) {
+    let localSaved = true;
+    try { localStorage.setItem(STORE, JSON.stringify(state)); }
+    catch (error) {
+      localSaved = false;
       cloudStatus = 'Браузер не смог сохранить данные локально';
       console.warn('Local state save failed', error);
-      refreshSyncStatus();
-      toast('Не удалось сохранить данные на устройстве');
-      return false;
     }
     if (cloudReady && cloudStorage) {
-      cloudStatus = 'Сохранено на устройстве · отправка в Telegram…';
+      cloudStatus = localSaved
+        ? 'Сохранено на устройстве · отправка в Telegram…'
+        : 'Локальное сохранение недоступно · отправка в Telegram…';
       scheduleCloudSave();
     }
-    return true;
+    if (!localSaved) {
+      refreshSyncStatus();
+      setTimeout(() => toast(cloudReady && cloudStorage
+        ? 'Не удалось сохранить локально — пробую синхронизировать с Telegram'
+        : 'Не удалось сохранить данные на устройстве'), 0);
+    }
+    return localSaved;
   }
   function cloudCall(method, ...args){
     return new Promise((resolve, reject) => {
