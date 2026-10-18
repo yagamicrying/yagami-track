@@ -37,6 +37,9 @@
       price: Math.max(1, Math.round(Number(item.price))),
       weight: Math.max(1, Number(item.weight) || 1),
       detail: String(item.detail || ''),
+      kind: ['supplement', 'equipment', 'consumable'].includes(item.kind) ? item.kind : (['wrist', 'grip', 'strap'].includes(item.slot) ? 'equipment' : 'supplement'),
+      slot: ['wrist', 'grip', 'strap'].includes(item.slot) ? item.slot : '',
+      effect: String(item.effect || ''),
       acquiredAt: finiteNonNegative(item.acquiredAt)
     };
   }
@@ -64,11 +67,18 @@
       starterBoxClaimed: source.starterBoxClaimed === true,
       lastDailyClaimDate: typeof source.lastDailyClaimDate === 'string' ? source.lastDailyClaimDate : '',
       dailyStreak: Math.max(0, Math.min(7, Math.floor(finiteNonNegative(source.dailyStreak)))),
-      armEquipment: Object.fromEntries(['wrist', 'grip', 'strap'].map(slot => [
-        slot,
-        inventory.some(item => item.instanceId === Number(source.armEquipment && source.armEquipment[slot]))
-          ? Number(source.armEquipment[slot]) : null
-      ])),
+      armEquipment: (() => {
+        const equipped = {};
+        const used = new Set();
+        for (const slot of ['wrist', 'grip', 'strap']) {
+          const id = Number(source.armEquipment && source.armEquipment[slot]);
+          const item = inventory.find(entry => entry.instanceId === id && entry.kind === 'equipment' && entry.slot === slot);
+          equipped[slot] = item && !used.has(id) ? (used.add(id), id) : null;
+        }
+        return equipped;
+      })(),
+      stamina: Math.max(0, Math.min(100, finiteNonNegative(source.stamina, 100))),
+      lastStaminaAt: finiteNonNegative(source.lastStaminaAt, Date.now()),
       armWins: Math.floor(finiteNonNegative(source.armWins)),
       armLosses: Math.floor(finiteNonNegative(source.armLosses)),
       lastArmMatch: source.lastArmMatch && isRecord(source.lastArmMatch) ? {
