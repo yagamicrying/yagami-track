@@ -15,6 +15,7 @@ test('normalizing a legacy state restores the complete game shape', () => {
   assert.equal(result.game.money, 1500);
   assert.deepEqual(Array.from(result.game.inventory), []);
   assert.equal(result.game.currency, 'RUB');
+  assert.deepEqual({ ...result.game.armEquipment }, { wrist: null, grip: null, strap: null });
 });
 
 test('invalid top-level values are rejected instead of silently wiping data', () => {
