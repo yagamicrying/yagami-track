@@ -17,7 +17,9 @@
       game: {
         money: 1500, currency: 'RUB', xp: 0, inventory: [], pendingDrops: [],
         lastSpinAt: 0, lastIncomeAt: Date.now(), nextItemId: 1, updatedAt: 0,
-        lastDrop: null, starterBoxClaimed: false, lastDailyClaimDate: '', dailyStreak: 0
+        lastDrop: null, starterBoxClaimed: false, lastDailyClaimDate: '', dailyStreak: 0,
+        armEquipment: { wrist: null, grip: null, strap: null },
+        armWins: 0, armLosses: 0, lastArmMatch: null
       }
     };
   }
