@@ -97,7 +97,22 @@
   function createDefaultState(){ return KairoState.createDefaultState(); }
   function normalizeGame(value){ return KairoState.normalizeGame(value); }
   function normalizeState(value){ return KairoState.normalizeState(value); }
-  function loadState(){try{return normalizeState(JSON.parse(localStorage.getItem(STORE)||'{}'));}catch{return createDefaultState();}}
+  function loadState(){
+    try {
+      const raw = localStorage.getItem(STORE);
+      return normalizeState(raw ? JSON.parse(raw) : {});
+    } catch (error) {
+      // Keep the damaged payload for manual recovery instead of silently discarding it.
+      try {
+        const raw = localStorage.getItem(STORE);
+        if (raw) localStorage.setItem(STORE + '-recovery-' + Date.now(), raw);
+      } catch (backupError) {
+        console.warn('Unable to preserve damaged local state', backupError);
+      }
+      console.warn('Saved state was invalid; starting with defaults', error);
+      return createDefaultState();
+    }
+  }
   function mergeGameStates(localGame,remoteGame){return KairoState.mergeGameStates(localGame,remoteGame);}
   function playerLevelInfo(xp=state.game.xp){let level=1,remaining=Math.max(0,Math.floor(Number(xp)||0)),needed=Math.round(150*Math.pow(level,1.7));while(remaining>=needed&&level<100){remaining-=needed;level++;needed=Math.round(150*Math.pow(level,1.7));}return {level,xpIntoLevel:remaining,xpNeeded:needed};}
   function inventoryCapacity(){return 10+playerLevelInfo().level-1;}
@@ -208,12 +223,15 @@
     if (!metaRaw) return null;
     const meta = JSON.parse(metaRaw);
     if (!meta || !Number.isInteger(meta.chunks) || meta.chunks < 1 || meta.chunks > 1000 ||
-        (meta.version >= 2 && (typeof meta.generation !== 'string' || typeof meta.checksum !== 'string'))) {
+        (meta.version >= 2 && (typeof meta.checksum !== 'string' ||
+          (!['a', 'b'].includes(meta.slot) && typeof meta.generation !== 'string')))) {
       throw new Error('Invalid cloud metadata');
     }
     let json = '';
     for (let i = 0; i < meta.chunks; i++) {
-      const key = meta.version >= 2 ? CLOUD_CHUNK_PREFIX + meta.generation + '_' + i : CLOUD_CHUNK_PREFIX + i;
+      const key = meta.version >= 2
+        ? (meta.slot ? CLOUD_CHUNK_PREFIX + 'snapshot_' + meta.slot + '_' + i : CLOUD_CHUNK_PREFIX + meta.generation + '_' + i)
+        : CLOUD_CHUNK_PREFIX + i;
       const chunk = await cloudCall('getItem', key);
       if (typeof chunk !== 'string') throw new Error('Missing cloud data');
       json += chunk;
@@ -229,14 +247,23 @@
     const json = JSON.stringify(snapshot);
     const chunks = [];
     for (let i = 0; i < json.length; i += CLOUD_CHUNK_SIZE) chunks.push(json.slice(i, i + CLOUD_CHUNK_SIZE));
-    const generation = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
-    for (let i = 0; i < chunks.length; i++) {
-      await cloudCall('setItem', CLOUD_CHUNK_PREFIX + generation + '_' + i, chunks[i]);
+    let previousMeta = null;
+    try {
+      const previousRaw = await cloudCall('getItem', CLOUD_META_KEY);
+      if (previousRaw) previousMeta = JSON.parse(previousRaw);
+    } catch (_) {
+      // A corrupt metadata record is not trusted; write a fresh first slot.
     }
-    // Publish metadata only after every chunk is written: readers see the previous
-    // complete snapshot until the new snapshot is ready.
+    // Alternate two bounded slots so repeated saves do not exhaust CloudStorage
+    // with a new set of chunk keys on every sync.
+    const slot = previousMeta && previousMeta.version >= 2 && previousMeta.slot === 'a' ? 'b' : 'a';
+    for (let i = 0; i < chunks.length; i++) {
+      await cloudCall('setItem', CLOUD_CHUNK_PREFIX + 'snapshot_' + slot + '_' + i, chunks[i]);
+    }
+    // Publish metadata only after every chunk is written: readers keep using the
+    // previous slot if a write is interrupted.
     await cloudCall('setItem', CLOUD_META_KEY, JSON.stringify({
-      version: 2, generation, chunks: chunks.length, length: json.length,
+      version: 2, slot, chunks: chunks.length, length: json.length,
       checksum: checksum(json), updatedAt: Date.now()
     }));
     cloudStatus = 'Синхронизировано с Telegram';
