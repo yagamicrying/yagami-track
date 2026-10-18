@@ -19,7 +19,7 @@
         lastSpinAt: 0, lastIncomeAt: Date.now(), nextItemId: 1, updatedAt: 0,
         lastDrop: null, starterBoxClaimed: false, lastDailyClaimDate: '', dailyStreak: 0,
         armEquipment: { wrist: null, grip: null, strap: null },
-        armWins: 0, armLosses: 0, lastArmMatch: null
+        stamina: 100, lastStaminaAt: Date.now(), armWins: 0, armLosses: 0, lastArmMatch: null
       }
     };
   }
