@@ -544,7 +544,7 @@
         const power=armPower(state.game),level=playerLevelInfo().level;
         const opponentPower=Math.max(3,Math.round(level*3+Math.random()*(6+Math.min(6,level))+1));
         const win=power>=opponentPower,reward=win?Math.round(35+level*12+opponentPower*4):0;
-        state.game.stamina=Math.max(0,stamina-25);state.game.lastStaminaAt=Date.now();
+        state.game.stamina=Math.max(0,staminaNow-25);state.game.lastStaminaAt=Date.now();
         state.game.lastArmMatch={result:win?'win':'loss',power,opponentPower,reward,at:Date.now()};
         if(win){state.game.money+=reward;state.game.xp+=8+Math.min(12,level);state.game.armWins++;}
         else{state.game.armLosses++;state.game.xp+=3;}
@@ -669,7 +669,7 @@
         if(tierNode){tierNode.className='roulette-tier tier-'+item.tier.toLowerCase();tierNode.textContent=item.tier;}
         const nameNode=result.querySelector('strong');
         if(nameNode)nameNode.textContent=count>1?count+' '+plural(count,'предмет выпал','предмета выпало','предметов выпало'):item.name;
-        if(incomeNode)incomeNode.textContent='+'+formatIncomeRate(itemIncomeRate(item))+' / мин';
+        if(incomeNode)incomeNode.textContent='+'+formatIncomeRate(itemIncomeRate(item))+' / час';
         const smallNode=result.querySelector('small');
         if(smallNode)smallNode.textContent=count>1?'Последний предмет · '+item.company:item.company+' · цена '+formatMoney(item.price);
         result.classList.add('is-revealed','roulette-pop');
