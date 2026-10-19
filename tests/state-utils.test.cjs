@@ -121,3 +121,13 @@ test('all supplement, equipment and recovery cases have valid 100% odds tables',
     assert.ok(Math.abs(values.reduce((sum, value) => sum + value, 0) - 100) < 0.001);
   }
 });
+
+test('arm-wrestling spends the validated stamina value without a ReferenceError', () => {
+  assert.match(appSource, /const staminaNow=Number\(state\.game\.stamina\)\|\|0;/);
+  assert.match(appSource, /state\.game\.stamina=Math\.max\(0,staminaNow-25\)/);
+  assert.doesNotMatch(appSource, /state\.game\.stamina=Math\.max\(0,stamina-25\)/);
+});
+
+test('roulette result labels passive income per hour consistently', () => {
+  assert.match(appSource, /if\(incomeNode\)incomeNode\.textContent='\+'\+formatIncomeRate\(itemIncomeRate\(item\)\)\+' \/ час';/);
+});
