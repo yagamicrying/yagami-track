@@ -557,10 +557,10 @@
     const refreshInventoryAndCraft=()=>{const inventoryNode=$('#inventoryContents',content);if(inventoryNode)inventoryNode.innerHTML=inventoryMarkup();const panel=$('#craftingDetails',content);if(panel)panel.innerHTML=craftMarkup();bindSellButtons();bindCraftButtons();refreshWallet();updateButton();};
     const refreshBatchResults=()=>{const node=$('#batchResults',content);if(node)node.innerHTML=batchResultsMarkup();bindBatchButtons();};
     const bindGearWorkshop=()=>{
-      $('[data-gear-case]',content).forEach(node=>node.addEventListener('click',()=>{
+      $$('[data-gear-case]',content).forEach(node=>node.addEventListener('click',()=>{
         if(rouletteIsSpinning||(state.game.pendingDrops||[]).length)return;
         selectedGearCaseId=node.dataset.gearCase;
-        $('[data-gear-case]',content).forEach(button=>{const active=button.dataset.gearCase===selectedGearCaseId;button.classList.toggle('is-selected',active);button.setAttribute('aria-pressed',String(active));});
+        $$('[data-gear-case]',content).forEach(button=>{const active=button.dataset.gearCase===selectedGearCaseId;button.classList.toggle('is-selected',active);button.setAttribute('aria-pressed',String(active));});
         const entry=GEAR_CASES.find(item=>item.id===selectedGearCaseId)||GEAR_CASES[0],label=$('#gearSelectedName',content),open=$('#openGearCase',content),oddsNode=$('#gearOdds',content);if(oddsNode)oddsNode.innerHTML=gearOddsMarkup(entry);
         if(label)label.textContent=entry.name;
         if(open){open.disabled=state.game.money<entry.price;open.textContent=state.game.money<entry.price?'Не хватает монет':'📦 Открыть за '+formatMoney(entry.price);}
