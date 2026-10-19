@@ -527,7 +527,7 @@
     const bindOpenCountButtons=()=>$$('[data-open-count]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning||(state.game.pendingDrops||[]).length||selectedCase().id==='starter')return;selectedOpenCount=Number(node.dataset.openCount)||1;$$('[data-open-count]',content).forEach(btn=>{const active=Number(btn.dataset.openCount)===selectedOpenCount;btn.classList.toggle('is-selected',active);btn.setAttribute('aria-pressed',String(active));});const total=$('#batchTotalCost',content);if(total)total.textContent=formatMoney(selectedCase().price*selectedOpenCount);triggerHaptic('selection');updateButton();}));
     const bindBatchButtons=()=>$$('[data-batch-action]',content).forEach(node=>node.addEventListener('click',()=>{if(rouletteIsSpinning)return;const drops=state.game.pendingDrops||[];if(!drops.length)return;if(node.dataset.batchAction==='sell'){const total=drops.reduce((sum,item)=>sum+sellValue(item),0);state.game.money+=total;state.game.pendingDrops=[];markGameChanged();refreshBatchResults();refreshWallet();updateButton();triggerHaptic('impact','light');toast('Продано '+drops.length+' предметов за '+formatMoney(total));return;}const capacity=inventoryCapacity(),rarity={S:5,A:4,B:3,C:2,D:1};const combined=[...state.game.inventory,...drops].sort((a,b)=>(rarity[b.tier]||0)-(rarity[a.tier]||0)||Number(b.price||0)-Number(a.price||0)||Number(a.acquiredAt||0)-Number(b.acquiredAt||0));const kept=combined.slice(0,capacity),overflow=combined.slice(capacity),autoSold=overflow.reduce((sum,item)=>sum+sellValue(item),0);state.game.inventory=kept;state.game.money+=autoSold;state.game.pendingDrops=[];markGameChanged();refreshInventoryAndCraft();refreshBatchResults();triggerHaptic('notification','success');toast('Оставлено '+kept.length+' предметов'+(overflow.length?' · автоматически продано '+overflow.length+' за '+formatMoney(autoSold):''));}));
     const bindArmWrestling=()=>{
-      $('[data-arm-slot]',content).forEach(node=>node.addEventListener('change',()=>{
+      $$('[data-arm-slot]',content).forEach(node=>node.addEventListener('change',()=>{
         if(rouletteIsSpinning)return;
         const slot=node.dataset.armSlot,id=Number(node.value);
         if(id&&['wrist','grip','strap'].some(other=>other!==slot&&state.game.armEquipment[other]===id)){toast('Этот предмет уже надет в другом слоте');renderRoulette(content);return;}
@@ -579,7 +579,7 @@
         markGameChanged();triggerHaptic('notification','success');renderRoulette(content);
         toast('🎉 Выпало: '+item.name+' · '+item.tier+'-ранг');
       });
-      $('[data-use-item]',content).forEach(node=>node.addEventListener('click',()=>{
+      $$('[data-use-item]',content).forEach(node=>node.addEventListener('click',()=>{
         if(rouletteIsSpinning)return;
         const id=Number(node.dataset.useItem),index=state.game.inventory.findIndex(item=>item.instanceId===id&&item.kind==='consumable');
         if(index<0)return;
