@@ -131,3 +131,9 @@ test('arm-wrestling spends the validated stamina value without a ReferenceError'
 test('roulette result labels passive income per hour consistently', () => {
   assert.match(appSource, /if\(incomeNode\)incomeNode\.textContent='\+'\+formatIncomeRate\(itemIncomeRate\(item\)\)\+' \/ час';/);
 });
+
+test('roulette binds all gear-case buttons without aborting the rest of its controls', () => {
+  assert.match(appSource, /\$\$\('\[data-gear-case\]',content\)\.forEach/);
+  assert.doesNotMatch(appSource, /(?<!\$)\$\('\[data-gear-case\]',content\)\.forEach/);
+  assert.match(appSource, /bindGearWorkshop\(\);bindCaseButtons\(\);bindOddsSheet\(\);bindOpenCountButtons\(\);/);
+});
