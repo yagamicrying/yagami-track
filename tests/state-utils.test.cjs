@@ -137,3 +137,10 @@ test('roulette binds all gear-case buttons without aborting the rest of its cont
   assert.doesNotMatch(appSource, /(?<!\$)\$\('\[data-gear-case\]',content\)\.forEach/);
   assert.match(appSource, /bindGearWorkshop\(\);bindCaseButtons\(\);bindOddsSheet\(\);bindOpenCountButtons\(\);/);
 });
+
+test('roulette collection handlers use querySelectorAll instead of querySelector', () => {
+  assert.doesNotMatch(appSource, /(?<!\$)\$\((['"][^'"]+['"],content)\)\.forEach/);
+  for (const selector of ['[data-case-id]', '[data-open-count]', '[data-batch-action]', '[data-arm-slot]', '[data-sell-id]', '[data-craft-key]', '[data-gear-case]', '[data-use-item]']) {
+    assert.ok(appSource.includes("$$('"+selector+"',content).forEach"), 'missing collection query for '+selector);
+  }
+});
