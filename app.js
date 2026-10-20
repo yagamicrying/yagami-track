@@ -709,47 +709,46 @@
   function renderTrendGraph(){
     const root=$('#trendContent');
     if(!root)return;
-    const metric=trendMetrics[trendMetric]||trendMetrics.calories;
     const today=dateFromKey(currentDate);
-    let start,end;
+    let startDate,endDate;
     if(trendPreset==='custom'){
-      start=trendCustomStart?dateFromKey(trendCustomStart):trendDateShift(today,'3w');
-      end=trendCustomEnd?dateFromKey(trendCustomEnd):today;
-    }else{start=trendDateShift(today,trendPreset);end=today;}
-    if(start>end){const swap=start;start=end;end=swap;}
-    const startKey=trendIso(start),endKey=trendIso(end);
-    const all=Object.entries(state.days).filter(([key,d])=>key>=startKey&&key<=endKey&&metric.valid(d)).sort(([a],[b])=>a.localeCompare(b)).map(([key,d])=>({key,value:metric.value(d),date:dateFromKey(key)}));
+      startDate=trendCustomStart?dateFromKey(trendCustomStart):trendDateShift(today,'3w');
+      endDate=trendCustomEnd?dateFromKey(trendCustomEnd):today;
+    }else{startDate=trendDateShift(today,trendPreset);endDate=today;}
+    if(startDate>endDate){const swap=startDate;startDate=endDate;endDate=swap;}
+    const startKey=trendIso(startDate),endKey=trendIso(endDate);
     const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     const dateLabel=key=>new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short'}).format(dateFromKey(key));
+    const metrics=Object.entries(trendMetrics);
     const ranges=trendRanges.map(r=>'<button type="button" class="trend-range '+(trendPreset===r.id?'is-active':'')+'" data-trend-range="'+r.id+'" aria-pressed="'+(trendPreset===r.id)+'">'+r.label+'</button>').join('');
-    let chart='';
-    let summary='<div class="trend-empty">За этот период пока нет записей по показателю «'+esc(metric.label.toLowerCase())+'». Добавь данные в трекере — график появится автоматически.</div>';
-    if(all.length){
-      const W=340,H=166,L=34,R=12,T=12,B=27,plotW=W-L-R,plotH=H-T-B;
-      const vals=all.map(p=>p.value),minV=Math.min(...vals),maxV=Math.max(...vals);
-      const pad=(maxV-minV)*.18||Math.max(Math.abs(maxV)*.08,.5);
-      const low=minV-pad,high=maxV+pad;
-      const xFor=key=>L+(endKey===startKey?0.5:(dateFromKey(key)-start)/(end-start||1))*plotW;
-      const yFor=value=>T+(high-value)/(high-low)*plotH;
-      const points=all.map(p=>({...p,x:xFor(p.key),y:yFor(p.value)}));
-      const paths=[];
-      let segment=[];
-      points.forEach((p,i)=>{
-        if(i&&((dateFromKey(p.key)-dateFromKey(points[i-1].key))/86400000)>2){if(segment.length)paths.push(segment);segment=[];}
-        segment.push(p);
-      });
-      if(segment.length)paths.push(segment);
-      const grid=[0,.5,1].map(t=>{const y=T+t*plotH;const value=high-t*(high-low);return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="currentColor" opacity=".10" stroke-dasharray="3 4"/><text x="'+(L-7)+'" y="'+(y+3)+'" fill="currentColor" opacity=".6" text-anchor="end" font-size="9">'+esc(fmtNum(value))+'</text>';}).join('');
-      const lines=paths.map(seg=>seg.length>1?'<polyline points="'+seg.map(p=>p.x+','+p.y).join(' ')+'" fill="none" stroke="'+metric.color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':'').join('');
-      const dots=points.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(all.length===1?4:2.8)+'" fill="'+metric.color+'" stroke="#151518" stroke-width="1.5"><title>'+esc(dateLabel(p.key)+': '+fmtNum(p.value)+' '+metric.unit)+'</title></circle>').join('');
-      const labelIndices=[0,Math.floor((points.length-1)/2),points.length-1].filter((v,i,arr)=>arr.indexOf(v)===i);
-      const labels=labelIndices.map(i=>{const p=points[i];return '<text x="'+p.x+'" y="'+(H-7)+'" fill="currentColor" opacity=".65" font-size="9" text-anchor="'+(i===0?'start':i===points.length-1?'end':'middle')+'">'+esc(dateLabel(p.key))+'</text>';}).join('');
-      chart='<div class="trend-chart-wrap"><svg class="trend-chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(metric.label)+': график за период '+esc(dateLabel(startKey))+' — '+esc(dateLabel(endKey))+'">'+grid+lines+dots+labels+'</svg></div>';
-      const first=all[0].value,last=all[all.length-1].value,diff=last-first;
-      const change=all.length>1?(diff>0?'+':'')+fmtNum(diff)+' '+metric.unit:'—';
-      summary='<div class="trend-summary"><div><small>Записей</small><strong>'+all.length+'</strong></div><div><small>Последнее значение</small><strong>'+fmtNum(last)+' <em>'+metric.unit+'</em></strong></div><div><small>Изменение за период</small><strong>'+change+'</strong></div></div>';
+    const selected=trendMetric==='all'?metrics:metrics.filter(([id])=>id===trendMetric);
+    const series=selected.map(([id,m])=>({id,...m,points:Object.entries(state.days).filter(([key,d])=>key>=startKey&&key<=endKey&&m.valid(d)).sort(([a],[b])=>a.localeCompare(b)).map(([key,d])=>({key,value:m.value(d)}))})).filter(s=>s.points.length);
+    let chart='<div class="trend-empty">За этот период пока нет записей. Добавь данные в трекере — график появится автоматически.</div>';
+    let summary='';
+    if(series.length){
+      const W=360,H=190,L=39,R=12,T=14,B=29,plotW=W-L-R,plotH=H-T-B;
+      const allDates=series.flatMap(s=>s.points.map(p=>p.key));
+      const daySpan=Math.max(1,dateFromKey(endKey)-dateFromKey(startKey));
+      const xFor=key=>L+((dateFromKey(key)-startDate)/daySpan)*plotW;
+      const normalized=series.map(s=>({...s,points:s.points.map(p=>({...p,x:xFor(p.key),yValue:trendMetric==='all'?(s.points[0].value===0?100:p.value/s.points[0].value*100):p.value}))}));
+      let low,high;
+      if(trendMetric==='all'){const vals=normalized.flatMap(s=>s.points.map(p=>p.yValue));low=Math.min(80,...vals);high=Math.max(120,...vals);const pad=Math.max(5,(high-low)*.08);low-=pad;high+=pad;}
+      else{const vals=normalized.flatMap(s=>s.points.map(p=>p.yValue));low=Math.min(...vals);high=Math.max(...vals);const pad=(high-low)*.18||Math.max(Math.abs(high)*.08,.5);low-=pad;high+=pad;}
+      const yFor=value=>T+(high-value)/(high-low||1)*plotH;
+      const grid=[0,.5,1].map(t=>{const y=T+t*plotH,v=high-t*(high-low);return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="currentColor" opacity=".11" stroke-dasharray="3 4"/><text x="'+(L-7)+'" y="'+(y+3)+'" fill="currentColor" opacity=".65" text-anchor="end" font-size="9">'+esc(fmtNum(v))+(trendMetric==='all'?'%':'')+'</text>';}).join('');
+      const lines=normalized.map(s=>{
+        const points=s.points.map(p=>({...p,y:yFor(p.yValue)})),segments=[];let segment=[];
+        points.forEach((p,i)=>{if(i&&((dateFromKey(p.key)-dateFromKey(points[i-1].key))/86400000)>2){if(segment.length)segments.push(segment);segment=[];}segment.push(p);});if(segment.length)segments.push(segment);
+        return segments.map(seg=>seg.length>1?'<polyline points="'+seg.map(p=>p.x+','+p.y).join(' ')+'" fill="none" stroke="'+s.color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':'').join('')+points.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(points.length===1?4:2.8)+'" fill="'+s.color+'" stroke="#151518" stroke-width="1.5"><title>'+esc(dateLabel(p.key)+': '+fmtNum(p.value)+' '+s.unit)+'</title></circle>').join('');
+      }).join('');
+      const labelKeys=[startKey,dateKey(new Date((dateFromKey(startKey).getTime()+dateFromKey(endKey).getTime())/2)),endKey].filter((v,i,arr)=>arr.indexOf(v)===i);
+      const labels=labelKeys.map((key,i)=>'<text x="'+xFor(key)+'" y="'+(H-7)+'" fill="currentColor" opacity=".65" font-size="9" text-anchor="'+(i===0?'start':i===labelKeys.length-1?'end':'middle')+'">'+esc(dateLabel(key))+'</text>').join('');
+      chart='<div class="trend-chart-wrap"><svg class="trend-chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Динамика показателей за период '+esc(dateLabel(startKey))+' — '+esc(dateLabel(endKey))+'">'+grid+lines+labels+'</svg></div>';
+      summary='<div class="trend-legend">'+normalized.map(s=>'<span><i style="background:'+s.color+'"></i>'+esc(s.label)+(trendMetric==='all'?' · '+s.points.length+' зап.':'')+'</span>').join('')+'</div>';
+      if(trendMetric==='all')summary+='<p class="trend-normalize-note">Все линии приведены к индексу 100% от первого значения каждого показателя в выбранном периоде. Подписи точек показывают исходные значения.</p>';
+      summary+='<div class="trend-summary">'+normalized.map(s=>{const first=s.points[0].value,last=s.points[s.points.length-1].value,diff=last-first;return '<div><small>'+esc(s.label)+' · последнее</small><strong>'+fmtNum(last)+' <em>'+s.unit+'</em></strong><small class="trend-change">Изменение: '+(s.points.length>1?(diff>0?'+':'')+fmtNum(diff)+' '+s.unit:'одна запись')+'</small></div>';}).join('')+'</div>';
     }
-    root.innerHTML='<section class="card trend-card"><div class="trend-heading"><div><span class="eyebrow">ТВОЙ ПРОГРЕСС</span><h3>Динамика</h3></div><span class="trend-period-label">'+esc(dateLabel(startKey))+' — '+esc(dateLabel(endKey))+'</span></div><div class="trend-metrics" role="group" aria-label="Показатель">'+Object.entries(trendMetrics).map(([id,m])=>'<button type="button" class="trend-metric '+(trendMetric===id?'is-active':'')+'" data-trend-metric="'+id+'" aria-pressed="'+(trendMetric===id)+'">'+m.label+'</button>').join('')+'</div><div class="trend-ranges" role="group" aria-label="Период">'+ranges+'</div><div class="trend-custom"><label>С <input type="date" id="trendStart" value="'+esc(trendPreset==='custom'?startKey:'')+'" max="'+esc(endKey)+'"></label><label>По <input type="date" id="trendEnd" value="'+esc(trendPreset==='custom'?endKey:'')+'" min="'+esc(startKey)+'" max="'+esc(currentDate)+'"></label><button type="button" class="trend-apply" data-trend-apply>Применить</button></div>'+chart+summary+'<p class="trend-footnote">Показаны только даты, в которые ты записывал '+esc(metric.label.toLowerCase())+'. Пропуски не считаются нулевыми значениями.</p></section>';
+    root.innerHTML='<section class="card trend-card"><div class="trend-heading"><div><span class="eyebrow">ТВОЙ ПРОГРЕСС</span><h3>Динамика</h3></div><span class="trend-period-label">'+esc(dateLabel(startKey))+' — '+esc(dateLabel(endKey))+'</span></div><div class="trend-metrics" role="group" aria-label="Категория динамики"><button type="button" class="trend-metric '+(trendMetric==='all'?'is-active':'')+'" data-trend-metric="all" aria-pressed="'+(trendMetric==='all')+'">Все показатели</button>'+metrics.map(([id,m])=>'<button type="button" class="trend-metric '+(trendMetric===id?'is-active':'')+'" data-trend-metric="'+id+'" aria-pressed="'+(trendMetric===id)+'">'+m.label+'</button>').join('')+'</div><div class="trend-ranges" role="group" aria-label="Период">'+ranges+'</div><div class="trend-custom"><label>С <input type="date" id="trendStart" value="'+esc(trendPreset==='custom'?startKey:'')+'" max="'+esc(endKey)+'"></label><label>По <input type="date" id="trendEnd" value="'+esc(trendPreset==='custom'?endKey:'')+'" min="'+esc(startKey)+'" max="'+esc(currentDate)+'"></label><button type="button" class="trend-apply" data-trend-apply>Применить</button></div>'+chart+summary+'<p class="trend-footnote">График строится по сохранённым записям. Пропущенные дни не считаются нулевыми значениями.</p></section>';
     root.querySelectorAll('[data-trend-metric]').forEach(btn=>btn.addEventListener('click',()=>{trendMetric=btn.dataset.trendMetric;renderTrendGraph();}));
     root.querySelectorAll('[data-trend-range]').forEach(btn=>btn.addEventListener('click',()=>{trendPreset=btn.dataset.trendRange;trendCustomStart='';trendCustomEnd='';renderTrendGraph();}));
     root.querySelector('[data-trend-apply]')?.addEventListener('click',()=>{

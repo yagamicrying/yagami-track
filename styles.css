@@ -1030,3 +1030,35 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 .trend-empty{padding:25px 12px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6}
 .trend-footnote{margin:10px 2px 0;color:var(--muted);font-size:10px;line-height:1.5}
 @media(max-width:360px){.trend-card{padding:11px!important}.trend-custom{grid-template-columns:1fr 1fr}.trend-apply{grid-column:1/-1}.trend-summary{gap:5px}.trend-summary>div{padding:8px 6px}.trend-summary strong{font-size:12px}}
+
+
+/* Refined responsive layout for the personal progress chart */
+.trend-card{box-sizing:border-box;width:100%;min-width:0;margin:0 0 16px!important;padding:16px!important;border-radius:16px!important;overflow:hidden}
+.trend-heading{align-items:center;min-width:0;margin-bottom:14px}
+.trend-heading>div{min-width:0}.trend-heading h3{line-height:1.2}
+.trend-period-label{flex:0 1 auto;max-width:52%;overflow-wrap:anywhere;line-height:1.4}
+.trend-metrics,.trend-ranges{box-sizing:border-box;width:100%;min-width:0;gap:7px;padding:2px 1px 7px;overscroll-behavior-x:contain}
+.trend-metric,.trend-range{min-height:35px;padding:8px 12px;line-height:1.2}
+.trend-custom{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;margin:9px 0 5px}
+.trend-custom input{height:36px;border-radius:9px;padding:7px 6px}
+.trend-apply{height:36px;padding:0 12px}
+.trend-chart-wrap{box-sizing:border-box;width:100%;min-width:0;margin:9px 0 0}
+.trend-chart{width:100%;max-width:100%;height:auto;aspect-ratio:360/190}
+.trend-legend{display:flex;flex-wrap:wrap;gap:8px 13px;margin:9px 2px 0}
+.trend-legend span{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
+.trend-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+.trend-normalize-note{margin:9px 2px;color:var(--muted);font-size:10px;line-height:1.5}
+.trend-summary{grid-template-columns:repeat(auto-fit,minmax(125px,1fr));align-items:stretch}
+.trend-summary>div{box-sizing:border-box;display:flex;flex-direction:column;gap:5px;min-width:0}
+.trend-summary small{margin:0;line-height:1.4}
+.trend-summary .trend-change{margin-top:auto;padding-top:3px}
+.trend-summary strong{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+@media(max-width:390px){
+ .trend-card{padding:12px!important}
+ .trend-heading{gap:7px}
+ .trend-heading h3{font-size:20px}
+ .trend-period-label{font-size:9px}
+ .trend-custom{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .trend-apply{grid-column:1/-1;width:100%}
+ .trend-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
