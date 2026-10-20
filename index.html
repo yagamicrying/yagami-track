@@ -23,6 +23,8 @@
         <span class="profile-status" id="profileStatus"><i></i><span>Сегодня ещё не начинал</span></span>
         <div class="player-level-line"><span id="playerLevel">Уровень 1</span><div class="player-xp-track"><i id="playerXpFill"></i></div><small id="playerXpText">0 / 100 XP</small></div>
       </div>
+      <div class="sticky-game-wallet" aria-live="polite"><span>Баланс</span><strong id="stickyGameMoney">500 ₽</strong></div>
+      <button class="sticky-gift-button" id="stickyGiftButton" type="button" aria-label="Ежедневный подарок" title="Ежедневный подарок">🎁</button>
       <button class="icon-button today-button" id="todayBtn" aria-label="Перейти к сегодняшнему дню" title="Сегодня">↻</button>
       <button class="icon-button settings-gear" id="openSettings" aria-label="Настройки" title="Настройки">⚙</button>
     </header>
@@ -66,8 +68,8 @@
         <span class="roulette-launcher-arrow" aria-hidden="true">↗</span>
       </button>
     </section>
-    <section class="roulette-modal" id="rouletteModal" hidden aria-modal="true" role="dialog" aria-labelledby="rouletteModalTitle">
-      <div class="roulette-modal-backdrop" id="closeRouletteBackdrop"></div>
+    <section class="roulette-modal roulette-page" id="rouletteModal" aria-labelledby="rouletteModalTitle">
+      <div class="roulette-modal-backdrop" id="closeRouletteBackdrop" hidden></div>
       <div class="roulette-modal-panel">
         <header class="roulette-modal-header"><button type="button" class="roulette-back-button" id="closeRoulette">‹ Назад</button><div><small>ИГРОВОЙ РЕЖИМ</small><h2 id="rouletteModalTitle">Рулетка</h2></div><span class="roulette-modal-spacer"></span></header>
         <div id="rouletteContent"></div>
