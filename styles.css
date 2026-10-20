@@ -1004,3 +1004,29 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 
 
 
+
+
+/* Personal progress trend chart */
+.trend-card{margin:0 0 14px!important;padding:15px!important;overflow:hidden}
+.trend-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:13px}
+.trend-heading h3{margin:3px 0 0;font-size:21px;letter-spacing:-.5px}
+.trend-period-label{max-width:48%;font-size:10px;color:var(--muted);text-align:right;padding-top:7px}
+.trend-metrics,.trend-ranges{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:1px 0 5px}
+.trend-metrics::-webkit-scrollbar,.trend-ranges::-webkit-scrollbar{display:none}
+.trend-metric,.trend-range{flex:0 0 auto;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:var(--panel2);color:var(--muted);font:inherit;font-size:11px;white-space:nowrap;cursor:pointer}
+.trend-metric.is-active,.trend-range.is-active{background:var(--text);border-color:var(--text);color:var(--bg);font-weight:750}
+.trend-ranges{margin-top:6px}
+.trend-custom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:end;gap:7px;margin:8px 0 3px}
+.trend-custom label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--muted);min-width:0}
+.trend-custom input{box-sizing:border-box;width:100%;min-width:0;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 5px;font:inherit;font-size:11px;color-scheme:dark}
+.trend-apply{height:34px;border:0;border-radius:8px;padding:0 10px;background:var(--text);color:var(--bg);font:inherit;font-size:11px;font-weight:750;white-space:nowrap;cursor:pointer}
+.trend-chart-wrap{width:100%;margin:7px 0 0}
+.trend-chart{display:block;width:100%;height:auto;overflow:visible;color:var(--muted)}
+.trend-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}
+.trend-summary>div{min-width:0;padding:10px 8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+.trend-summary small{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-bottom:5px}
+.trend-summary strong{display:block;font-size:13px;line-height:1.25;overflow-wrap:anywhere}
+.trend-summary em{font-size:9px;font-style:normal;color:var(--muted);font-weight:500}
+.trend-empty{padding:25px 12px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6}
+.trend-footnote{margin:10px 2px 0;color:var(--muted);font-size:10px;line-height:1.5}
+@media(max-width:360px){.trend-card{padding:11px!important}.trend-custom{grid-template-columns:1fr 1fr}.trend-apply{grid-column:1/-1}.trend-summary{gap:5px}.trend-summary>div{padding:8px 6px}.trend-summary strong{font-size:12px}}
