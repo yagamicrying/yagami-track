@@ -1001,3 +1001,59 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 .gear-case-card .gear-case-art img{transition:transform .25s ease}
 .gear-case-card:active .gear-case-art img{transform:scale(1.04)}
 @media(prefers-reduced-motion:reduce){.arena-hero-cta,.gear-case-card .gear-case-art img{transition:none}}
+
+
+/* Yagami roulette: single-page mobile layout inspired by the supplied reference */
+:root{--bg:#f7f7f5;--panel:#fff;--panel2:#f1f1ef;--line:#e5e5e2;--text:#171717;--muted:#777875;--accent:#171717}
+body{background-color:#f7f7f5!important;background-image:radial-gradient(#d8d8d4 1.25px,transparent 1.25px)!important;background-size:19px 19px!important;color:#171717!important}
+.app-shell{width:min(100%,760px)!important;padding:calc(env(safe-area-inset-top) + 8px) 14px calc(24px + env(safe-area-inset-bottom))!important}
+.topbar{position:sticky!important;top:0!important;z-index:900!important;margin:calc(-1 * (env(safe-area-inset-top) + 8px)) -14px 14px!important;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px!important;background:rgba(248,248,246,.91)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;border-bottom:1px solid rgba(0,0,0,.06);gap:8px!important}
+.profile-avatar{background:#e5e5e2!important;color:#171717!important}
+.profile-copy{min-width:0;flex:1}
+.profile-copy>strong{color:#171717!important;font-size:13px!important}
+.profile-status,.player-level-line{display:none!important}
+.avatar-level{background:#171717!important;color:white!important}
+.sticky-game-wallet{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;min-width:70px;gap:2px}
+.sticky-game-wallet span{font-size:9px;color:#777875}
+.sticky-game-wallet strong{font-size:13px;white-space:nowrap;font-weight:850;font-variant-numeric:tabular-nums}
+.sticky-gift-button{width:38px;height:38px;flex:0 0 38px;border:0;border-radius:50%;background:#ecece9;color:#171717;font-size:18px;display:grid;place-items:center}
+.icon-button{margin-left:0!important;width:34px!important;height:34px!important;flex:0 0 34px!important;background:#ecece9!important;color:#171717!important;font-size:18px!important}
+.today-button{display:none!important}
+.date-row,.calories-card,.stats-grid,.progress-page,.history-page,.roulette-launcher-section,.settings-page,.privacy-page,.app-footer{display:none!important}
+.roulette-modal.roulette-page{display:block!important;position:static!important;inset:auto!important;z-index:auto!important;padding:0!important;margin:0!important;background:transparent!important}
+.roulette-page .roulette-modal-backdrop,.roulette-page .roulette-modal-header .roulette-back-button,.roulette-page .roulette-modal-spacer{display:none!important}
+.roulette-modal-panel{position:static!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;overflow:visible!important;overscroll-behavior:auto!important;padding:0 0 24px!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#171717!important;animation:none!important}
+.roulette-modal-header{position:static!important;display:flex!important;justify-content:flex-start!important;margin:0 0 10px!important;padding:4px 2px 10px!important;background:transparent!important;color:#171717!important;backdrop-filter:none!important}
+.roulette-modal-header>div{text-align:left!important;flex:1!important}
+.roulette-modal-header small{font-size:9px!important;letter-spacing:1.3px;color:#7a7a76!important}
+.roulette-modal-header h2{font-size:24px!important;color:#171717!important;letter-spacing:-.7px!important}
+#rouletteContent,.roulette-modal-panel #rouletteContent{width:100%!important;max-width:none!important;margin:0 auto!important;padding:0 0 30px!important;color:#171717!important}
+#rouletteContent .card,#rouletteContent .roulette-hero,#rouletteContent .game-wallet,#rouletteContent .game-collapsible,#rouletteContent .inventory-item,#rouletteContent .batch-drop,#rouletteContent .crafting-panel,#rouletteContent .roulette-stage,#rouletteContent .roulette-result,#rouletteContent .daily-reward-launcher{background:#fff!important;color:#171717!important;border:1px solid rgba(20,20,20,.07)!important;border-radius:17px!important;box-shadow:0 2px 8px rgba(0,0,0,.025)!important}
+#rouletteContent .roulette-hero{padding:15px!important;margin-bottom:12px!important}
+#rouletteContent .roulette-hero>h2{color:#171717!important;font-size:24px!important}
+#rouletteContent .roulette-hero>p,#rouletteContent .gear-intro,#rouletteContent .gear-note{color:#777875!important}
+#rouletteContent .eyebrow,#rouletteContent .case-group-title,#rouletteContent .case-picker-heading{color:#777875!important}
+#rouletteContent .case-selector{background:#e7e7e3!important;border-radius:15px!important;gap:1px!important}
+#rouletteContent .case-choice{background:#fff!important;color:#171717!important;border:0!important;border-radius:12px!important}
+#rouletteContent .case-choice.is-selected{background:#f0f0ed!important;outline:1.5px solid #171717!important}
+#rouletteContent .case-choice-name,#rouletteContent .case-choice-price,#rouletteContent .case-choice-check{color:#171717!important}
+#rouletteContent .case-choice-subtitle{color:#777875!important}
+#rouletteContent .case-odds-sheet,#rouletteContent .arm-slot,#rouletteContent .arm-power-line,#rouletteContent .arm-arena-versus>div,#rouletteContent .arm-last-match{background:#f1f1ef!important;color:#171717!important}
+#rouletteContent .arm-arena,#rouletteContent .gear-collapsible,#rouletteContent .supplement-cases-collapsible{background:#fff!important;border:1px solid rgba(0,0,0,.07)!important;color:#171717!important}
+#rouletteContent .gear-case-card{background:#fff!important;border:1px solid #e4e4e0!important;color:#171717!important}
+#rouletteContent .gear-case-card.is-selected{background:#f0f0ed!important;border-color:#171717!important}
+#rouletteContent .gear-case-name,#rouletteContent .gear-case-card>strong{color:#171717!important}
+#rouletteContent .gear-case-card small,#rouletteContent .arm-arena-intro,#rouletteContent .arm-slot-copy small{color:#777875!important}
+#rouletteContent .game-floating-balance{background:#fff!important;color:#171717!important;border:1px solid #e8e8e4!important}
+#rouletteContent .primary-button,#rouletteContent .arena-hero-cta{background:#171717!important;color:#fff!important;border:0!important}
+#rouletteContent .secondary-button,#rouletteContent .batch-count,#rouletteContent .text-button{background:#efefec!important;color:#171717!important}
+#rouletteContent .arena-hero{border-radius:19px!important;box-shadow:none!important}
+#rouletteContent .daily-reward-launcher{display:flex!important;align-items:center!important;gap:10px!important;padding:12px!important;margin:0 0 12px!important}
+#rouletteContent .daily-launcher-copy strong{color:#171717!important}
+#rouletteContent .daily-launcher-copy small{color:#777875!important}
+#rouletteContent .daily-launcher-action{background:#171717!important;color:#fff!important}
+#rouletteContent .inventory-item-copy strong,#rouletteContent .inventory-item-main strong{color:#171717!important}
+#rouletteContent .roulette-tier{color:#171717!important}
+#rouletteContent .roulette-stage{overflow:hidden}
+#rouletteContent button{touch-action:manipulation}
+@media(max-width:390px){.app-shell{padding-left:10px!important;padding-right:10px!important}.topbar{margin-left:-10px!important;margin-right:-10px!important;padding-left:10px!important;padding-right:10px!important}.profile-copy>strong{font-size:12px!important}.sticky-game-wallet{min-width:62px}.sticky-game-wallet strong{font-size:12px!important}}
