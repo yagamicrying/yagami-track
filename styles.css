@@ -1062,3 +1062,10 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
  .trend-apply{grid-column:1/-1;width:100%}
  .trend-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Keep custom date controls compact and prevent overlap on small screens */
+.trend-custom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:end;width:100%;box-sizing:border-box}
+.trend-custom label{min-width:0;width:100%;box-sizing:border-box}
+.trend-custom input{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;padding:7px 5px;font-size:10px}
+.trend-apply{grid-column:1/-1;width:100%;min-width:0;box-sizing:border-box}
+@media(min-width:420px){.trend-custom{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.trend-apply{grid-column:auto;width:auto}}
