@@ -695,7 +695,7 @@
   let trendPreset='3w';
   let trendCustomStart='';
   let trendCustomEnd='';
-  const trendRanges=[{id:'3d',label:'3 дня',days:3},{id:'3w',label:'3 недели',days:21},{id:'1m',label:'1 мес.',months:1},{id:'2m',label:'2 мес.',months:2},{id:'3m',label:'3 мес.',months:3},{id:'6m',label:'6 мес.',months:6},{id:'11m',label:'11 мес.',months:11}];
+  const trendRanges=[{id:'3d',label:'3 дня',days:3},{id:'1w',label:'1 нед.',days:7},{id:'3w',label:'3 недели',days:21},{id:'1m',label:'1 мес.',months:1},{id:'2m',label:'2 мес.',months:2},{id:'3m',label:'3 мес.',months:3},{id:'6m',label:'6 мес.',months:6},{id:'11m',label:'11 мес.',months:11},{id:'1y',label:'1 год',months:12}];
   const trendMetrics={calories:{label:'Калории',unit:'ккал',color:'#a5b4fc',field:'calories',valid:d=>Number(d.calories)>0,value:d=>Number(d.calories)},sleep:{label:'Сон',unit:'ч',color:'#67e8f9',field:'sleep',valid:d=>d.sleep!==''&&d.sleep!==undefined&&Number.isFinite(Number(d.sleep)),value:d=>Number(d.sleep)},weight:{label:'Вес',unit:'кг',color:'#86efac',field:'weight',valid:d=>d.weight!==''&&d.weight!==undefined&&Number.isFinite(Number(d.weight)),value:d=>Number(d.weight)}};
   function trendDateShift(date,preset){
     const d=new Date(date);
