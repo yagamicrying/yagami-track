@@ -14,6 +14,8 @@
     return {
       goal: DEFAULT_GOAL,
       days: {},
+      workouts: { plans: [], sessions: {} },
+      language: 'ru',
       game: {
         money: 1500, currency: 'RUB', xp: 0, inventory: [], pendingDrops: [],
         lastSpinAt: 0, lastIncomeAt: Date.now(), nextItemId: 1, updatedAt: 0,
@@ -121,9 +123,24 @@
       }
     }
     const goal = Number(value.goal);
+    const workoutSource = isRecord(value.workouts) ? value.workouts : {};
+    const plans = Array.isArray(workoutSource.plans) ? workoutSource.plans.filter(p => isRecord(p) && typeof p.id === 'string').slice(0, 300).map(p => ({
+      id: p.id.slice(0, 100), name: String(p.name || 'Day').slice(0, 40),
+      color: /^#[0-9a-f]{6}$/i.test(String(p.color || '')) ? p.color : '',
+      groups: Array.isArray(p.groups) ? p.groups.slice(0, 50).filter(g => isRecord(g)).map(g => ({
+        id: String(g.id || '').slice(0, 100), muscle: String(g.muscle || '').slice(0, 60),
+        exercises: Array.isArray(g.exercises) ? g.exercises.slice(0, 100).map(x => String(x).slice(0, 80)) : []
+      })) : []
+    })) : [];
+    const sessions = {};
+    if (isRecord(workoutSource.sessions)) for (const [key, id] of Object.entries(workoutSource.sessions)) {
+      if (/^\\d{4}-\\d{2}-\\d{2}$/.test(key) && plans.some(p => p.id === id)) sessions[key] = id;
+    }
     return {
       goal: Number.isFinite(goal) && goal > 0 ? Math.min(1000000, goal) : DEFAULT_GOAL,
       days,
+      workouts: { plans, sessions },
+      language: value.language === 'en' ? 'en' : 'ru',
       game: normalizeGame(value.game)
     };
   }
@@ -169,6 +186,8 @@
     return {
       goal: remote.goal !== DEFAULT_GOAL || local.goal === DEFAULT_GOAL ? remote.goal : local.goal,
       days: mergeDayStates(local.days, remote.days),
+      workouts: remote.workouts && remote.workouts.plans.length ? remote.workouts : local.workouts,
+      language: remote.language || local.language,
       game: mergeGameStates(local.game, remote.game)
     };
   }
