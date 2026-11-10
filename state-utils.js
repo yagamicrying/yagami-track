@@ -134,7 +134,7 @@
     })) : [];
     const sessions = {};
     if (isRecord(workoutSource.sessions)) for (const [key, id] of Object.entries(workoutSource.sessions)) {
-      if (/^\\d{4}-\\d{2}-\\d{2}$/.test(key) && plans.some(p => p.id === id)) sessions[key] = id;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(key) && plans.some(p => p.id === id)) sessions[key] = id;
     }
     return {
       goal: Number.isFinite(goal) && goal > 0 ? Math.min(1000000, goal) : DEFAULT_GOAL,
