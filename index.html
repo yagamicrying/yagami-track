@@ -12,6 +12,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="workouts.css">
   <title>Kairo</title>
 </head>
 <body>
@@ -60,6 +61,9 @@
       <div id="trendContent"></div>
       <div id="historyContent"></div>
     </section>
+    <section class="page-section workout-page" id="workoutsPage">
+      <div id="workoutsContent"></div>
+    </section>
     <section class="page-section settings-page" id="settingsPanel" hidden>
       <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2>Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
       <div id="settingsContent"></div>
@@ -93,11 +97,24 @@
       </details>
       <span>Kairo · 2026</span>
     </footer>
+    <nav class="bottom-nav workout-bottom-nav" aria-label="Навигация">
+      <button type="button" class="nav-item" data-jump="#caloriesValue"><small>Трекер</small></button>
+      <button type="button" class="nav-item" data-jump=".history-page"><small>История</small></button>
+      <button type="button" class="nav-item active" data-jump="#workoutsPage"><small>Тренировки</small></button>
+    </nav>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </main>
   <dialog id="editDialog"><form method="dialog" id="editForm"><div class="dialog-head"><h2 id="dialogTitle">Изменить</h2><button class="dialog-close" value="cancel" aria-label="Закрыть">×</button></div><label id="fieldLabel" for="fieldInput">Значение</label><input id="fieldInput" type="number" inputmode="decimal" min="0" step="any"><p id="fieldHint" class="dialog-hint"></p><div class="dialog-actions"><button class="secondary-button" value="cancel">Отмена</button><button class="primary-button" id="saveField" value="save">Сохранить</button></div></form></dialog>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="state-utils.js"></script>
   <script src="app.js"></script>
+  <script src="workouts.js"></script>
+  <script>
+    document.querySelectorAll("[data-jump]").forEach(button => button.addEventListener("click", () => {
+      const target = document.querySelector(button.dataset.jump);
+      if (target) target.scrollIntoView({behavior:"smooth", block:"start"});
+      document.querySelectorAll("[data-jump]").forEach(item => item.classList.toggle("active", item === button));
+    }));
+  </script>
 </body>
 </html>

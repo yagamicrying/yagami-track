@@ -100,6 +100,12 @@
   let rouletteIsSpinning = false;
   let gameUiRefresh = null;
   let state = loadState();
+  window.YagamiTrackWorkouts = {
+    getData: () => state.workouts || { plans: [], sessions: {}, updatedAt: 0 },
+    saveData: value => { state.workouts = { ...value, updatedAt: Date.now() }; saveState(); },
+    getLanguage: () => state.language || 'ru',
+    setLanguage: value => { state.language = value === 'en' ? 'en' : 'ru'; saveState(); }
+  };
   let currentDate = dateKey(new Date());
   let historyExpanded = false;
   let editType = '';
@@ -384,7 +390,7 @@
           }
           mergedDays[key] = merged;
         }
-        state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, game: mergeGameStates(localState.game, remoteState.game)};
+        state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', game: mergeGameStates(localState.game, remoteState.game)};
       }
       localStorage.setItem(STORE, JSON.stringify(state));
       cloudReady = true;
@@ -423,7 +429,7 @@
               mergedDays[key] = merged;
             }
           }
-          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, game: mergeGameStates(localState.game, remoteState.game)};
+          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', game: mergeGameStates(localState.game, remoteState.game)};
           cloudStatus = 'Данные загружены из Telegram';
         } else {
           state = localState;
@@ -478,6 +484,7 @@
   $$('.add-chip[data-add]').forEach(btn=>btn.addEventListener('click',()=>{dayData().calories+=Number(btn.dataset.add);saveState();render();refreshPageSections();toast('Добавлено '+btn.dataset.add+' ккал');}));
   $('#resetCalories').addEventListener('click',()=>{if(dayData().calories===0){toast('Счётчик уже пустой');return;}if(confirm('Сбросить все калории за этот день?')){dayData().calories=0;saveState();render();refreshPageSections();toast('Калории сброшены');}});
   function renderRoulette(content){
+    if(!content)return;
     const armPower=game=>Math.round(playerLevelInfo().level*3+['wrist','grip','strap'].reduce((sum,slot)=>{const item=(game.inventory||[]).find(entry=>entry.instanceId===game.armEquipment?.[slot]&&entry.kind==='equipment'&&entry.slot===slot);return sum+(item?(Number(item.power)||({D:2,C:5,B:12,A:25,S:55}[item.tier]||2)):0);},0));
     if(rouletteCooldownTimer){clearInterval(rouletteCooldownTimer);rouletteCooldownTimer=null;}
     regenerateStamina();
@@ -805,7 +812,7 @@
       '<article class="card stat-card"><span class="eyebrow">ДНЕЙ С ДАННЫМИ</span><div class="stat-value">'+daysWithData+'</div><div class="stat-note">За всё время</div></article></div>';
   }
     function plural(n,one,few,many){const x=n%100;return x>=11&&x<=14?many:n%10===1?one:n%10>=2&&n%10<=4?few:many;}
-  function renderSettings(content){content.innerHTML=`<div class="card"><div class="section-heading"><div><span class="eyebrow">ЦЕЛИ</span><h2>Твои настройки</h2></div></div><div class="settings-row"><span>Калории в день</span><button id="settingsGoal">${fmtNum(state.goal)} ккал · Изменить</button></div><label class="settings-row"><span>Валюта игры</span><select id="gameCurrency"><option value="RUB" ${state.game.currency==='RUB'?'selected':''}>Рубли (₽)</option><option value="USD" ${state.game.currency==='USD'?'selected':''}>Доллары ($)</option></select></label><p class="settings-copy">Внутренний баланс считается в рублях. Для отображения в долларах используется условный курс $1 = 90 ₽.</p><div class="settings-row"><span>Синхронизация Telegram</span><button id="syncNow">Синхронизировать</button></div><div class="settings-row"><span>Данные</span><button id="exportData">Экспорт JSON</button></div><div class="settings-row"><span>Резервная копия</span><button id="importData">Импорт JSON</button></div><div class="settings-row"><span>Удаление данных</span><button id="clearData">Сбросить всё</button></div><div class="settings-row"><span>Конфиденциальность</span><button id="openPrivacy">Политика конфиденциальности <span aria-hidden="true">↗</span></button></div><p class="settings-copy" id="syncStatus">Хранение: ${cloudStatus}. В Telegram Mini App данные синхронизируются через Telegram CloudStorage для твоего аккаунта. Вне Telegram используется локальное хранилище браузера.</p><p class="settings-copy">Экспорт JSON можно использовать как резервную копию. Kairo · версия 1.2</p></div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
+  function renderSettings(content){if(!content)return;content.innerHTML=`<div class="card"><div class="section-heading"><div><span class="eyebrow">ЦЕЛИ</span><h2>Твои настройки</h2></div></div><div class="settings-row"><span>Калории в день</span><button id="settingsGoal">${fmtNum(state.goal)} ккал · Изменить</button></div><label class="settings-row"><span>Валюта игры</span><select id="gameCurrency"><option value="RUB" ${state.game.currency==='RUB'?'selected':''}>Рубли (₽)</option><option value="USD" ${state.game.currency==='USD'?'selected':''}>Доллары ($)</option></select></label><p class="settings-copy">Внутренний баланс считается в рублях. Для отображения в долларах используется условный курс $1 = 90 ₽.</p><div class="settings-row"><span>Синхронизация Telegram</span><button id="syncNow">Синхронизировать</button></div><div class="settings-row"><span>Данные</span><button id="exportData">Экспорт JSON</button></div><div class="settings-row"><span>Резервная копия</span><button id="importData">Импорт JSON</button></div><div class="settings-row"><span>Удаление данных</span><button id="clearData">Сбросить всё</button></div><div class="settings-row"><span>Конфиденциальность</span><button id="openPrivacy">Политика конфиденциальности <span aria-hidden="true">↗</span></button></div><p class="settings-copy" id="syncStatus">Хранение: ${cloudStatus}. В Telegram Mini App данные синхронизируются через Telegram CloudStorage для твоего аккаунта. Вне Telegram используется локальное хранилище браузера.</p><p class="settings-copy">Экспорт JSON можно использовать как резервную копию. Kairo · версия 1.2</p></div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
     $('#gameCurrency').addEventListener('change',e=>{state.game.currency=e.target.value==='USD'?'USD':'RUB';markGameChanged();renderRoulette($('#rouletteContent'));renderSettings($('#settingsContent'));toast('Валюта изменена');});$('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});$('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;$('#settingsPanel').hidden=true;panel.scrollIntoView({behavior:'smooth',block:'start'});});$('#syncNow').addEventListener('click',syncNow);$('#exportData').addEventListener('click',exportData);$('#importData').addEventListener('click',()=>$('#importFile').click());$('#importFile').addEventListener('change',importData);$('#clearData').addEventListener('click',()=>{if(confirm('Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные удалены');}});}
   function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kairo-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
   function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state=normalizeState(parsed);saveState();render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
