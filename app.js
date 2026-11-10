@@ -101,8 +101,8 @@
   let gameUiRefresh = null;
   let state = loadState();
   window.YagamiTrackWorkouts = {
-    getData: () => state.workouts || { plans: [], sessions: {} },
-    saveData: value => { state.workouts = value; saveState(); },
+    getData: () => state.workouts || { plans: [], sessions: {}, updatedAt: 0 },
+    saveData: value => { state.workouts = { ...value, updatedAt: Date.now() }; saveState(); },
     getLanguage: () => state.language || 'ru',
     setLanguage: value => { state.language = value === 'en' ? 'en' : 'ru'; saveState(); }
   };
@@ -390,7 +390,7 @@
           }
           mergedDays[key] = merged;
         }
-        state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, game: mergeGameStates(localState.game, remoteState.game)};
+        state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', game: mergeGameStates(localState.game, remoteState.game)};
       }
       localStorage.setItem(STORE, JSON.stringify(state));
       cloudReady = true;
@@ -429,7 +429,7 @@
               mergedDays[key] = merged;
             }
           }
-          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, game: mergeGameStates(localState.game, remoteState.game)};
+          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', game: mergeGameStates(localState.game, remoteState.game)};
           cloudStatus = 'Данные загружены из Telegram';
         } else {
           state = localState;
