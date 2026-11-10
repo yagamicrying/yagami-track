@@ -1,0 +1,74 @@
+
+.workout-toolbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:24px 0 16px}
+.workout-toolbar h2{font-size:27px;letter-spacing:-.8px;margin:6px 0}
+.workout-toolbar p{font-size:12px;line-height:1.5;color:var(--muted);margin:0;max-width:270px}
+.workout-language{display:flex;flex-direction:column;gap:5px;align-items:flex-end;color:var(--muted);font-size:9px}
+.workout-language select,.workout-date-actions select{background:#222224;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:11px;max-width:112px}
+.workout-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.workout-section-head h3{font-size:17px;margin:5px 0 0}
+.workout-add-day{width:37px;height:37px;border:1px solid rgba(10,132,255,.45);border-radius:50%;background:rgba(10,132,255,.12);color:#69b5ff;font-size:24px;line-height:1}
+.workout-plan-list{margin-top:12px}
+.workout-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;padding:24px 10px;color:var(--muted)}
+.workout-empty strong{font-size:13px;color:#d8d8dc}
+.workout-empty small{font-size:11px;line-height:1.5}
+.workout-empty.compact{padding:15px 8px;font-size:11px}
+.workout-plan-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.workout-plan-row:last-child{border-bottom:0}
+.workout-plan-dot{width:10px;height:10px;flex:0 0 10px;border-radius:50%;background:var(--plan-color)}
+.workout-plan-main{flex:1;min-width:0;text-align:left;border:0;background:transparent;padding:4px 0;color:var(--text);display:flex;flex-direction:column;gap:4px}
+.workout-plan-main strong{font-size:13px}
+.workout-plan-main small{font-size:10px;color:var(--muted)}
+.workout-plan-edit{border:1px solid var(--line);border-radius:9px;background:#222224;color:var(--muted);width:33px;height:33px}
+.workout-calendar-card{margin-top:13px}
+.workout-today{border:1px solid var(--line);background:#222224;color:#69b5ff;border-radius:20px;padding:7px 11px;font-size:10px}
+.workout-month-head{display:flex;align-items:center;justify-content:space-between;margin:19px 0 12px}
+.workout-month-head strong{font-size:14px}
+.workout-month-head button{width:32px;height:32px;border:1px solid var(--line);border-radius:50%;background:#222224;color:#fff;font-size:22px;line-height:1}
+.workout-weekdays,.workout-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.workout-weekdays span{text-align:center;color:var(--muted);font-size:9px;padding:5px 0}
+.workout-calendar-day{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1;border:1px solid transparent;border-radius:12px;background:#202022;color:#ddd;font-size:12px;font-weight:600}
+.workout-calendar-day.is-outside{opacity:.28}
+.workout-calendar-day.is-today{border-color:rgba(10,132,255,.7)}
+.workout-calendar-day.is-selected{background:rgba(10,132,255,.2);border-color:#0a84ff;color:#fff}
+.workout-calendar-day i{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--plan-color)}
+.workout-calendar-day.has-workout span{transform:translateY(-2px)}
+.workout-date-detail{margin-top:15px;padding:13px;border-radius:15px;background:#202022;border:1px solid #303034}
+.workout-date-copy{display:flex;flex-direction:column;gap:5px}
+.workout-date-copy strong{font-size:12px}
+.workout-date-copy small{font-size:10px;color:var(--muted)}
+.workout-date-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.workout-date-actions select{flex:1;max-width:none;min-width:0}
+.workout-date-actions .primary-button{margin:0;padding:9px 11px}
+.workout-remove{border:1px solid #633c3c;border-radius:10px;background:#332020;color:#ff8b8b;padding:8px 10px;font-size:10px}
+.workout-editor-dialog,.workout-picker-dialog{width:calc(100% - 28px);max-width:470px;max-height:min(86vh,760px);overflow:auto;background:#1b1b1e;color:var(--text);border:1px solid #38383c;border-radius:22px;padding:19px}
+.workout-editor-form{display:flex;flex-direction:column;gap:13px}
+.workout-editor-head,.workout-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.workout-editor-head h2{font-size:21px;margin:4px 0}
+.workout-dialog-close{width:32px;height:32px;border:0;border-radius:50%;background:#303034;color:#ddd;font-size:21px}
+.workout-editor-form>label,.workout-custom-exercise label{display:flex;flex-direction:column;gap:7px;color:#b4b4bb;font-size:11px}
+.workout-editor-form input:not([type=color]):not([type=checkbox]),.workout-custom-exercise input{width:100%;border:1px solid #38383c;border-radius:11px;background:#111113;color:#fff;padding:12px;font-size:14px}
+.workout-editor-form input[type=color]{width:100%;height:37px;border:1px solid #38383c;border-radius:10px;background:#111113;padding:3px}
+.workout-optional{color:var(--muted);font-size:10px}
+.workout-color-none{display:flex!important;flex-direction:row!important;align-items:center;gap:8px!important}
+.workout-color-none input{accent-color:var(--accent)}
+.workout-editor-groups{border-top:1px solid var(--line);padding-top:12px}
+.workout-muscle-group{padding:12px;margin-top:9px;border:1px solid #303034;border-radius:14px;background:#202022}
+.workout-muscle-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.workout-muscle-head strong{font-size:12px}
+.workout-muscle-head button,.workout-exercise-row button{border:0;background:transparent;color:#ff7777;font-size:20px}
+.workout-exercise-list{margin-top:8px}
+.workout-exercise-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:#c8c8ce}
+.workout-add-exercise{margin-top:8px;border:0;background:transparent;color:#69b5ff;padding:5px 0;font-size:10px}
+.workout-editor-actions{display:flex;gap:8px;justify-content:space-between;margin-top:5px}
+.workout-editor-actions button{margin:0;flex:1}
+.workout-editor-actions [hidden]{display:none}
+.workout-editor-actions #workoutDelete{color:#ff8b8b;border-color:#633c3c}
+.workout-picker-head{margin-bottom:12px}
+.workout-picker-head strong{font-size:14px}
+.workout-picker-list{display:flex;flex-direction:column;max-height:42vh;overflow:auto}
+.workout-picker-list button{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;padding:11px 5px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);font-size:12px}
+.workout-picker-list button span{color:#69b5ff;font-size:18px}
+.workout-custom-exercise{display:flex;align-items:flex-end;gap:8px;margin-top:14px}
+.workout-custom-exercise label{flex:1;min-width:0}
+.workout-custom-exercise .primary-button{margin:0;padding:11px}
+@media(max-width:380px){.workout-toolbar{flex-direction:column}.workout-language{align-items:flex-start;flex-direction:row;align-items:center}.workout-date-actions select{flex-basis:100%}}
