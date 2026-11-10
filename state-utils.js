@@ -14,7 +14,7 @@
     return {
       goal: DEFAULT_GOAL,
       days: {},
-      workouts: { plans: [], sessions: {} },
+      workouts: { plans: [], sessions: {}, updatedAt: 0 },
       language: 'ru',
       game: {
         money: 1500, currency: 'RUB', xp: 0, inventory: [], pendingDrops: [],
@@ -139,7 +139,7 @@
     return {
       goal: Number.isFinite(goal) && goal > 0 ? Math.min(1000000, goal) : DEFAULT_GOAL,
       days,
-      workouts: { plans, sessions },
+      workouts: { plans, sessions, updatedAt: Number.isFinite(Number(workoutSource.updatedAt)) ? Math.max(0, Number(workoutSource.updatedAt)) : 0 },
       language: value.language === 'en' ? 'en' : 'ru',
       game: normalizeGame(value.game)
     };
@@ -186,7 +186,7 @@
     return {
       goal: remote.goal !== DEFAULT_GOAL || local.goal === DEFAULT_GOAL ? remote.goal : local.goal,
       days: mergeDayStates(local.days, remote.days),
-      workouts: remote.workouts && remote.workouts.plans.length ? remote.workouts : local.workouts,
+      workouts: (Number(remote.workouts?.updatedAt)||0) > (Number(local.workouts?.updatedAt)||0) ? remote.workouts : local.workouts,
       language: remote.language || local.language,
       game: mergeGameStates(local.game, remote.game)
     };
