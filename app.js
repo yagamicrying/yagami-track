@@ -425,7 +425,7 @@
               mergedDays[key] = merged;
             }
           }
-          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', game: mergeGameStates(localState.game, remoteState.game)};
+          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', themeColor: remoteState.themeColor || localState.themeColor || 'blue', themeMode: remoteState.themeMode || localState.themeMode || 'dark', game: mergeGameStates(localState.game, remoteState.game)};
           cloudStatus = 'Данные загружены из Telegram';
         } else {
           state = localState;
