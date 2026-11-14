@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const $ = (selector, root=document) => root.querySelector(selector);
+  const $$ = (selector, root=document) => Array.from(root.querySelectorAll(selector));
   const root = $('#workoutsContent');
   if (!root) return;
 
@@ -72,32 +73,32 @@
   }
   function renderCalendar(){
     const grid=$('#workoutCalendarGrid',root),detail=$('#workoutDateDetail',root);
+    if(!grid||!detail)return;
     const first=new Date(month.getFullYear(),month.getMonth(),1),offset=(first.getDay()+6)%7,start=new Date(first);start.setDate(first.getDate()-offset);
     const today=iso(new Date());
     grid.innerHTML=Array.from({length:42},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const key=iso(d),session=data.sessions[key],plan=session&&planById(session),inMonth=d.getMonth()===month.getMonth();return '<button type="button" class="workout-calendar-day '+(inMonth?'':'is-outside')+(key===selectedDate?' is-selected':'')+(key===today?' is-today':'')+(plan?' has-workout':'')+'" data-date="'+key+'"><span>'+d.getDate()+'</span>'+(plan?'<i style="--plan-color:'+(plan.color||'#0a84ff')+'"></i>':'')+'</button>';}).join('');
     $$('[data-date]',grid).forEach(btn=>btn.addEventListener('click',()=>{selectedDate=btn.dataset.date;const d=new Date(selectedDate+'T12:00:00');month=new Date(d.getFullYear(),d.getMonth(),1);renderCalendar();}));
     const active=data.sessions[selectedDate],plan=active&&planById(active);
-    detail.innerHTML='<div class="workout-date-copy"><strong>'+t('selectDate')+' · '+new Intl.DateTimeFormat(lang==='ru'?'ru-RU':'en-US',{day:'numeric',month:'long',year:'numeric'}).format(new Date(selectedDate+'T12:00:00'))+'</strong><small>'+(plan?esc(plan.name)+' · '+t('assigned'):t('noWorkout'))+'</small></div><div class="workout-date-actions"><select id="workoutAssignSelect" aria-label="'+t('choosePlan')+'"><option value="">'+t('choosePlan')+'</option>'+data.plans.map(p=>'<option value="'+esc(p.id)+'" '+(p.id===active?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select><button type="button" class="primary-button" id="workoutAssign" '+(!data.plans.length?'disabled':'')+'>'+t('assign')+'</button>'+(active?'<button type="button" class="workout-remove" id="workoutRemove">'+t('remove')+'</button>':'')+'</div>';
+    detail.innerHTML='<div class="workout-date-copy"><strong>'+t('selectDate')+' · '+new Intl.DateTimeFormat(lang==='ru'?'ru-RU':'en-US',{day:'numeric',month:'long',year:'numeric'}).format(new Date(selectedDate+'T12:00:00'))+'</strong><small>'+(plan?esc(plan.name)+' · '+t('assigned'):t('noWorkout'))+'</small></div><div class="workout-date-actions"><select id="workoutAssignSelect" aria-label="'+t('choosePlan')+'"><option value="">'+t('choosePlan')+'</option>'+data.plans.map(p=>'<option value="'+esc(p.id)+'" '+(p.id===active?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select><button type="button" class="primary-button" id="workoutAssign" '+(!data.plans.length?'disabled':'')+'>'+t('assign')+'</button>'+(active?'<button type="button" class="workout-remove" id="workoutRemove">'+t('remove')+'</button>':'')+'</div><p class="workout-calendar-hint">'+(plan?(lang==='ru'?'Нажми на программу выше, чтобы изменить её в списке «Мои программы».':'Tap the plan in “My plans” to edit it.'):(lang==='ru'?'Выбери программу и нажми «Назначить тренировку».':'Choose a plan and tap “Assign workout”.'))+'</p>';
     $('#workoutAssign',detail).addEventListener('click',()=>{const id=$('#workoutAssignSelect',detail).value;if(!id)return;data.sessions[selectedDate]=id;persist();renderCalendar();});
     $('#workoutRemove',detail)?.addEventListener('click',()=>{delete data.sessions[selectedDate];persist();renderCalendar();});
   }
   function openEditor(id){
     editingPlan=id||null;
     const original=id?planById(id):null;
-    draft=original?JSON.parse(JSON.stringify(original)):{id:uid(),name:t('day')+' '+(data.plans.length+1),color:'',groups:[]};
+    draft=original?JSON.parse(JSON.stringify(original)):{id:uid(),name:t('day')+' '+(data.plans.length+1),color:'#0a84ff',groups:[]};
+    if(!draft.color)draft.color='#0a84ff';
     renderEditor();
   }
   function renderEditor(){
     const existing=$('#workoutEditor',document);
     if(existing)existing.remove();
     const dialog=document.createElement('dialog');dialog.id='workoutEditor';dialog.className='workout-editor-dialog';
-    dialog.innerHTML='<form method="dialog" class="workout-editor-form"><div class="workout-editor-head"><div><span class="eyebrow">'+t('day')+'</span><h2>'+t('edit')+' / '+t('day')+'</h2></div><button type="button" class="workout-dialog-close" id="workoutEditorClose">×</button></div><label>'+t('dayName')+'<input id="workoutPlanName" maxlength="40" value="'+esc(draft.name)+'"></label><label>'+t('color')+' <span class="workout-optional">· '+(lang==='ru'?'необязательно':'optional')+'</span><input type="color" id="workoutPlanColor" value="'+(draft.color||'#0a84ff')+'"></label><label>'+ (lang==='ru'?'Дата тренировки':'Workout date') +'<input type="date" id="workoutPlanDate" value="'+esc(selectedDate)+'"></label><label class="workout-color-none"><input type="checkbox" id="workoutNoColor" '+(!draft.color?'checked':'')+'> '+(lang==='ru'?'Без цвета':'No color')+'</label><div class="workout-editor-groups"><div class="workout-section-head"><h3>'+t('muscle')+'</h3><button type="button" class="workout-add-day" id="addWorkoutMuscle">＋</button></div><div id="workoutDraftGroups"></div></div><div class="workout-editor-actions"><button type="button" class="secondary-button" id="workoutDelete" '+(!editingPlan?'hidden':'')+'>'+t('delete')+'</button><button type="button" class="primary-button" id="workoutSave">'+t('save')+'</button></div></form>';
+    dialog.innerHTML='<form method="dialog" class="workout-editor-form"><div class="workout-editor-head"><div><span class="eyebrow">'+t('day')+'</span><h2>'+t('edit')+' / '+t('day')+'</h2></div><button type="button" class="workout-dialog-close" id="workoutEditorClose">×</button></div><label>'+t('dayName')+'<input id="workoutPlanName" maxlength="40" value="'+esc(draft.name)+'"></label><div class="workout-color-field"><span class="workout-field-label">'+t('color')+'</span><div class="workout-color-palette" id="workoutColorPalette" role="group" aria-label="'+t('color')+'">'+[['#0a84ff','Синий','Blue'],['#ff8a00','Оранжевый','Orange'],['#22c55e','Зелёный','Green'],['#a855f7','Фиолетовый','Purple'],['#ec4899','Розовый','Pink'],['#06b6d4','Бирюзовый','Cyan'],['#eab308','Жёлтый','Yellow'],['#ef4444','Красный','Red']].map(([color,ru,en])=>'<button type="button" class="workout-color-swatch '+(draft.color===color?'is-selected':'')+'" data-color="'+color+'" style="--swatch:'+color+'" aria-label="'+(lang==='ru'?ru:en)+'" aria-pressed="'+(draft.color===color)+'"></button>').join('')+'</div></div><label>'+ (lang==='ru'?'Дата тренировки':'Workout date') +'<input type="date" id="workoutPlanDate" value="'+esc(selectedDate)+'"></label><div class="workout-editor-groups"><div class="workout-section-head"><h3>'+t('muscle')+'</h3><button type="button" class="workout-add-day" id="addWorkoutMuscle">＋</button></div><div id="workoutDraftGroups"></div></div><div class="workout-editor-actions"><button type="button" class="secondary-button" id="workoutDelete" '+(!editingPlan?'hidden':'')+'>'+t('delete')+'</button><button type="button" class="primary-button" id="workoutSave">'+t('save')+'</button></div></form>';
     document.body.append(dialog);
     $('#workoutEditorClose',dialog).addEventListener('click',()=>dialog.close());
     $('#workoutPlanName',dialog).addEventListener('input',e=>{draft.name=e.target.value;});
-    $('#workoutPlanColor',dialog).addEventListener('input',e=>{draft.color=e.target.value;});
-    $('#workoutNoColor',dialog).addEventListener('change',e=>{draft.color=e.target.checked?'':$('#workoutPlanColor',dialog).value;$('#workoutPlanColor',dialog).disabled=e.target.checked;});
-    $('#workoutPlanColor',dialog).disabled=!draft.color;
+    $$('.workout-color-swatch',dialog).forEach(btn=>btn.addEventListener('click',()=>{draft.color=btn.dataset.color;$$('.workout-color-swatch',dialog).forEach(item=>{const active=item===btn;item.classList.toggle('is-selected',active);item.setAttribute('aria-pressed',String(active));});}));
     $('#addWorkoutMuscle',dialog).addEventListener('click',openMusclePicker);
     $('#workoutSave',dialog).addEventListener('click',savePlan);
     $('#workoutDelete',dialog).addEventListener('click',deletePlan);
@@ -134,7 +135,7 @@
   function savePlan(){
     const name=$('#workoutPlanName').value.trim();
     if(!name){toast(lang==='ru'?'Введи название дня':'Enter a day name');return;}
-    draft.name=name;draft.color=$('#workoutNoColor').checked?'':$('#workoutPlanColor').value;
+    draft.name=name;draft.color=draft.color||'#0a84ff';
     const workoutDate=$('#workoutPlanDate')?.value||selectedDate;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(workoutDate)){toast(lang==='ru'?'Выбери корректную дату':'Choose a valid date');return;}
     const index=data.plans.findIndex(p=>p.id===draft.id);
