@@ -25,6 +25,10 @@
       </div>
       <button class="icon-button today-button" id="todayBtn" aria-label="Перейти к сегодняшнему дню" title="Сегодня">↻</button>
       <button class="icon-button settings-gear" id="openSettings" aria-label="Настройки" title="Настройки">⚙</button>
+    <section class="settings-drawer" id="settingsPanel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+      <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2 id="settingsTitle">Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
+      <div id="settingsContent"></div>
+    </section>
     </header>
 
     <section class="date-row">
@@ -62,10 +66,6 @@
     </section>
     <section class="page-section workout-page" id="workoutsPage">
       <div id="workoutsContent"></div>
-    </section>
-    <section class="page-section settings-page settings-modal" id="settingsPanel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
-      <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2 id="settingsTitle">Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
-      <div id="settingsContent"></div>
     </section>
     <section class="page-section privacy-page" id="privacyPanel" hidden>
       <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ИНФОРМАЦИЯ</span><h2>Политика конфиденциальности</h2></div><button class="settings-close" id="closePrivacy" aria-label="Вернуться в настройки">×</button></div>
