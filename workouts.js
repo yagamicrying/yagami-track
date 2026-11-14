@@ -136,7 +136,7 @@
     if(!name){toast(lang==='ru'?'Введи название дня':'Enter a day name');return;}
     draft.name=name;draft.color=$('#workoutNoColor').checked?'':$('#workoutPlanColor').value;
     const workoutDate=$('#workoutPlanDate')?.value||selectedDate;
-    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(workoutDate)){toast(lang==='ru'?'Выбери корректную дату':'Choose a valid date');return;}
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(workoutDate)){toast(lang==='ru'?'Выбери корректную дату':'Choose a valid date');return;}
     const index=data.plans.findIndex(p=>p.id===draft.id);
     if(index>=0)data.plans[index]=draft;else data.plans.push(draft);
     data.sessions[workoutDate]=draft.id;selectedDate=workoutDate;const selected=new Date(workoutDate+'T12:00:00');month=new Date(selected.getFullYear(),selected.getMonth(),1);
