@@ -42,7 +42,22 @@
     'Отмена':'Cancel','Сохранить':'Save','Закрыть':'Close','Значение':'Value',
     'Внешний вид':'Appearance','Язык приложения':'App language','Цвет интерфейса':'Accent color',
     'Фон приложения':'App background','Чёрный':'Black','Белый':'White',
-    'Синий':'Blue','Оранжевый':'Orange','Зелёный':'Green','Фиолетовый':'Purple','Розовый':'Pink','Бирюзовый':'Cyan','Жёлтый':'Yellow'
+    'Синий':'Blue','Оранжевый':'Orange','Зелёный':'Green','Фиолетовый':'Purple','Розовый':'Pink','Бирюзовый':'Cyan','Жёлтый':'Yellow',
+    "СРЕДНИЕ КАЛОРИИ ЗА ВСЁ ВРЕМЯ":"AVERAGE CALORIES ALL TIME",
+    "СРЕДНИЙ СОН ЗА ВСЁ ВРЕМЯ":"AVERAGE SLEEP ALL TIME",
+    "ПОСЛЕДНИЙ ВЕС":"LATEST WEIGHT",
+    "ДНЕЙ С ДАННЫМИ":"DAYS WITH DATA",
+    "Добавь первую запись":"Add your first entry",
+    "За всё время":"All time",
+    "Показать всю историю":"Show full history",
+    "Скрыть историю":"Hide history",
+    "Нет данных за выбранный период":"No data for the selected period",
+    "Заметка за день":"Daily note",
+    "Локальное сохранение":"Local storage",
+    "Не удалось сохранить данные":"Could not save data",
+    "ВЕС":"WEIGHT",
+    "СОН":"SLEEP",
+    "КАЛОРИИ":"CALORIES",
   };
   const reverse = Object.fromEntries(Object.entries(translations).map(([ru,en])=>[en,ru]));
   function translateNode(node, language) {
