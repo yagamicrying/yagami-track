@@ -100,6 +100,7 @@
   let rouletteIsSpinning = false;
   let gameUiRefresh = null;
   let state = loadState();
+  if(window.KairoPreferences) window.KairoPreferences.apply(state);
   window.YagamiTrackWorkouts = {
     getData: () => state.workouts || { plans: [], sessions: {}, updatedAt: 0 },
     saveData: value => { state.workouts = { ...value, updatedAt: Date.now() }; saveState(); },
@@ -145,12 +146,7 @@
     const label = status.querySelector('span');
     label.textContent = activeToday ? 'Активность сегодня' : 'Сегодня ещё не начинал';
     status.classList.toggle('is-active', activeToday);
-    const levelInfo=playerLevelInfo();
-    const levelBadge=$('#avatarLevel'),levelText=$('#playerLevel'),xpFill=$('#playerXpFill'),xpText=$('#playerXpText');
-    if(levelBadge)levelBadge.textContent='LVL '+levelInfo.level;
-    if(levelText)levelText.textContent='Уровень '+levelInfo.level;
-    if(xpFill)xpFill.style.width=Math.min(100,Math.round(levelInfo.xpIntoLevel/levelInfo.xpNeeded*100))+'%';
-    if(xpText)xpText.textContent=fmtNum(levelInfo.xpIntoLevel)+' / '+fmtNum(levelInfo.xpNeeded)+' XP';
+    if(window.KairoPreferences) window.KairoPreferences.apply(state);
   }
 
   function createDefaultState(){ return KairoState.createDefaultState(); }
@@ -180,7 +176,7 @@
   function formatMoney(value){
     const currency=state.game.currency==='USD'?'USD':'RUB';
     const amount=Number(value||0)/(currency==='USD'?GAME_DOLLAR_RATE:1);
-    return new Intl.NumberFormat('ru-RU',{style:'currency',currency,minimumFractionDigits:currency==='USD'?2:0,maximumFractionDigits:currency==='USD'?2:0}).format(amount);
+    return new Intl.NumberFormat(state.language==='en'?'en-US':'ru-RU',{style:'currency',currency,minimumFractionDigits:currency==='USD'?2:0,maximumFractionDigits:currency==='USD'?2:0}).format(amount);
   }
   function fixedPrice(item){return Math.max(1,Math.round(Number(item&&item.price)||1));}
   function formatIncomeRate(value){return formatMoney(Math.max(0,Math.round(Number(value)||0)));}
@@ -390,7 +386,7 @@
           }
           mergedDays[key] = merged;
         }
-        state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', game: mergeGameStates(localState.game, remoteState.game)};
+        state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', themeColor: remoteState.themeColor || localState.themeColor || 'blue', themeMode: remoteState.themeMode || localState.themeMode || 'dark', game: mergeGameStates(localState.game, remoteState.game)};
       }
       localStorage.setItem(STORE, JSON.stringify(state));
       cloudReady = true;
@@ -429,7 +425,7 @@
               mergedDays[key] = merged;
             }
           }
-          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', game: mergeGameStates(localState.game, remoteState.game)};
+          state = {goal: remoteState.goal || localState.goal || 3500, days: mergedDays, workouts: (Number(remoteState.workouts?.updatedAt)||0) > (Number(localState.workouts?.updatedAt)||0) ? remoteState.workouts : localState.workouts, language: remoteState.language || localState.language || 'ru', themeColor: remoteState.themeColor || localState.themeColor || 'blue', themeMode: remoteState.themeMode || localState.themeMode || 'dark', game: mergeGameStates(localState.game, remoteState.game)};
           cloudStatus = 'Данные загружены из Telegram';
         } else {
           state = localState;
@@ -457,9 +453,9 @@
   function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
   function dayData(key=currentDate){ if(!state.days[key]) state.days[key] = {calories:0, weight:'', sleep:'', checks:{water:false,activity:false,sleepRoutine:false}, note:''}; const d=state.days[key]; d.checks ||= {water:false,activity:false,sleepRoutine:false}; return d; }
   function dateFromKey(key){ const [y,m,d]=key.split('-').map(Number); return new Date(y,m-1,d); }
-  function formatDate(key){return new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'}).format(dateFromKey(key));}
-  function formatDay(key){return new Intl.DateTimeFormat('ru-RU',{weekday:'long'}).format(dateFromKey(key)).toUpperCase();}
-  function fmtNum(n){return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(n);}
+  function formatDate(key){return new Intl.DateTimeFormat(state.language==='en'?'en-US':'ru-RU',{day:'numeric',month:'long'}).format(dateFromKey(key));}
+  function formatDay(key){return new Intl.DateTimeFormat(state.language==='en'?'en-US':'ru-RU',{weekday:'long'}).format(dateFromKey(key)).toUpperCase();}
+  function fmtNum(n){return new Intl.NumberFormat(state.language==='en'?'en-US':'ru-RU',{maximumFractionDigits:1}).format(n);}
   function toast(message){const t=$('#toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1900);}
   function render(){
     updateProfile();
@@ -812,8 +808,57 @@
       '<article class="card stat-card"><span class="eyebrow">ДНЕЙ С ДАННЫМИ</span><div class="stat-value">'+daysWithData+'</div><div class="stat-note">За всё время</div></article></div>';
   }
     function plural(n,one,few,many){const x=n%100;return x>=11&&x<=14?many:n%10===1?one:n%10>=2&&n%10<=4?few:many;}
-  function renderSettings(content){if(!content)return;content.innerHTML=`<div class="card"><div class="section-heading"><div><span class="eyebrow">ЦЕЛИ</span><h2>Твои настройки</h2></div></div><div class="settings-row"><span>Калории в день</span><button id="settingsGoal">${fmtNum(state.goal)} ккал · Изменить</button></div><label class="settings-row"><span>Валюта игры</span><select id="gameCurrency"><option value="RUB" ${state.game.currency==='RUB'?'selected':''}>Рубли (₽)</option><option value="USD" ${state.game.currency==='USD'?'selected':''}>Доллары ($)</option></select></label><p class="settings-copy">Внутренний баланс считается в рублях. Для отображения в долларах используется условный курс $1 = 90 ₽.</p><div class="settings-row"><span>Синхронизация Telegram</span><button id="syncNow">Синхронизировать</button></div><div class="settings-row"><span>Данные</span><button id="exportData">Экспорт JSON</button></div><div class="settings-row"><span>Резервная копия</span><button id="importData">Импорт JSON</button></div><div class="settings-row"><span>Удаление данных</span><button id="clearData">Сбросить всё</button></div><div class="settings-row"><span>Конфиденциальность</span><button id="openPrivacy">Политика конфиденциальности <span aria-hidden="true">↗</span></button></div><p class="settings-copy" id="syncStatus">Хранение: ${cloudStatus}. В Telegram Mini App данные синхронизируются через Telegram CloudStorage для твоего аккаунта. Вне Telegram используется локальное хранилище браузера.</p><p class="settings-copy">Экспорт JSON можно использовать как резервную копию. Kairo · версия 1.2</p></div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
-    $('#gameCurrency').addEventListener('change',e=>{state.game.currency=e.target.value==='USD'?'USD':'RUB';markGameChanged();renderRoulette($('#rouletteContent'));renderSettings($('#settingsContent'));toast('Валюта изменена');});$('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});$('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;$('#settingsPanel').hidden=true;panel.scrollIntoView({behavior:'smooth',block:'start'});});$('#syncNow').addEventListener('click',syncNow);$('#exportData').addEventListener('click',exportData);$('#importData').addEventListener('click',()=>$('#importFile').click());$('#importFile').addEventListener('change',importData);$('#clearData').addEventListener('click',()=>{if(confirm('Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные удалены');}});}
+  function renderSettings(content){
+    if(!content)return;
+    const lang=state.language==='en'?'en':'ru';
+    const labels=lang==='en'
+      ? {settings:'Your settings',appearance:'Appearance',language:'App language',theme:'Accent color',background:'Background',calories:'Daily calorie goal',change:'Change',currency:'Game currency',rubles:'Rubles (₽)',dollars:'Dollars ($)',sync:'Telegram sync',syncNow:'Sync now',data:'Data',export:'Export JSON',backup:'Backup',import:'Import JSON',delete:'Delete data',reset:'Reset all',privacy:'Privacy',privacyPolicy:'Privacy policy'}
+      : {settings:'Твои настройки',appearance:'Внешний вид',language:'Язык приложения',theme:'Цвет интерфейса',background:'Фон приложения',calories:'Калории в день',change:'Изменить',currency:'Валюта игры',rubles:'Рубли (₽)',dollars:'Доллары ($)',sync:'Синхронизация Telegram',syncNow:'Синхронизировать',data:'Данные',export:'Экспорт JSON',backup:'Резервная копия',import:'Импорт JSON',delete:'Удаление данных',reset:'Сбросить всё',privacy:'Конфиденциальность',privacyPolicy:'Политика конфиденциальности'};
+    const colors=[['blue',lang==='en'?'Blue':'Синий'],['orange',lang==='en'?'Orange':'Оранжевый'],['green',lang==='en'?'Green':'Зелёный'],['purple',lang==='en'?'Purple':'Фиолетовый'],['pink',lang==='en'?'Pink':'Розовый'],['cyan',lang==='en'?'Cyan':'Бирюзовый'],['yellow',lang==='en'?'Yellow':'Жёлтый']];
+    content.innerHTML=`<div class="card">
+      <div class="section-heading"><div><span class="eyebrow">${labels.appearance}</span><h2>${labels.settings}</h2></div></div>
+      <div class="settings-row"><span>${labels.language}</span><select id="appLanguage"><option value="ru" ${lang==='ru'?'selected':''}>Русский</option><option value="en" ${lang==='en'?'selected':''}>English</option></select></div>
+      <div class="settings-row"><span>${labels.theme}</span><select id="appThemeColor">${colors.map(([value,label])=>`<option value="${value}" ${(state.themeColor||'blue')===value?'selected':''}>${label}</option>`).join('')}</select></div>
+      <div class="settings-row"><span>${labels.background}</span><select id="appThemeMode"><option value="dark" ${(state.themeMode||'dark')==='dark'?'selected':''}>${lang==='en'?'Black':'Чёрный'}</option><option value="light" ${state.themeMode==='light'?'selected':''}>${lang==='en'?'White':'Белый'}</option></select></div>
+      <div class="settings-row"><span>${labels.calories}</span><button id="settingsGoal">${fmtNum(state.goal)} ккал · ${labels.change}</button></div>
+      <label class="settings-row"><span>${labels.currency}</span><select id="gameCurrency"><option value="RUB" ${state.game.currency==='RUB'?'selected':''}>${labels.rubles}</option><option value="USD" ${state.game.currency==='USD'?'selected':''}>${labels.dollars}</option></select></label>
+      <p class="settings-copy">${lang==='en'?'The in-app balance is stored in rubles. Dollar display uses a fixed illustrative rate of $1 = ₽90.':'Внутренний баланс считается в рублях. Для отображения в долларах используется условный курс $1 = 90 ₽.'}</p>
+      <div class="settings-row"><span>${labels.sync}</span><button id="syncNow">${labels.syncNow}</button></div>
+      <div class="settings-row"><span>${labels.data}</span><button id="exportData">${labels.export}</button></div>
+      <div class="settings-row"><span>${labels.backup}</span><button id="importData">${labels.import}</button></div>
+      <div class="settings-row"><span>${labels.delete}</span><button id="clearData">${labels.reset}</button></div>
+      <div class="settings-row"><span>${labels.privacy}</span><button id="openPrivacy">${labels.privacyPolicy} <span aria-hidden="true">↗</span></button></div>
+      <p class="settings-copy" id="syncStatus">${lang==='en'?'Storage: ':'Хранение: '}${cloudStatus}. ${lang==='en'?'Inside Telegram Mini App, data syncs through Telegram CloudStorage. Outside Telegram, browser storage is used.':'В Telegram Mini App данные синхронизируются через Telegram CloudStorage. Вне Telegram используется локальное хранилище браузера.'}</p>
+      <p class="settings-copy">Kairo · ${lang==='en'?'version':'версия'} 1.3</p>
+    </div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
+    $('#appLanguage').addEventListener('change',e=>{
+      state.language=e.target.value==='en'?'en':'ru';
+      saveState();
+      if(window.KairoPreferences)window.KairoPreferences.apply(state);
+      window.dispatchEvent(new CustomEvent('kairo:language-change',{detail:{language:state.language}}));
+      renderSettings($('#settingsContent'));
+      render();
+      refreshPageSections();
+    });
+    $('#appThemeColor').addEventListener('change',e=>{
+      state.themeColor=e.target.value;
+      saveState();
+      if(window.KairoPreferences)window.KairoPreferences.apply(state);
+    });
+    $('#appThemeMode').addEventListener('change',e=>{
+      state.themeMode=e.target.value==='light'?'light':'dark';
+      saveState();
+      if(window.KairoPreferences)window.KairoPreferences.apply(state);
+    });
+    $('#gameCurrency').addEventListener('change',e=>{state.game.currency=e.target.value==='USD'?'USD':'RUB';markGameChanged();renderRoulette($('#rouletteContent'));renderSettings($('#settingsContent'));toast(lang==='en'?'Currency changed':'Валюта изменена');});
+    $('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});
+    $('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;$('#settingsPanel').hidden=true;panel.scrollIntoView({behavior:'smooth',block:'start'});});
+    $('#syncNow').addEventListener('click',syncNow);
+    $('#exportData').addEventListener('click',exportData);
+    $('#importData').addEventListener('click',()=>$('#importFile').click());
+    $('#importFile').addEventListener('change',importData);
+    $('#clearData').addEventListener('click',()=>{if(confirm(lang==='en'?'Delete all saved app data? This cannot be undone.':'Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();if(window.KairoPreferences)window.KairoPreferences.apply(state);currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast(lang==='en'?'Data deleted':'Данные удалены');}});
+  }
   function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kairo-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
   function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state=normalizeState(parsed);saveState();render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
   const rouletteModal=$('#rouletteModal');

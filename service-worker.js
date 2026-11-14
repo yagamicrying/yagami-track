@@ -1,8 +1,8 @@
 'use strict';
 
 const CACHE_PREFIX = 'kairo-cache-';
-const CACHE_NAME = 'kairo-cache-v42';
-const APP_SHELL = ['./', './index.html', './styles.css', './workouts.css', './workouts.js', './state-utils.js', './app.js', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/gear-glove.svg', './icons/gear-bandage.svg', './icons/gear-strap.svg', './icons/gear-arena.svg', './icons/arena-banner.svg', './icons/gear-wrist.svg', './icons/gear-grip.svg', './icons/gear-medkit.svg'];
+const CACHE_NAME = 'kairo-cache-v43';
+const APP_SHELL = ['./', './index.html', './styles.css', './workouts.css', './workouts.js', './state-utils.js', './ui-preferences.js', './app.js', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/gear-glove.svg', './icons/gear-bandage.svg', './icons/gear-strap.svg', './icons/gear-arena.svg', './icons/arena-banner.svg', './icons/gear-wrist.svg', './icons/gear-grip.svg', './icons/gear-medkit.svg'];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
