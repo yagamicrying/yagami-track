@@ -176,7 +176,7 @@
   function formatMoney(value){
     const currency=state.game.currency==='USD'?'USD':'RUB';
     const amount=Number(value||0)/(currency==='USD'?GAME_DOLLAR_RATE:1);
-    return new Intl.NumberFormat('ru-RU',{style:'currency',currency,minimumFractionDigits:currency==='USD'?2:0,maximumFractionDigits:currency==='USD'?2:0}).format(amount);
+    return new Intl.NumberFormat(state.language==='en'?'en-US':'ru-RU',{style:'currency',currency,minimumFractionDigits:currency==='USD'?2:0,maximumFractionDigits:currency==='USD'?2:0}).format(amount);
   }
   function fixedPrice(item){return Math.max(1,Math.round(Number(item&&item.price)||1));}
   function formatIncomeRate(value){return formatMoney(Math.max(0,Math.round(Number(value)||0)));}
@@ -453,9 +453,9 @@
   function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
   function dayData(key=currentDate){ if(!state.days[key]) state.days[key] = {calories:0, weight:'', sleep:'', checks:{water:false,activity:false,sleepRoutine:false}, note:''}; const d=state.days[key]; d.checks ||= {water:false,activity:false,sleepRoutine:false}; return d; }
   function dateFromKey(key){ const [y,m,d]=key.split('-').map(Number); return new Date(y,m-1,d); }
-  function formatDate(key){return new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'}).format(dateFromKey(key));}
-  function formatDay(key){return new Intl.DateTimeFormat('ru-RU',{weekday:'long'}).format(dateFromKey(key)).toUpperCase();}
-  function fmtNum(n){return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(n);}
+  function formatDate(key){return new Intl.DateTimeFormat(state.language==='en'?'en-US':'ru-RU',{day:'numeric',month:'long'}).format(dateFromKey(key));}
+  function formatDay(key){return new Intl.DateTimeFormat(state.language==='en'?'en-US':'ru-RU',{weekday:'long'}).format(dateFromKey(key)).toUpperCase();}
+  function fmtNum(n){return new Intl.NumberFormat(state.language==='en'?'en-US':'ru-RU',{maximumFractionDigits:1}).format(n);}
   function toast(message){const t=$('#toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1900);}
   function render(){
     updateProfile();
