@@ -54,6 +54,7 @@
   function persist(){ if(api){api.saveData(data);} else {try{localStorage.setItem('yagami-track-workouts-v1',JSON.stringify(data));}catch(_){}} }
   function planById(id){return data.plans.find(p=>p.id===id);}
   function monthTitle(d){return t('monthNames')[d.getMonth()]+' '+d.getFullYear();}
+  window.addEventListener('kairo:language-change',event=>{lang=event.detail&&event.detail.language==='en'?'en':'ru';render();});
   function render(){
     root.innerHTML = '<div class="workout-toolbar"><div><span class="eyebrow">'+t('eyebrow')+'</span><h2>'+t('title')+'</h2><p>'+t('subtitle')+'</p></div><label class="workout-language"><span>'+t('language')+'</span><select id="workoutLanguage"><option value="ru" '+(lang==='ru'?'selected':'')+'>Русский</option><option value="en" '+(lang==='en'?'selected':'')+'>English</option></select></label></div>'+
       '<section class="card workout-plans-card"><div class="workout-section-head"><div><span class="eyebrow">'+t('plans')+'</span><h3>'+t('plans')+'</h3></div><button type="button" class="workout-add-day" id="addWorkoutDay" aria-label="'+t('addDay')+'" title="'+t('addDay')+'">＋</button></div><div class="workout-plan-list" id="workoutPlanList"></div></section>'+
