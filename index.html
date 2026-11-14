@@ -6,14 +6,14 @@
   <meta name="theme-color" content="#111111">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Kairo">
+  <meta name="apple-mobile-web-app-title" content="GymHub">
   <meta name="description" content="Ежедневный трекер калорий, веса и сна.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="workouts.css">
-  <title>Kairo</title>
+  <title>GymHub</title>
 </head>
 <body>
   <main class="app-shell">
@@ -63,8 +63,8 @@
     <section class="page-section workout-page" id="workoutsPage">
       <div id="workoutsContent"></div>
     </section>
-    <section class="page-section settings-page" id="settingsPanel" hidden>
-      <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2>Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
+    <section class="page-section settings-page settings-modal" id="settingsPanel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+      <div class="page-section-heading settings-page-heading"><div><span class="eyebrow">ПАРАМЕТРЫ</span><h2 id="settingsTitle">Настройки</h2></div><button class="settings-close" id="closeSettings" aria-label="Закрыть настройки">×</button></div>
       <div id="settingsContent"></div>
     </section>
     <section class="page-section privacy-page" id="privacyPanel" hidden>
@@ -72,7 +72,7 @@
       <article class="card privacy-copy">
         <p class="privacy-updated">Последнее обновление: 17 октября 2026 г.</p>
         <h3>Какие данные сохраняются</h3>
-        <p>Kairo сохраняет введённые тобой данные о калориях, весе, сне, дневной цели и игровой прогресс (баланс, опыт, уровень и предметы инвентаря).</p>
+        <p>GymHub сохраняет введённые тобой данные о калориях, весе, сне, дневной цели и игровой прогресс (баланс, опыт, уровень и предметы инвентаря).</p>
         <h3>Где хранятся данные</h3>
         <p>Вне Telegram данные хранятся в локальном хранилище браузера на устройстве. При запуске внутри Telegram приложение может использовать Telegram WebApp CloudStorage для синхронизации данных аккаунта. Доступность синхронизации зависит от среды запуска.</p>
         <h3>Профиль Telegram</h3>
@@ -89,12 +89,12 @@
       <details class="legal-disclosures">
         <summary>Правовая информация</summary>
         <div class="legal-disclosures-content">
-          <p>Kairo — инструмент для личного учёта, а не медицинская рекомендация. Показатели калорий, веса и сна не заменяют консультацию специалиста.</p>
+          <p>GymHub — инструмент для личного учёта, а не медицинская рекомендация. Показатели калорий, веса и сна не заменяют консультацию специалиста.</p>
           <p>Приложение предназначено для личного учёта питания, веса и сна.</p>
           <p></p>
         </div>
       </details>
-      <span>Kairo · 2026</span>
+      <span>GymHub · 2026</span>
     </footer>
     <nav class="bottom-nav workout-bottom-nav" aria-label="Навигация">
       <button type="button" class="nav-item" data-jump="#caloriesValue"><small>Трекер</small></button>

@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Kairo — ежедневный трекер",
-  "short_name": "Kairo",
+  "name": "GymHub — фитнес-трекер",
+  "short_name": "GymHub",
   "description": "Ежедневный трекер калорий, веса, сна и привычек.",
   "lang": "ru",
   "start_url": "./",
