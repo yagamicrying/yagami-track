@@ -884,16 +884,35 @@
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&rouletteModal&&!rouletteModal.hidden)closeRoulette();});
   function setSettingsOpen(open){
     const panel=$('#settingsPanel');
-    if(!panel)return;
-    panel.hidden=!open;
-    document.body.classList.toggle('settings-open',open);
-    if(open) $('#closeSettings')?.focus({preventScroll:true});
-    else $('#openSettings')?.focus({preventScroll:true});
+    const topbar=$('.topbar');
+    const trigger=$('#openSettings');
+    if(!panel||!topbar||!trigger)return;
+    if(open){
+      panel.hidden=false;
+      panel.classList.remove('is-closing');
+      requestAnimationFrame(()=>panel.classList.add('is-open'));
+      trigger.setAttribute('aria-expanded','true');
+      trigger.setAttribute('aria-label','Закрыть настройки');
+      $('#closeSettings')?.focus({preventScroll:true});
+    }else{
+      panel.classList.remove('is-open');
+      panel.classList.add('is-closing');
+      trigger.setAttribute('aria-expanded','false');
+      trigger.setAttribute('aria-label','Настройки');
+      const finish=event=>{
+        if(event.target!==panel)return;
+        panel.hidden=true;
+        panel.classList.remove('is-closing');
+        panel.removeEventListener('animationend',finish);
+      };
+      panel.addEventListener('animationend',finish);
+      $('#openSettings')?.focus({preventScroll:true});
+    }
   }
+  $('#openSettings').setAttribute('aria-expanded','false');
   $('#openSettings').addEventListener('click',()=>setSettingsOpen($('#settingsPanel').hidden));
   $('#closeSettings').addEventListener('click',()=>setSettingsOpen(false));
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('#settingsPanel').hidden)setSettingsOpen(false);});
-  $('#settingsPanel').addEventListener('click',event=>{if(event.target===$('#settingsPanel'))setSettingsOpen(false);});
   $('#closePrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=true;setSettingsOpen(true);});
   function persistRouletteProgress(){
     try{
