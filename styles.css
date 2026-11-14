@@ -1127,3 +1127,7 @@ button:focus-visible{outline:2px solid var(--ios-blue);outline-offset:2px}
 .profile-copy{flex:1 1 auto}
 .topbar{min-width:0}
 @media(max-width:360px){.settings-row{align-items:flex-start}.settings-row>span{max-width:48%;line-height:1.4}.settings-row select{max-width:52%;min-width:0}.topbar{gap:8px}.settings-gear{margin-left:4px}}
+
+/* Keep the settings entry point available while scrolling */
+.topbar{position:sticky;top:0;z-index:30;background:var(--bg);padding:10px 1px;margin:0 0 25px}
+:root[data-theme="light"] .topbar{background:var(--bg)}
