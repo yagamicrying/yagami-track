@@ -98,7 +98,7 @@
     document.body.append(dialog);
     $('#workoutEditorClose',dialog).addEventListener('click',()=>dialog.close());
     $('#workoutPlanName',dialog).addEventListener('input',e=>{draft.name=e.target.value;});
-    $('.workout-color-swatch',dialog).forEach(btn=>btn.addEventListener('click',()=>{draft.color=btn.dataset.color;$('.workout-color-swatch',dialog).forEach(item=>{const active=item===btn;item.classList.toggle('is-selected',active);item.setAttribute('aria-pressed',String(active));});}));
+    $$('.workout-color-swatch',dialog).forEach(btn=>btn.addEventListener('click',()=>{draft.color=btn.dataset.color;$$('.workout-color-swatch',dialog).forEach(item=>{const active=item===btn;item.classList.toggle('is-selected',active);item.setAttribute('aria-pressed',String(active));});}));
     $('#addWorkoutMuscle',dialog).addEventListener('click',openMusclePicker);
     $('#workoutSave',dialog).addEventListener('click',savePlan);
     $('#workoutDelete',dialog).addEventListener('click',deletePlan);
