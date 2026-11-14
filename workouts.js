@@ -46,7 +46,7 @@
   let draft = null;
   let draftMuscle = null;
   const t = key => T[lang][key] ?? T.ru[key] ?? key;
-  const muscleName = id => { const m=MUSCLES.find(x=>x.id===id); return m ? (lang==='ru'?m.ru:m.en) : id; };
+  const muscleName = id => { const m=MUSCLES.find(x=>x.id===id); return m ? (lang==='ru'?m.ru:m.en) : String(id||'').startsWith('custom:') ? String(id).slice(7) : id; };
   const exerciseName = name => name;
   const uid = () => 'w'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
   const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -91,7 +91,7 @@
     const existing=$('#workoutEditor',document);
     if(existing)existing.remove();
     const dialog=document.createElement('dialog');dialog.id='workoutEditor';dialog.className='workout-editor-dialog';
-    dialog.innerHTML='<form method="dialog" class="workout-editor-form"><div class="workout-editor-head"><div><span class="eyebrow">'+t('day')+'</span><h2>'+t('edit')+' / '+t('day')+'</h2></div><button type="button" class="workout-dialog-close" id="workoutEditorClose">×</button></div><label>'+t('dayName')+'<input id="workoutPlanName" maxlength="40" value="'+esc(draft.name)+'"></label><label>'+t('color')+' <span class="workout-optional">· '+(lang==='ru'?'необязательно':'optional')+'</span><input type="color" id="workoutPlanColor" value="'+(draft.color||'#0a84ff')+'"></label><label class="workout-color-none"><input type="checkbox" id="workoutNoColor" '+(!draft.color?'checked':'')+'> '+(lang==='ru'?'Без цвета':'No color')+'</label><div class="workout-editor-groups"><div class="workout-section-head"><h3>'+t('muscle')+'</h3><button type="button" class="workout-add-day" id="addWorkoutMuscle">＋</button></div><div id="workoutDraftGroups"></div></div><div class="workout-editor-actions"><button type="button" class="secondary-button" id="workoutDelete" '+(!editingPlan?'hidden':'')+'>'+t('delete')+'</button><button type="button" class="primary-button" id="workoutSave">'+t('save')+'</button></div></form>';
+    dialog.innerHTML='<form method="dialog" class="workout-editor-form"><div class="workout-editor-head"><div><span class="eyebrow">'+t('day')+'</span><h2>'+t('edit')+' / '+t('day')+'</h2></div><button type="button" class="workout-dialog-close" id="workoutEditorClose">×</button></div><label>'+t('dayName')+'<input id="workoutPlanName" maxlength="40" value="'+esc(draft.name)+'"></label><label>'+t('color')+' <span class="workout-optional">· '+(lang==='ru'?'необязательно':'optional')+'</span><input type="color" id="workoutPlanColor" value="'+(draft.color||'#0a84ff')+'"></label><label>'+ (lang==='ru'?'Дата тренировки':'Workout date') +'<input type="date" id="workoutPlanDate" value="'+esc(selectedDate)+'"></label><label class="workout-color-none"><input type="checkbox" id="workoutNoColor" '+(!draft.color?'checked':'')+'> '+(lang==='ru'?'Без цвета':'No color')+'</label><div class="workout-editor-groups"><div class="workout-section-head"><h3>'+t('muscle')+'</h3><button type="button" class="workout-add-day" id="addWorkoutMuscle">＋</button></div><div id="workoutDraftGroups"></div></div><div class="workout-editor-actions"><button type="button" class="secondary-button" id="workoutDelete" '+(!editingPlan?'hidden':'')+'>'+t('delete')+'</button><button type="button" class="primary-button" id="workoutSave">'+t('save')+'</button></div></form>';
     document.body.append(dialog);
     $('#workoutEditorClose',dialog).addEventListener('click',()=>dialog.close());
     $('#workoutPlanName',dialog).addEventListener('input',e=>{draft.name=e.target.value;});
@@ -115,9 +115,10 @@
   }
   function openMusclePicker(){
     const dialog=document.createElement('dialog');dialog.className='workout-picker-dialog';
-    dialog.innerHTML='<div class="workout-picker-head"><strong>'+t('chooseMuscle')+'</strong><button type="button" class="workout-dialog-close">×</button></div><div class="workout-picker-list">'+MUSCLES.map(m=>'<button type="button" data-muscle="'+m.id+'">'+esc(lang==='ru'?m.ru:m.en)+' <span>＋</span></button>').join('')+'</div>';
+    dialog.innerHTML='<div class="workout-picker-head"><strong>'+t('chooseMuscle')+'</strong><button type="button" class="workout-dialog-close">×</button></div><div class="workout-picker-list">'+MUSCLES.map(m=>'<button type="button" data-muscle="'+m.id+'">'+esc(lang==='ru'?m.ru:m.en)+' <span>＋</span></button>').join('')+'</div><form class="workout-custom-muscle"><label>'+(lang==='ru'?'Своя группа мышц':'Custom muscle group')+'<input id="workoutCustomMuscle" maxlength="60" placeholder="'+(lang==='ru'?'Например, корпус':'e.g. Core')+'"></label><button type="submit" class="primary-button">'+t('add')+'</button></form>';
     document.body.append(dialog);dialog.querySelector('.workout-dialog-close').addEventListener('click',()=>dialog.close());
     $$('[data-muscle]',dialog).forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.muscle;if(draft.groups.some(g=>g.muscle===id)){toast(lang==='ru'?'Эта группа уже добавлена':'This muscle group is already added');return;}draft.groups.push({id:uid(),muscle:id,exercises:[]});draftMuscle=draft.groups.length-1;dialog.close();renderDraftGroups();openExercisePicker();}));
+    $('.workout-custom-muscle',dialog).addEventListener('submit',e=>{e.preventDefault();const name=$('#workoutCustomMuscle',dialog).value.trim();if(!name)return;const id='custom:'+name;if(draft.groups.some(g=>g.muscle===id)){toast(lang==='ru'?'Эта группа уже добавлена':'This group is already added');return;}draft.groups.push({id:uid(),muscle:id,exercises:[]});draftMuscle=draft.groups.length-1;dialog.close();renderDraftGroups();openExercisePicker();});
     dialog.addEventListener('close',()=>dialog.remove());dialog.showModal();
   }
   function openExercisePicker(){
@@ -134,8 +135,11 @@
     const name=$('#workoutPlanName').value.trim();
     if(!name){toast(lang==='ru'?'Введи название дня':'Enter a day name');return;}
     draft.name=name;draft.color=$('#workoutNoColor').checked?'':$('#workoutPlanColor').value;
+    const workoutDate=$('#workoutPlanDate')?.value||selectedDate;
+    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(workoutDate)){toast(lang==='ru'?'Выбери корректную дату':'Choose a valid date');return;}
     const index=data.plans.findIndex(p=>p.id===draft.id);
     if(index>=0)data.plans[index]=draft;else data.plans.push(draft);
+    data.sessions[workoutDate]=draft.id;selectedDate=workoutDate;const selected=new Date(workoutDate+'T12:00:00');month=new Date(selected.getFullYear(),selected.getMonth(),1);
     persist();$('#workoutEditor').close();$('#workoutEditor').remove();renderPlans();renderCalendar();
   }
   function deletePlan(){
