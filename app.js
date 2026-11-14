@@ -777,7 +777,7 @@
       row.className='history-row';
       row.style.cssText='width:100%;background:transparent;border:0;color:inherit;text-align:left';
       row.innerHTML=`<span><strong>${formatDate(key)}</strong><small>${formatDay(key)}</small></span><span class="history-value">${fmtNum(d.calories||0)} <small>ккал</small></span>`;
-      row.addEventListener('click',()=>{currentDate=key;$('#settingsPanel').hidden=true;render();refreshPageSections();});
+      row.addEventListener('click',()=>{currentDate=key;setSettingsOpen(false);render();refreshPageSections();});
       content.append(row);
     });
     if(keys.length>3){
@@ -829,7 +829,7 @@
       <div class="settings-row"><span>${labels.delete}</span><button id="clearData">${labels.reset}</button></div>
       <div class="settings-row"><span>${labels.privacy}</span><button id="openPrivacy">${labels.privacyPolicy} <span aria-hidden="true">↗</span></button></div>
       <p class="settings-copy" id="syncStatus">${lang==='en'?'Storage: ':'Хранение: '}${cloudStatus}. ${lang==='en'?'Inside Telegram Mini App, data syncs through Telegram CloudStorage. Outside Telegram, browser storage is used.':'В Telegram Mini App данные синхронизируются через Telegram CloudStorage. Вне Telegram используется локальное хранилище браузера.'}</p>
-      <p class="settings-copy">Kairo · ${lang==='en'?'version':'версия'} 1.3</p>
+      <p class="settings-copy">GymHub · ${lang==='en'?'version':'версия'} 1.3</p>
     </div><input type="file" id="importFile" accept="application/json,.json" hidden>`;
     $('#appLanguage').addEventListener('change',e=>{
       state.language=e.target.value==='en'?'en':'ru';
@@ -851,16 +851,16 @@
       if(window.KairoPreferences)window.KairoPreferences.apply(state);
     });
     $('#gameCurrency').addEventListener('change',e=>{state.game.currency=e.target.value==='USD'?'USD':'RUB';markGameChanged();renderRoulette($('#rouletteContent'));renderSettings($('#settingsContent'));toast(lang==='en'?'Currency changed':'Валюта изменена');});
-    $('#settingsGoal').addEventListener('click',()=>{$('#settingsPanel').hidden=true;openEditor('goal');});
-    $('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;$('#settingsPanel').hidden=true;panel.scrollIntoView({behavior:'smooth',block:'start'});});
+    $('#settingsGoal').addEventListener('click',()=>{setSettingsOpen(false);openEditor('goal');});
+    $('#openPrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=false;setSettingsOpen(false);panel.scrollIntoView({behavior:'smooth',block:'start'});});
     $('#syncNow').addEventListener('click',syncNow);
     $('#exportData').addEventListener('click',exportData);
     $('#importData').addEventListener('click',()=>$('#importFile').click());
     $('#importFile').addEventListener('change',importData);
-    $('#clearData').addEventListener('click',()=>{if(confirm(lang==='en'?'Delete all saved app data? This cannot be undone.':'Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();if(window.KairoPreferences)window.KairoPreferences.apply(state);currentDate=dateKey(new Date());render();refreshPageSections();$('#settingsPanel').hidden=true;toast(lang==='en'?'Data deleted':'Данные удалены');}});
+    $('#clearData').addEventListener('click',()=>{if(confirm(lang==='en'?'Delete all saved app data? This cannot be undone.':'Удалить все сохранённые данные приложения? Это действие нельзя отменить.')){state=createDefaultState();saveState();if(window.KairoPreferences)window.KairoPreferences.apply(state);currentDate=dateKey(new Date());render();refreshPageSections();setSettingsOpen(false);toast(lang==='en'?'Data deleted':'Данные удалены');}});
   }
-  function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kairo-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
-  function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state=normalizeState(parsed);saveState();render();refreshPageSections();$('#settingsPanel').hidden=true;toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
+  function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='gymhub-backup.json';a.click();URL.revokeObjectURL(url);toast('Резервная копия подготовлена');}
+  function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);if(!parsed||typeof parsed!=='object'||!parsed.days||typeof parsed.days!=='object')throw new Error('bad');state=normalizeState(parsed);saveState();render();refreshPageSections();setSettingsOpen(false);toast('Данные импортированы');}catch{toast('Не удалось прочитать файл');}e.target.value='';};reader.readAsText(file);}
   const rouletteModal=$('#rouletteModal');
   const openRoulette=()=>{
     if(!rouletteModal)return;
@@ -882,13 +882,19 @@
   $('#closeRoulette')?.addEventListener('click',closeRoulette);
   $('#closeRouletteBackdrop')?.addEventListener('click',closeRoulette);
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&rouletteModal&&!rouletteModal.hidden)closeRoulette();});
-  $('#openSettings').addEventListener('click',()=>{
+  function setSettingsOpen(open){
     const panel=$('#settingsPanel');
-    panel.hidden=!panel.hidden;
-    if(!panel.hidden) panel.scrollIntoView({behavior:'smooth',block:'start'});
-  });
-  $('#closeSettings').addEventListener('click',()=>$('#settingsPanel').hidden=true);
-  $('#closePrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=true;$('#settingsPanel').hidden=false;$('#settingsPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+    if(!panel)return;
+    panel.hidden=!open;
+    document.body.classList.toggle('settings-open',open);
+    if(open) $('#closeSettings')?.focus({preventScroll:true});
+    else $('#openSettings')?.focus({preventScroll:true});
+  }
+  $('#openSettings').addEventListener('click',()=>setSettingsOpen($('#settingsPanel').hidden));
+  $('#closeSettings').addEventListener('click',()=>setSettingsOpen(false));
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('#settingsPanel').hidden)setSettingsOpen(false);});
+  $('#settingsPanel').addEventListener('click',event=>{if(event.target===$('#settingsPanel'))setSettingsOpen(false);});
+  $('#closePrivacy').addEventListener('click',()=>{const panel=$('#privacyPanel');panel.hidden=true;setSettingsOpen(true);});
   function persistRouletteProgress(){
     try{
       localStorage.setItem(STORE,JSON.stringify(state));
