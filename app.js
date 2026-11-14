@@ -901,9 +901,10 @@
       trigger.setAttribute('aria-label','Настройки');
       const finish=event=>{
         if(event.target!==panel)return;
+        panel.removeEventListener('animationend',finish);
+        if(!panel.classList.contains('is-closing'))return;
         panel.hidden=true;
         panel.classList.remove('is-closing');
-        panel.removeEventListener('animationend',finish);
       };
       panel.addEventListener('animationend',finish);
       $('#openSettings')?.focus({preventScroll:true});
