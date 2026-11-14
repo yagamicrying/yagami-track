@@ -16,6 +16,8 @@
       days: {},
       workouts: { plans: [], sessions: {}, updatedAt: 0 },
       language: 'ru',
+      themeColor: 'blue',
+      themeMode: 'dark',
       game: {
         money: 1500, currency: 'RUB', xp: 0, inventory: [], pendingDrops: [],
         lastSpinAt: 0, lastIncomeAt: Date.now(), nextItemId: 1, updatedAt: 0,
@@ -141,6 +143,8 @@
       days,
       workouts: { plans, sessions, updatedAt: Number.isFinite(Number(workoutSource.updatedAt)) ? Math.max(0, Number(workoutSource.updatedAt)) : 0 },
       language: value.language === 'en' ? 'en' : 'ru',
+      themeColor: ['blue','orange','green','purple','pink','cyan','yellow'].includes(value.themeColor) ? value.themeColor : 'blue',
+      themeMode: value.themeMode === 'light' ? 'light' : 'dark',
       game: normalizeGame(value.game)
     };
   }
@@ -188,6 +192,8 @@
       days: mergeDayStates(local.days, remote.days),
       workouts: (Number(remote.workouts?.updatedAt)||0) > (Number(local.workouts?.updatedAt)||0) ? remote.workouts : local.workouts,
       language: remote.language || local.language,
+      themeColor: remote.themeColor || local.themeColor || 'blue',
+      themeMode: remote.themeMode || local.themeMode || 'dark',
       game: mergeGameStates(local.game, remote.game)
     };
   }
